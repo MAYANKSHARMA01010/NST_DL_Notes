@@ -85,7 +85,8 @@ DL/
 
 | Category | File | Description |
 | :--- | :--- | :--- |
-| **Worksheet** | [Worksheet_05_Gradient_Descent_and_Optimization.pdf](02_Worksheets/Worksheet_05_Gradient_Descent_and_Optimization.pdf) | Worksheet 05: Hand calculations for GD step updates |
+| **Worksheet** | [Worksheet_05_Gradient_Descent_and_Optimization.pdf](02_Worksheets/Worksheet_05_Gradient_Descent_and_Optimization.pdf) | Worksheet 05: Hand calculations for GD step updates (PDF) |
+| **Worksheet / Web** | [Worksheet_05_Gradient_Descent_and_Optimization_Interactive.html](02_Worksheets/Worksheet_05_Gradient_Descent_and_Optimization_Interactive.html) | Worksheet 05: Interactive explorable notes & step-by-step calculations (HTML) |
 | **Visualization** | [Module_05_Epoch_Circuit_Visual_Analogy.html](03_HTML_Visualizations/Module_05_Epoch_Circuit_Visual_Analogy.html) | Visual race track comparing Batch, Mini-batch, and SGD speeds |
 | **Lab Notebook** | [Lab_05_Part_1_PyTorch_Autograd_Computational_Graph.ipynb](04_Notebooks/Lab_05_Gradient_Descent_and_Training/Lab_05_Part_1_PyTorch_Autograd_Computational_Graph.ipynb) | PyTorch Autograd computational graph inspection |
 | **Lab Notebook** | [Lab_05_Part_1_Quiz_Autograd_in_AI_Town.ipynb](04_Notebooks/Lab_05_Gradient_Descent_and_Training/Lab_05_Part_1_Quiz_Autograd_in_AI_Town.ipynb) | Practical Autograd quiz and problem scenarios |
