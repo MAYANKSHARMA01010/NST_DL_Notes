@@ -1,0 +1,584 @@
+<title>Epoch Circuit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+
+<style>
+  :root{
+    --bg:#e9edf3;
+    --surface:#ffffff;
+    --surface-2:#f1f4f9;
+    --ink:#141922;
+    --muted:#5b6674;
+    --line:#d5dbe5;
+    --track:#c4ccd8;
+    --track-line:#ffffff;
+    --sprinter:#2563eb;
+    --sprinter-soft:#dbe7ff;
+    --tweaker:#d9760a;
+    --tweaker-soft:#fcecd4;
+    --good:#15883f;
+    --grid: rgba(20,25,34,0.04);
+    --shadow: 0 1px 2px rgba(20,25,34,.06), 0 12px 30px -18px rgba(20,25,34,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0b0e15;
+      --surface:#141a25;
+      --surface-2:#1b2231;
+      --ink:#eef2f9;
+      --muted:#94a2b8;
+      --line:#26303f;
+      --track:#222b3a;
+      --track-line:#4a586b;
+      --sprinter:#4aa8ff;
+      --sprinter-soft:#16304f;
+      --tweaker:#f7ac3e;
+      --tweaker-soft:#3a2a10;
+      --good:#48d17a;
+      --grid: rgba(255,255,255,0.035);
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 18px 40px -20px rgba(0,0,0,.75);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b0e15;
+    --surface:#141a25;
+    --surface-2:#1b2231;
+    --ink:#eef2f9;
+    --muted:#94a2b8;
+    --line:#26303f;
+    --track:#222b3a;
+    --track-line:#4a586b;
+    --sprinter:#4aa8ff;
+    --sprinter-soft:#16304f;
+    --tweaker:#f7ac3e;
+    --tweaker-soft:#3a2a10;
+    --good:#48d17a;
+    --grid: rgba(255,255,255,0.035);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 18px 40px -20px rgba(0,0,0,.75);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color:var(--ink);
+    font-family:"Inter", system-ui, -apple-system, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
+
+  /* ---------- header ---------- */
+  .eyebrow{
+    font-family:"JetBrains Mono", monospace;
+    font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--muted);display:flex;align-items:center;gap:.6em;
+  }
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--ink);opacity:.5}
+  h1{
+    font-family:"Chakra Petch", sans-serif;font-weight:700;
+    font-size:clamp(2rem,6vw,3.4rem);line-height:1.02;letter-spacing:-.01em;
+    margin:.28em 0 .18em;text-wrap:balance;
+  }
+  h1 .stripe{
+    background:linear-gradient(100deg,var(--sprinter),var(--tweaker));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lede{color:var(--muted);max-width:60ch;font-size:1.02rem;margin:0}
+
+  /* ---------- control bar ---------- */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:14px 18px;align-items:center;
+    margin:26px 0 20px;padding:14px 16px;
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+  }
+  .btn{
+    font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:.92rem;
+    letter-spacing:.02em;cursor:pointer;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--ink);
+    padding:.62em 1.15em;border-radius:10px;display:inline-flex;align-items:center;gap:.5em;
+    transition:transform .12s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:focus-visible{outline:2px solid var(--sprinter);outline-offset:2px}
+  .btn.primary{
+    background:linear-gradient(180deg,var(--ink),color-mix(in srgb,var(--ink) 82%, #000));
+    color:var(--surface);border-color:transparent;
+  }
+  .btn.primary.running{background:var(--tweaker);color:#1a1206}
+  .btn .dot{width:9px;height:9px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 var(--good)}
+  .clockbox{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .clock-label{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .clock-val{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.5rem;color:var(--ink);font-variant-numeric:tabular-nums}
+  .clock-val small{font-size:.7rem;color:var(--muted);font-weight:500}
+  .speed{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .speed button{
+    border:none;background:transparent;color:var(--muted);cursor:pointer;
+    font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.8rem;
+    padding:.4em .7em;border-radius:7px;
+  }
+  .speed button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+
+  /* ---------- race grid ---------- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:16px 16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+    --accent:var(--sprinter);--accent-soft:var(--sprinter-soft);
+  }
+  .card[data-team="tweaker"]{--accent:var(--tweaker);--accent-soft:var(--tweaker-soft)}
+  .card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--accent)}
+
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px;padding-left:6px}
+  .team-name{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:1.18rem;letter-spacing:.01em}
+  .team-sub{color:var(--muted);font-size:.82rem;margin-top:1px}
+  .pill{
+    font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.74rem;letter-spacing:.06em;
+    color:var(--accent);background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%, transparent);
+    padding:.32em .6em;border-radius:999px;white-space:nowrap;
+  }
+
+  .track-wrap{position:relative;margin:6px 0 12px}
+  svg.track{display:block;width:100%;height:auto}
+  .flag{
+    position:absolute;top:8px;right:8px;
+    font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:.8rem;
+    color:var(--good);background:color-mix(in srgb,var(--good) 14%, var(--surface));
+    border:1px solid color-mix(in srgb,var(--good) 40%, transparent);
+    padding:.34em .7em;border-radius:8px;display:flex;align-items:center;gap:.4em;
+    opacity:0;transform:translateY(-6px);transition:opacity .3s ease, transform .3s ease;
+  }
+  .flag.show{opacity:1;transform:none}
+
+  .telemetry{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 2px}
+  .stat{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .stat .k{font-family:"JetBrains Mono",monospace;font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.42rem;line-height:1.1;font-variant-numeric:tabular-nums;margin-top:2px}
+  .stat .v small{font-size:.62rem;color:var(--muted);font-weight:500;letter-spacing:.02em}
+
+  .quality{margin:12px 2px 0}
+  .quality-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .quality-top .lbl{font-family:"JetBrains Mono",monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .quality-top .pct{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1rem;color:var(--accent);font-variant-numeric:tabular-nums}
+  .bar{height:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;overflow:hidden;position:relative}
+  .bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 55%,transparent),var(--accent))}
+  .bar-fill.done{background:linear-gradient(90deg,color-mix(in srgb,var(--good) 55%,transparent),var(--good))}
+
+  /* ---------- legend ---------- */
+  .legend{
+    margin:22px 0 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  }
+  @media (max-width:620px){.legend{grid-template-columns:1fr}}
+  .map{
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+    box-shadow:var(--shadow);
+  }
+  .map .from{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:1rem}
+  .map .arrow{color:var(--muted);font-family:"JetBrains Mono",monospace;margin:2px 0;font-size:.8rem}
+  .map .to{color:var(--accent-legend,var(--sprinter));font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.86rem;letter-spacing:.04em}
+  .map p{margin:.4em 0 0;font-size:.82rem;color:var(--muted)}
+
+  /* ---------- debrief ---------- */
+  .debrief{margin-top:40px}
+  .section-title{
+    font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:1.5rem;
+    display:flex;align-items:center;gap:.5em;margin:0 0 4px;
+  }
+  .section-sub{color:var(--muted);margin:0 0 18px;font-size:.95rem}
+  details.q{
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;
+  }
+  details.q summary{
+    list-style:none;cursor:pointer;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;
+  }
+  details.q summary::-webkit-details-marker{display:none}
+  .qnum{
+    font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:.9rem;
+    background:var(--ink);color:var(--surface);border-radius:8px;
+    width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;
+  }
+  .qtext{flex:1}
+  .qtext .q-q{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:1.06rem}
+  .qtext .q-hint{color:var(--muted);font-size:.84rem;margin-top:2px}
+  .chev{color:var(--muted);font-family:"JetBrains Mono",monospace;transition:transform .2s ease;margin-top:6px}
+  details.q[open] .chev{transform:rotate(90deg)}
+  .answer{padding:0 18px 18px 66px}
+  .answer .predict, .answer .reveal{border-radius:10px;padding:11px 13px;margin-top:10px;font-size:.92rem}
+  .answer .predict{background:var(--surface-2);border:1px solid var(--line)}
+  .answer .reveal{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+  .answer .tag{font-family:"JetBrains Mono",monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+  .answer .reveal .tag{color:var(--accent)}
+  .answer strong{color:var(--ink)}
+  .q[data-team="tweaker"]{--accent:var(--tweaker);--accent-soft:var(--tweaker-soft)}
+  .q[data-team="sprinter"]{--accent:var(--sprinter);--accent-soft:var(--sprinter-soft)}
+  .q[data-team="both"]{--accent:var(--good);--accent-soft:color-mix(in srgb,var(--good) 14%, var(--surface))}
+
+  footer{margin-top:34px;color:var(--muted);font-size:.8rem;text-align:center;font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important}
+  }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Gradient Descent &middot; Pit Wall</div>
+  <h1>The <span class="stripe">Epoch Circuit</span></h1>
+  <p class="lede">Two garages, one championship. <strong>Team Sprinter</strong> flies through each lap without stopping. <strong>Team Tweaker</strong> pits over and over to adjust the car. Start the race and watch who actually reaches a race-winning setup first.</p>
+
+  <div class="controls">
+    <button class="btn primary" id="startBtn"><span class="dot"></span><span id="startLabel">Start race</span></button>
+    <button class="btn" id="resetBtn">&#8635; Reset</button>
+    <div class="speed" role="group" aria-label="Simulation speed">
+      <button data-speed="1" aria-pressed="false">1&times;</button>
+      <button data-speed="5" aria-pressed="true">5&times;</button>
+      <button data-speed="15" aria-pressed="false">15&times;</button>
+    </div>
+    <div class="clockbox">
+      <span class="clock-label">Race clock</span>
+      <span class="clock-val"><span id="clock">0.0</span><small>s</small></span>
+    </div>
+  </div>
+
+  <div class="grid2" id="grid"></div>
+
+  <div class="legend" id="legend"></div>
+
+  <section class="debrief">
+    <h2 class="section-title">Pit-wall debrief</h2>
+    <p class="section-sub">Ask the class each question before revealing the answer. By the time the terms land, they already own the mental model.</p>
+
+    <details class="q" data-team="sprinter">
+      <summary>
+        <span class="qnum">Q1</span>
+        <span class="qtext">
+          <span class="q-q">Which team finishes a single lap faster?</span>
+          <span class="q-hint">Watch one lap on each track.</span>
+        </span>
+        <span class="chev">&#9656;</span>
+      </summary>
+      <div class="answer">
+        <div class="predict"><span class="tag">What students say</span>Team Sprinter &mdash; they don't stop.</div>
+        <div class="reveal"><span class="tag">The ML reveal</span>A lap is an <strong>epoch</strong>. Team Sprinter is <strong>Batch Gradient Descent (BGD)</strong>. Because it processes all the data at once and updates only once, a single epoch runs incredibly fast.</div>
+      </div>
+    </details>
+
+    <details class="q" data-team="tweaker">
+      <summary>
+        <span class="qnum">Q2</span>
+        <span class="qtext">
+          <span class="q-q">After one lap, whose car actually handles better?</span>
+          <span class="q-hint">Count the adjustments each team made.</span>
+        </span>
+        <span class="chev">&#9656;</span>
+      </summary>
+      <div class="answer">
+        <div class="predict"><span class="tag">What students say</span>Team Tweaker's car &mdash; they adjusted it 20 times, not just once.</div>
+        <div class="reveal"><span class="tag">The ML reveal</span>Every adjustment is a <strong>weight update</strong>. Team Tweaker is <strong>Stochastic Gradient Descent (SGD)</strong>. By updating the weights continuously through the lap, the model learns far more per epoch.</div>
+      </div>
+    </details>
+
+    <details class="q" data-team="both">
+      <summary>
+        <span class="qnum">Q3</span>
+        <span class="qtext">
+          <span class="q-q">To win you need 100% setup quality. Who gets there first?</span>
+          <span class="q-hint">Ignore lap time &mdash; watch the quality bars and the clock.</span>
+        </span>
+        <span class="chev">&#9656;</span>
+      </summary>
+      <div class="answer">
+        <div class="predict"><span class="tag">What students say</span>Team Tweaker! Each lap is slow (~8s), but they hit 100% in just 3 laps. Sprinter's laps are quick (~2s) but they need 50 of them.</div>
+        <div class="reveal"><span class="tag">The ML reveal</span>This is <strong>convergence</strong>. SGD converges in far fewer epochs. Each epoch takes longer on the clock, but the total number of epochs needed to reach minimum loss drops dramatically.</div>
+      </div>
+    </details>
+  </section>
+
+  <footer>Numbers are teaching values &middot; Sprinter: 2.0s/lap, +1 update &middot; Tweaker: 8.0s/lap, +20 updates</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const SVGNS = "http://www.w3.org/2000/svg";
+
+  const TEAMS = {
+    sprinter:{
+      key:"sprinter", name:"Team Sprinter", ml:"Batch Gradient Descent", abbr:"BGD",
+      sub:"One update per lap &mdash; never pits",
+      lapTime:2.0, qualityPerLap:2, updatesPerLap:1
+    },
+    tweaker:{
+      key:"tweaker", name:"Team Tweaker", ml:"Stochastic Gradient Descent", abbr:"SGD",
+      sub:"20 updates per lap &mdash; pits constantly",
+      lapTime:8.0, qualityPerLap:100/3, updatesPerLap:20
+    }
+  };
+
+  const TRACK_D = "M80 30 H240 A50 50 0 0 1 290 80 V100 A50 50 0 0 1 240 150 H80 A50 50 0 0 1 30 100 V80 A50 50 0 0 1 80 30 Z";
+
+  const grid = document.getElementById("grid");
+  const refs = {};
+
+  function el(tag, attrs, parent){
+    const n = document.createElementNS(SVGNS, tag);
+    for(const k in attrs) n.setAttribute(k, attrs[k]);
+    if(parent) parent.appendChild(n);
+    return n;
+  }
+
+  function buildCard(cfg){
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.team = cfg.key;
+    card.innerHTML = `
+      <div class="card-head">
+        <div>
+          <div class="team-name">${cfg.name}</div>
+          <div class="team-sub">${cfg.sub}</div>
+        </div>
+        <div class="pill">${cfg.abbr}</div>
+      </div>
+      <div class="track-wrap">
+        <div class="flag"><span>&#10003;</span><span class="flag-txt">100%</span></div>
+      </div>
+      <div class="telemetry">
+        <div class="stat"><div class="k">Epochs (laps)</div><div class="v epochs">0</div></div>
+        <div class="stat"><div class="k">Weight updates</div><div class="v updates">0</div></div>
+        <div class="stat"><div class="k">Lap time</div><div class="v">${cfg.lapTime.toFixed(1)}<small>s</small></div></div>
+      </div>
+      <div class="quality">
+        <div class="quality-top"><span class="lbl">Setup quality</span><span class="pct">0%</span></div>
+        <div class="bar"><div class="bar-fill"></div></div>
+      </div>`;
+    grid.appendChild(card);
+
+    const wrap = card.querySelector(".track-wrap");
+    const svg = el("svg", {class:"track", viewBox:"0 0 320 180", "aria-hidden":"true"}, wrap);
+
+    // track band
+    el("path", {d:TRACK_D, fill:"none", stroke:"var(--track)", "stroke-width":"22", "stroke-linejoin":"round"}, svg);
+    el("path", {d:TRACK_D, fill:"none", stroke:"var(--track-line)", "stroke-width":"1.4", "stroke-dasharray":"5 9", "stroke-linejoin":"round", opacity:"0.7"}, svg);
+    // measuring path (invisible, for geometry)
+    const mpath = el("path", {d:TRACK_D, fill:"none", stroke:"none"}, svg);
+    const L = mpath.getTotalLength();
+
+    // update dots (tweaker) - 20 around the lap
+    const dots = [];
+    if(cfg.updatesPerLap > 1){
+      for(let i=0;i<cfg.updatesPerLap;i++){
+        const p = mpath.getPointAtLength(((i+1)/cfg.updatesPerLap)*L);
+        const c = el("circle", {cx:p.x, cy:p.y, r:"3.1", fill:"var(--track-line)", opacity:"0.5", stroke:"var(--surface)", "stroke-width":"1"}, svg);
+        dots.push(c);
+      }
+    }
+
+    // start / finish line (checkered) at length 0, sitting across the top straight
+    const sp = mpath.getPointAtLength(0.5);
+    const sfin = el("g", {transform:`translate(${sp.x},${sp.y})`}, svg);
+    for(let row=0;row<6;row++){
+      for(let col=0;col<2;col++){
+        el("rect",{x:-2+col*2,y:-12+row*4,width:2,height:4,
+          fill:((row+col)%2 ? "var(--ink)":"var(--track-line)")},sfin);
+      }
+    }
+
+    // pulse ring + car
+    const ring = el("circle", {r:"12", fill:"none", stroke:"var(--accent)", "stroke-width":"2", opacity:"0"}, svg);
+    const carG = el("g", {}, svg);
+    el("rect", {x:-8,y:-5,width:16,height:10,rx:"3", fill:"var(--accent)"}, carG);
+    el("rect", {x:1,y:-3.4,width:4.5,height:6.8,rx:"1.5", fill:"var(--surface)", opacity:"0.85"}, carG);
+    el("rect", {x:-6.5,y:-6.2,width:4,height:1.6,rx:".8", fill:"var(--ink)"}, carG);
+    el("rect", {x:-6.5,y:4.6,width:4,height:1.6,rx:".8", fill:"var(--ink)"}, carG);
+
+    // accent color resolve for svg (svg can't read the --accent var set on card via CSS on attributes reliably in all engines -> set inline)
+    const accent = getComputedStyle(card).getPropertyValue("--accent").trim();
+    ring.setAttribute("stroke", accent);
+    carG.querySelector("rect").setAttribute("fill", accent);
+
+    refs[cfg.key] = {
+      card, svg, mpath, L, dots, carG, ring,
+      accent,
+      epochs: card.querySelector(".epochs"),
+      updates: card.querySelector(".updates"),
+      pct: card.querySelector(".pct"),
+      barFill: card.querySelector(".bar-fill"),
+      flag: card.querySelector(".flag"),
+      flagTxt: card.querySelector(".flag-txt"),
+    };
+  }
+
+  buildCard(TEAMS.sprinter);
+  buildCard(TEAMS.tweaker);
+
+  // ---------- legend ----------
+  const legendData = [
+    {from:"A lap", to:"= 1 EPOCH", note:"One full pass over the training data.", accent:"var(--sprinter)"},
+    {from:"An adjustment", to:"= 1 WEIGHT UPDATE", note:"One step of the optimiser on the model's parameters.", accent:"var(--tweaker)"},
+    {from:"Setup quality", to:"= CONVERGENCE", note:"How close the model is to minimum loss.", accent:"var(--good)"},
+  ];
+  const legend = document.getElementById("legend");
+  legendData.forEach(d=>{
+    const m = document.createElement("div");
+    m.className="map";
+    m.style.setProperty("--accent-legend", d.accent);
+    m.innerHTML = `<div class="from">${d.from}</div><div class="arrow">&darr; maps to</div><div class="to" style="color:${d.accent}">${d.to}</div><p>${d.note}</p>`;
+    legend.appendChild(m);
+  });
+
+  // ---------- simulation ----------
+  function fresh(){ return {pos:0, laps:0, updates:0, quality:0, finished:false, finishClock:0, finishEpoch:0, pulse:0}; }
+  const sim = { running:false, speed:5, clock:0, last:null, raf:null,
+    sprinter:fresh(), tweaker:fresh() };
+
+  const clockEl = document.getElementById("clock");
+  const startBtn = document.getElementById("startBtn");
+  const startLabel = document.getElementById("startLabel");
+  const resetBtn = document.getElementById("resetBtn");
+
+  function stepTeam(k, cfg, dt){
+    if(k.finished) return;
+    k.pos += dt / cfg.lapTime;
+    const target = Math.floor(k.pos * cfg.updatesPerLap);
+    const qPerU = cfg.qualityPerLap / cfg.updatesPerLap;
+    while(k.updates < target && !k.finished){
+      k.updates++;
+      k.quality += qPerU;
+      k.pulse = 1;
+      if(k.quality >= 100 - 1e-9){
+        k.quality = 100;
+        k.finished = true;
+        k.finishClock = sim.clock;
+        k.finishEpoch = Math.ceil(k.updates / cfg.updatesPerLap);
+      }
+    }
+    k.laps = Math.floor(k.pos);
+  }
+
+  function placeCar(r, k){
+    const frac = k.finished ? 0 : (k.pos - Math.floor(k.pos));
+    const len = frac * r.L;
+    const p = r.mpath.getPointAtLength(len);
+    const p2 = r.mpath.getPointAtLength((len + 1) % r.L);
+    const ang = Math.atan2(p2.y - p.y, p2.x - p.x) * 180/Math.PI;
+    r.carG.setAttribute("transform", `translate(${p.x},${p.y}) rotate(${ang})`);
+    r.ring.setAttribute("cx", p.x);
+    r.ring.setAttribute("cy", p.y);
+    r.ring.setAttribute("opacity", (k.pulse*0.9).toFixed(3));
+    r.ring.setAttribute("r", (10 + (1-k.pulse)*6).toFixed(1));
+  }
+
+  function renderTeam(key, cfg){
+    const r = refs[key], k = sim[key];
+    const epochDisplay = k.finished ? k.finishEpoch : Math.floor(k.pos);
+    r.epochs.textContent = epochDisplay;
+    r.updates.textContent = k.updates;
+    r.pct.textContent = Math.round(k.quality) + "%";
+    r.barFill.style.width = k.quality.toFixed(1) + "%";
+    r.barFill.classList.toggle("done", k.finished);
+
+    // dots
+    if(r.dots.length){
+      const active = k.finished ? r.dots.length : Math.floor((k.pos - Math.floor(k.pos)) * r.dots.length);
+      for(let i=0;i<r.dots.length;i++){
+        const on = i < active || k.finished;
+        r.dots[i].setAttribute("fill", on ? r.accent : "var(--track-line)");
+        r.dots[i].setAttribute("opacity", on ? "1" : "0.45");
+        r.dots[i].setAttribute("r", on ? "3.6" : "3.1");
+      }
+    }
+
+    if(k.finished){
+      r.flag.classList.add("show");
+      r.flagTxt.textContent = `100% in ${k.finishEpoch} epochs @ ${k.finishClock.toFixed(1)}s`;
+    } else {
+      r.flag.classList.remove("show");
+    }
+
+    placeCar(r, k);
+    k.pulse *= 0.88;
+  }
+
+  function renderAll(){
+    clockEl.textContent = sim.clock.toFixed(1);
+    renderTeam("sprinter", TEAMS.sprinter);
+    renderTeam("tweaker", TEAMS.tweaker);
+  }
+
+  function frame(ts){
+    if(!sim.running){ return; }
+    if(sim.last == null) sim.last = ts;
+    let dtReal = (ts - sim.last)/1000;
+    sim.last = ts;
+    if(dtReal > 0.1) dtReal = 0.1; // clamp tab-switch jumps
+    const dt = dtReal * sim.speed;
+    sim.clock += dt;
+    stepTeam(sim.sprinter, TEAMS.sprinter, dt);
+    stepTeam(sim.tweaker, TEAMS.tweaker, dt);
+    renderAll();
+
+    if(sim.sprinter.finished && sim.tweaker.finished){
+      stopRace(true);
+      return;
+    }
+    sim.raf = requestAnimationFrame(frame);
+  }
+
+  function startRace(){
+    if(sim.running) return;
+    if(sim.sprinter.finished && sim.tweaker.finished) resetRace();
+    sim.running = true;
+    sim.last = null;
+    startLabel.textContent = "Pause";
+    startBtn.classList.add("running");
+    startBtn.querySelector(".dot").style.background = "#1a1206";
+    sim.raf = requestAnimationFrame(frame);
+  }
+  function pauseRace(){
+    sim.running = false;
+    if(sim.raf) cancelAnimationFrame(sim.raf);
+    startLabel.textContent = "Resume";
+    startBtn.classList.remove("running");
+    startBtn.querySelector(".dot").style.background = "";
+  }
+  function stopRace(finished){
+    sim.running = false;
+    if(sim.raf) cancelAnimationFrame(sim.raf);
+    startLabel.textContent = finished ? "Race over" : "Start race";
+    startBtn.classList.remove("running");
+    startBtn.querySelector(".dot").style.background = "";
+  }
+  function resetRace(){
+    sim.running = false;
+    if(sim.raf) cancelAnimationFrame(sim.raf);
+    sim.clock = 0; sim.last = null;
+    sim.sprinter = fresh(); sim.tweaker = fresh();
+    startLabel.textContent = "Start race";
+    startBtn.classList.remove("running");
+    startBtn.querySelector(".dot").style.background = "";
+    renderAll();
+  }
+
+  startBtn.addEventListener("click", ()=>{
+    if(sim.running) pauseRace(); else startRace();
+  });
+  resetBtn.addEventListener("click", resetRace);
+
+  document.querySelectorAll(".speed button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      sim.speed = parseFloat(b.dataset.speed);
+      document.querySelectorAll(".speed button").forEach(x=>x.setAttribute("aria-pressed", x===b ? "true":"false"));
+    });
+  });
+
+  renderAll();
+})();
+</script>
