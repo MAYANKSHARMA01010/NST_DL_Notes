@@ -37,6 +37,7 @@ DL/
 | **Notes** | [Lecture_01_Perceptron_to_Shallow_Networks.pdf](01_Notes/Lecture_01_Perceptron_to_Shallow_Networks.pdf) | Slide deck covering neurons, weights, biases, and thresholding |
 | **Worksheet** | [Worksheet_01_From_Perceptron_to_Shallow_Networks.pdf](02_Worksheets/Worksheet_01_From_Perceptron_to_Shallow_Networks.pdf) | Worksheet 01 on perceptrons and labelled shallow networks |
 | **Lab Notebook** | [Lab_00_PyTorch_Coding_Demonstration.ipynb](04_Notebooks/Lab_00_PyTorch_Basics/Lab_00_PyTorch_Coding_Demonstration.ipynb) | Lab 0: PyTorch tensor fundamentals demonstration |
+| **Lab Notebook (Solved)** | [Lab_00_PyTorch_Coding_Demonstration_Solved.ipynb](04_Notebooks/Lab_00_PyTorch_Basics/Lab_00_PyTorch_Coding_Demonstration_Solved.ipynb) | Lab 0: Fully solved and executed key |
 | **Lab Notebook** | [Lab_01_Part_1_XOR_Problem_Why_We_Need_Hidden_Layers.ipynb](04_Notebooks/Lab_01_Perceptrons_and_XOR/Lab_01_Part_1_XOR_Problem_Why_We_Need_Hidden_Layers.ipynb) | Demonstrating linear inseparability of XOR |
 | **Lab Notebook** | [Lab_01_Part_2_Shallow_Neural_Networks_1D.ipynb](04_Notebooks/Lab_01_Perceptrons_and_XOR/Lab_01_Part_2_Shallow_Neural_Networks_1D.ipynb) | Shallow neural networks on 1D continuous functions |
 
