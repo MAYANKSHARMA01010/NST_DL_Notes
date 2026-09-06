@@ -103,7 +103,6 @@ DL/
 
 | Category | File | Description |
 | :--- | :--- | :--- |
-| **Notes / Web** | [Lecture_06_Gradient_Descent_Comprehensive_Notes.html](01_Notes/Lecture_06_Gradient_Descent_Comprehensive_Notes.html) | Comprehensive 10-part interactive lecture on Gradient Descent |
 | **Worksheet** | [Worksheet_06_Optimizers_With_Memory_Student.pdf](02_Worksheets/Worksheet_06_Optimizers_With_Memory_Student.pdf) | Worksheet 06: Student practice worksheet (unsolved) |
 | **Worksheet (Solved)** | [Worksheet_06_Optimizers_With_Memory_Solved.pdf](02_Worksheets/Solved/Worksheet_06_Optimizers_With_Memory_Solved.pdf) | Worksheet 06: Full step-by-step solved key derivations |
 | **Worksheet / Web** | [Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html](02_Worksheets/Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html) | Interactive Worksheet 07: SGD &rarr; EWMA &rarr; Momentum &rarr; NAG |
