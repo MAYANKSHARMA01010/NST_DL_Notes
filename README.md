@@ -11,7 +11,7 @@ All materials have been categorized into dedicated folders and cross-referenced 
 ```text
 DL/
 ├── 01_Notes/                  # Lecture slides and comprehensive notes
-├── 02_Worksheets/             # Worksheets 01 to 07 (PDFs & interactive HTML)
+├── 02_Worksheets/             # Worksheets 01 to 08 (PDFs & interactive HTML)
 │   └── Solved/                # Solved worksheet answer keys
 ├── 03_HTML_Visualizations/    # Web-based explorables, interactive tools, & visual analogies
 ├── 04_Notebooks/              # Hands-on Jupyter & Google Colab lab notebooks (Lab 00 to 06)
@@ -107,8 +107,10 @@ DL/
 | **Worksheet** | [Worksheet_06_Optimizers_With_Memory_Student.pdf](02_Worksheets/Worksheet_06_Optimizers_With_Memory_Student.pdf) | Worksheet 06: Student practice worksheet (unsolved) |
 | **Worksheet (Solved)** | [Worksheet_06_Optimizers_With_Memory_Solved.pdf](02_Worksheets/Solved/Worksheet_06_Optimizers_With_Memory_Solved.pdf) | Worksheet 06: Full step-by-step solved key derivations |
 | **Worksheet / Web** | [Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html](02_Worksheets/Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html) | Interactive Worksheet 07: SGD &rarr; EWMA &rarr; Momentum &rarr; NAG |
+| **Worksheet / Web** | [Worksheet_08_Adaptive_Learning_AdaGrad_RMSProp_and_Adam_Interactive.html](02_Worksheets/Worksheet_08_Adaptive_Learning_AdaGrad_RMSProp_and_Adam_Interactive.html) | Interactive Worksheet 08: Adaptive Learning Rates &middot; AdaGrad &rarr; RMSProp &rarr; Adam |
 | **Visualization** | [Module_06_Gradient_Descent_Interactive_Lecture.html](03_HTML_Visualizations/Module_06_Gradient_Descent_Interactive_Lecture.html) | Explorable gradient descent trajectory visualizer |
 | **Visualization** | [Module_06_Momentum_and_NAG_Interactive_Worksheet.html](03_HTML_Visualizations/Module_06_Momentum_and_NAG_Interactive_Worksheet.html) | Interactive momentum and NAG comparison tool |
+| **Visualization** | [Module_06_Adaptive_Learning_Rates_Interactive_Worksheet.html](03_HTML_Visualizations/Module_06_Adaptive_Learning_Rates_Interactive_Worksheet.html) | Interactive adaptive learning rates comparison tool (AdaGrad, RMSProp, Adam) |
 | **Lab Notebook** | [Lab_06_Part_A_Optimizers_Zoo_Ravine_Trajectories.ipynb](04_Notebooks/Lab_06_Optimizers/Lab_06_Part_A_Optimizers_Zoo_Ravine_Trajectories.ipynb) | Lab 6 Part A: 2D quadratic ravine loss optimizer trajectories |
 | **Lab Notebook** | [Lab_06_The_Optimizer_Zoo_SGD_to_Adam.ipynb](04_Notebooks/Lab_06_Optimizers/Lab_06_The_Optimizer_Zoo_SGD_to_Adam.ipynb) | Lab 6: 80-minute PyTorch lab navigating SGD, Momentum, and Adam |
 
