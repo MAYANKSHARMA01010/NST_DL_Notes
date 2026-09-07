@@ -4,6 +4,10 @@ This repository contains all organized lecture notes, worksheets, interactive HT
 
 All materials have been categorized into dedicated folders and cross-referenced module-by-module so you can easily find everything without scrolling through Google Space or Drive.
 
+### 🔗 Official Google Drive Folders
+* 📂 **[DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)** — Lecture slides, reading notes, and worksheets.
+* 📓 **[DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)** — Official lab notebooks and reference solutions.
+
 ---
 
 ### Directory Structure
@@ -142,3 +146,6 @@ DL/
    Alternatively, upload the `.ipynb` file to [Google Colab](https://colab.research.google.com).
 3. **Lab Notebooks Mirror**:
    The `Deep Learning Lab Notebooks/` directory maintains a streamlined 1-to-1 mirror (`LAB_0` through `LAB_8`) matching official course lab submissions.
+4. **Accessing Cloud Sources**:
+   - Slides, Notes & Worksheets: [DL Notes Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)
+   - Online Colab Notebooks: [DL Lab Notebooks Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)
