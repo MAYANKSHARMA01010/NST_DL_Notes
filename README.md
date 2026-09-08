@@ -2,11 +2,19 @@
 
 This repository contains all organized lecture notes, worksheets, interactive HTML visualizations, and Jupyter/Google Colab lab notebooks for the **Deep Learning Course (Semester 5)**.
 
-All materials have been categorized into dedicated folders and cross-referenced module-by-module so you can easily find everything without scrolling through Google Space or Drive.
+All materials have been categorized into dedicated folders and cross-referenced module-by-module so you can easily find everything without scrolling through chat history or cloud storage.
 
-### 🔗 Official Google Drive Folders
-* 📂 **[DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)** — Lecture slides, reading notes, and worksheets.
+---
+
+### 🔗 Official Course Links & Interactive Web Labs
+
+* 📂 **[DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)** — Official lecture slides, reading notes, and worksheets.
 * 📓 **[DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)** — Official lab notebooks and reference solutions.
+* 🐙 **[Newton Deep Learning Labs GitHub](https://github.com/sparshbansal-newton/deep-learning-labs)** — Upstream course lab repository by Sparsh Bansal with one-click Colab badges.
+* 🌐 **[Interactive Labs Live Web Site](https://sparshbansal-newton.github.io/deep-learning-labs/)** — Browser-based interactive simulations (no installation or Python runtime required).
+* 📊 **[Interactive Lab: Dataset & DataLoader](https://sparshbansal-newton.github.io/deep-learning-labs/dataset-dataloader-lab.html)** — Standalone explorable simulation for PyTorch `Dataset`, `DataLoader`, batches, samplers, and `collate_fn`.
+* 📉 **[Interactive Lab: Gradient Descent & Its Types](https://sparshbansal-newton.github.io/deep-learning-labs/gradient-descent-lab.html)** — Real-time loss surface & trajectory simulation comparing Batch, Stochastic, and Mini-batch GD.
+* 🚀 **[Google Colab: Lab 8 Face Recognition MLP Pipeline](https://colab.research.google.com/drive/1U_cPSKnLHCt7Z_5tAQw2bsbl3m4LHRNO)** — Live Google Colab notebook for the Olivetti Faces end-to-end MLP pipeline.
 
 ---
 
@@ -15,10 +23,10 @@ All materials have been categorized into dedicated folders and cross-referenced 
 ```text
 DL/
 ├── 01_Notes/                  # Lecture slides and comprehensive notes
-├── 02_Worksheets/             # Worksheets 01 to 08 (PDFs & interactive HTML)
+├── 02_Worksheets/             # Worksheets 01 to 08 (PDFs & interactive HTML worksheets)
 │   └── Solved/                # Solved worksheet answer keys
 ├── 03_HTML_Visualizations/    # Web-based explorables, interactive tools, & visual analogies
-├── 04_Notebooks/              # Hands-on Jupyter & Google Colab lab notebooks (Lab 00 to 08)
+├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 08)
 │   ├── Lab_00_PyTorch_Basics/
 │   ├── Lab_01_Perceptrons_and_XOR/
 │   ├── Lab_02_Activation_Functions/
@@ -29,7 +37,7 @@ DL/
 │   ├── Lab_07_The_Optimizer_Zoo/
 │   ├── Lab_08_Face_Recognition_MLP_Pipeline/
 │   └── Pratice/
-└── Deep Learning Lab Notebooks/ # Clean curriculum mirror (LAB_0 through LAB_8)
+└── docs/                      # Course documentation and guides
 ```
 
 ---
@@ -74,11 +82,14 @@ DL/
 | Category | File | Description |
 | :--- | :--- | :--- |
 | **Lab Notebook** | [Lab_03_Part_1_Activation_Functions_Simple_Demo.ipynb](04_Notebooks/Lab_03_ReLU_ELU_Softmax_and_Autograd/Lab_03_Part_1_Activation_Functions_Simple_Demo.ipynb) | Student version: step-by-step activation intuition |
-| **Lab Notebook** | [Lab_03_Part_2_NN_Forward_Prop_and_Loss_Bank_Churn.ipynb](04_Notebooks/Lab_03_ReLU_ELU_Softmax_and_Autograd/Lab_03_Part_2_NN_Forward_Prop_and_Loss_Bank_Churn.ipynb) | Forward prop and loss evaluation on Bank Customer Churn data |
+| **Lab Notebook** | [Lab_03_Part_2_NN_Forward_Prop_and_Loss_Bank_Churn.ipynb](04_Notebooks/Lab_03_ReLU_ELU_Softmax_and_Autograd/Lab_03_Part_2_NN_Forward_Prop_and_Loss_Bank_Churn.ipynb) | Forward prop and loss evaluation on Bank Customer Churn data (Student) |
+| **Lab Notebook (Solved)** | [Lab_03_Part_2_NN_Forward_Prop_and_Loss_Bank_Churn_Solved.ipynb](04_Notebooks/Lab_03_ReLU_ELU_Softmax_and_Autograd/Lab_03_Part_2_NN_Forward_Prop_and_Loss_Bank_Churn_Solved.ipynb) | Forward prop and loss evaluation on Bank Customer Churn data (Solved Key) |
 | **Lab Notebook** | [Lab_03_Part_3_PyTorch_Autograd_From_First_Principles.ipynb](04_Notebooks/Lab_03_ReLU_ELU_Softmax_and_Autograd/Lab_03_Part_3_PyTorch_Autograd_From_First_Principles.ipynb) | Reverse-mode automatic differentiation from first principles |
 | **Lab Notebook** | [Lab_03_Part_4_ReLU_ELU_Softmax_and_Dying_Neuron.ipynb](04_Notebooks/Lab_03_ReLU_ELU_Softmax_and_Autograd/Lab_03_Part_4_ReLU_ELU_Softmax_and_Dying_Neuron.ipynb) | Lab 3: ReLU, Leaky ReLU, ELU, Dying ReLU detection, and Softmax |
 | **Lab Notebook** | [Lab_04_Part_1_Loss_Functions_MSE_MAE_BCE_CCE.ipynb](04_Notebooks/Lab_04_Loss_Functions/Lab_04_Part_1_Loss_Functions_MSE_MAE_BCE_CCE.ipynb) | Comprehensive 80-minute lab on standard loss functions |
 | **Lab Notebook** | [Lab_04_Part_2_Loss_Functions_Practice_and_Landscapes.ipynb](04_Notebooks/Lab_04_Loss_Functions/Lab_04_Part_2_Loss_Functions_Practice_and_Landscapes.ipynb) | Lab 4: Loss landscapes, California Housing (MSE/MAE), BCE with logits, and CCE |
+| **Lab Notebook (Exercise)** | [Lab_04_Exercise_AI_Town_Loss_Functions.ipynb](04_Notebooks/Lab_04_Loss_Functions/Lab_04_Exercise_AI_Town_Loss_Functions.ipynb) | Practice Exercise: Back to AI Town — Teaching Models to Learn (Student) |
+| **Lab Notebook (Solved)** | [Lab_04_Exercise_Solution_AI_Town_Loss_Functions.ipynb](04_Notebooks/Lab_04_Loss_Functions/Lab_04_Exercise_Solution_AI_Town_Loss_Functions.ipynb) | Practice Exercise: Back to AI Town — Teaching Models to Learn (Solution Key) |
 
 ---
 
@@ -90,7 +101,7 @@ DL/
 | **Worksheet** | [Worksheet_04_MLP_XOR_to_Backpropagation.pdf](02_Worksheets/Worksheet_04_MLP_XOR_to_Backpropagation.pdf) | Worksheet 04: Hand derivations of gradients and parameter counts |
 | **Worksheet / Web** | [Worksheet_04_Backpropagation_Output_Layer_Interactive.html](02_Worksheets/Worksheet_04_Backpropagation_Output_Layer_Interactive.html) | Interactive output layer backprop step-by-step calculator |
 | **Visualization** | [Module_04_Backpropagation_Interactive_Worksheet.html](03_HTML_Visualizations/Module_04_Backpropagation_Interactive_Worksheet.html) | Standalone interactive backprop explorer |
-| **Lab Notebook (Boilerplate)** | [Lab_08_Face_Recognition_MLP_Boilerplate.ipynb](04_Notebooks/Lab_08_Face_Recognition_MLP_Pipeline/Lab_08_Face_Recognition_MLP_Boilerplate.ipynb) | Lab 8: End-to-End MLP Pipeline on Olivetti Faces (Student Boilerplate) |
+| **Lab Notebook (Boilerplate)** | [Lab_08_Face_Recognition_MLP_Boilerplate.ipynb](04_Notebooks/Lab_08_Face_Recognition_MLP_Pipeline/Lab_08_Face_Recognition_MLP_Boilerplate.ipynb) | Lab 8: End-to-End MLP Pipeline on Olivetti Faces (Synchronized with Colab) |
 | **Lab Notebook (Solved)** | [Lab_08_Face_Recognition_MLP_Solved.ipynb](04_Notebooks/Lab_08_Face_Recognition_MLP_Pipeline/Lab_08_Face_Recognition_MLP_Solved.ipynb) | Lab 8: End-to-End MLP Pipeline on Olivetti Faces (Complete Solved Key) |
 
 ---
@@ -102,16 +113,22 @@ DL/
 | :--- | :--- | :--- |
 | **Worksheet** | [Worksheet_05_Gradient_Descent_and_Optimization.pdf](02_Worksheets/Worksheet_05_Gradient_Descent_and_Optimization.pdf) | Worksheet 05: Hand calculations for GD step updates (PDF) |
 | **Worksheet / Web** | [Worksheet_05_Gradient_Descent_and_Optimization_Interactive.html](02_Worksheets/Worksheet_05_Gradient_Descent_and_Optimization_Interactive.html) | Worksheet 05: Interactive explorable notes & step-by-step calculations (HTML) |
+| **Worksheet / Web** | [Worksheet_05_Gradient_Descent_Types_Interactive_Lab.html](02_Worksheets/Worksheet_05_Gradient_Descent_Types_Interactive_Lab.html) | Worksheet 05: Interactive simulation of Batch, Mini-batch, and Stochastic GD |
+| **Visualization** | [Module_05_Gradient_Descent_Types_Interactive_Lab.html](03_HTML_Visualizations/Module_05_Gradient_Descent_Types_Interactive_Lab.html) | Interactive 2D loss surface and optimization path visualizer |
 | **Visualization** | [Module_05_Epoch_Circuit_Visual_Analogy.html](03_HTML_Visualizations/Module_05_Epoch_Circuit_Visual_Analogy.html) | Visual race track comparing Batch, Mini-batch, and SGD speeds |
+| **Worksheet / Web** | [Worksheet_06_Dataset_and_DataLoader_Interactive_Lab.html](02_Worksheets/Worksheet_06_Dataset_and_DataLoader_Interactive_Lab.html) | Worksheet 06: Interactive PyTorch `Dataset` & `DataLoader` lab |
+| **Visualization** | [Module_06_Dataset_and_DataLoader_Interactive_Lab.html](03_HTML_Visualizations/Module_06_Dataset_and_DataLoader_Interactive_Lab.html) | Interactive simulation of dataset slicing, batching, and worker processes |
 | **Lab Notebook** | [Lab_05_Part_1_PyTorch_Autograd_Computational_Graph.ipynb](04_Notebooks/Lab_05_nn_Module_and_Pipelines/Lab_05_Part_1_PyTorch_Autograd_Computational_Graph.ipynb) | PyTorch Autograd computational graph inspection |
 | **Lab Notebook** | [Lab_05_Part_1_Quiz_Autograd_in_AI_Town.ipynb](04_Notebooks/Lab_05_nn_Module_and_Pipelines/Lab_05_Part_1_Quiz_Autograd_in_AI_Town.ipynb) | Practical Autograd quiz and problem scenarios |
-| **Lab Notebook** | [Lab_05_Part_2_nn_Module_Breast_Cancer_Pipeline.ipynb](04_Notebooks/Lab_05_nn_Module_and_Pipelines/Lab_05_Part_2_nn_Module_Breast_Cancer_Pipeline.ipynb) | Lab 5: Building a binary classifier with PyTorch `nn.Module` on Breast Cancer data |
+| **Lab Notebook (Practice)** | [Lab_05_Part_2_Practice_Breast_Cancer_nn_Module.ipynb](04_Notebooks/Lab_05_nn_Module_and_Pipelines/Lab_05_Part_2_Practice_Breast_Cancer_nn_Module.ipynb) | Practice Exercise: Breast Cancer classification with 10 student TODOs |
+| **Lab Notebook (Solved)** | [Lab_05_Part_2_nn_Module_Breast_Cancer_Pipeline.ipynb](04_Notebooks/Lab_05_nn_Module_and_Pipelines/Lab_05_Part_2_nn_Module_Breast_Cancer_Pipeline.ipynb) | Lab 5: Building a binary classifier with PyTorch `nn.Module` on Breast Cancer data |
 | **Lab Notebook** | [Lab_05_Part_3_In_Class_Diabetes_Prediction_Boilerplate.ipynb](04_Notebooks/Lab_05_nn_Module_and_Pipelines/Lab_05_Part_3_In_Class_Diabetes_Prediction_Boilerplate.ipynb) | In-class exercise boilerplate on Pima Indians Diabetes dataset |
 | **Lab Notebook (Solved)** | [Lab_05_Part_3_In_Class_Diabetes_Prediction_Solved.ipynb](04_Notebooks/Lab_05_nn_Module_and_Pipelines/Lab_05_Part_3_In_Class_Diabetes_Prediction_Solved.ipynb) | In-class exercise solved key with executed loss curves |
 | **Diagram** | [network_diagram.png](04_Notebooks/Lab_05_nn_Module_and_Pipelines/network_diagram.png) | Architecture diagram for Lab 5 neural network |
 | **Lab Notebook** | [Lab_06_Part_1_Gradient_Descent_Batch_vs_SGD.ipynb](04_Notebooks/Lab_06_Gradient_Descent_and_DataLoaders/Lab_06_Part_1_Gradient_Descent_Batch_vs_SGD.ipynb) | Lab 6 Part 1: Empirical comparison of Batch vs SGD with execution plots |
 | **Lab Notebook** | [Lab_06_Part_2_PyTorch_Dataset_DataLoader_Pipeline.ipynb](04_Notebooks/Lab_06_Gradient_Descent_and_DataLoaders/Lab_06_Part_2_PyTorch_Dataset_DataLoader_Pipeline.ipynb) | Lab 6 Part 2: Deep dive into PyTorch `Dataset` and `DataLoader` machinery |
 | **Lab Notebook** | [Lab_06_Part_3_PyTorch_Training_Pipeline.ipynb](04_Notebooks/Lab_06_Gradient_Descent_and_DataLoaders/Lab_06_Part_3_PyTorch_Training_Pipeline.ipynb) | Lab 6 Part 3: End-to-end training pipeline with dataset loaders & evaluation |
+| **Lab Notebook (Practice)** | [Lab_06_Part_4_Exercise_Fashion_MNIST_Pipeline.ipynb](04_Notebooks/Lab_06_Gradient_Descent_and_DataLoaders/Lab_06_Part_4_Exercise_Fashion_MNIST_Pipeline.ipynb) | Practice Exercise: Fashion-MNIST 70k images end-to-end pipeline with 10 TODOs |
 
 ---
 
@@ -134,8 +151,8 @@ DL/
 
 ## How to Use These Materials
 
-1. **Viewing HTML Visualizations**:
-   Double click any `.html` file inside `03_HTML_Visualizations/` to open it in Chrome, Safari, or your default web browser. All visualizers are self-contained with no server required.
+1. **Viewing HTML Visualizations & Interactive Labs**:
+   Double click any `.html` file inside `03_HTML_Visualizations/` or `02_Worksheets/` to open it in Chrome, Safari, or your default web browser. All visualizers and simulation labs are completely self-contained and run 100% locally with no web server or Python environment needed.
 2. **Running Notebooks**:
    Open notebooks locally using:
    ```bash
@@ -143,9 +160,8 @@ DL/
    # or
    jupyter notebook
    ```
-   Alternatively, upload the `.ipynb` file to [Google Colab](https://colab.research.google.com).
-3. **Lab Notebooks Mirror**:
-   The `Deep Learning Lab Notebooks/` directory maintains a streamlined 1-to-1 mirror (`LAB_0` through `LAB_8`) matching official course lab submissions.
-4. **Accessing Cloud Sources**:
+   Alternatively, open directly in [Google Colab](https://colab.research.google.com) or click any of the live Colab links in the repository table.
+3. **Official Cloud Sources**:
    - Slides, Notes & Worksheets: [DL Notes Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)
    - Online Colab Notebooks: [DL Lab Notebooks Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)
+   - Online Interactive Labs: [Deep Learning Interactive Live Site](https://sparshbansal-newton.github.io/deep-learning-labs/)

@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB 7: Deep Learning — Dataset &amp; DataLoader</title>
+<style>
+:root{
+  --bg:#fbfaf7; --panel:#ffffff; --ink:#1f2328; --ink-soft:#55606e; --ink-faint:#7c8794;
+  --rule:#e3e0d8; --rule-soft:#efece5;
+  --accent:#3b3a8f; --accent-soft:#ecebf7; --accent-line:#c9c7ec;
+  --ok:#1c6b41; --ok-soft:#e7f2ec; --ok-line:#a9d4bd;
+  --bad:#9e2f2f; --bad-soft:#f9ebea; --bad-line:#e2b6b3;
+  --miss:#8a6a1c; --miss-soft:#faf4e3; --miss-line:#dcc98a;
+  --code-bg:#f5f3ee; --code-ink:#2b2f36;
+  --kw:#8a2f6b; --str:#1f6b52; --com:#8b9099; --num:#a35a12; --dun:#3b3a8f;
+  --chip0:#e8eef8; --chip0-line:#9db8dd; --chip1:#fbeae6; --chip1-line:#e0a493;
+  --pt0:#3f72af; --pt1:#c0504d; --grid:#e8e5dd;
+  --serif:"Iowan Old Style",Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14161a; --panel:#1b1e23; --ink:#e7e7e4; --ink-soft:#a6adb8; --ink-faint:#828b96;
+    --rule:#2c3138; --rule-soft:#242930;
+    --accent:#a3a1f2; --accent-soft:#23253a; --accent-line:#3f4270;
+    --ok:#78d2a0; --ok-soft:#18291f; --ok-line:#2f5d43;
+    --bad:#e08b86; --bad-soft:#2a1a1a; --bad-line:#5f3634;
+    --miss:#d9bd6d; --miss-soft:#2a2417; --miss-line:#5d4f2a;
+    --code-bg:#11141a; --code-ink:#d6dae0;
+    --kw:#e08bc0; --str:#8fd6b4; --com:#6e7783; --num:#e0a86a; --dun:#a3a1f2;
+    --chip0:#1c2634; --chip0-line:#3d5a80; --chip1:#2e1f1c; --chip1-line:#7a4740;
+    --pt0:#7fa9dd; --pt1:#e08b86; --grid:#262b32;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:24px}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:16.5px; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- progress ---------- */
+#progress{position:fixed; top:0; left:0; height:3px; width:0%; background:var(--accent); z-index:60; transition:width .08s linear}
+
+/* ---------- layout ---------- */
+.shell{display:grid; grid-template-columns:290px minmax(0,1fr); gap:0; max-width:1240px; margin:0 auto}
+.side{
+  position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+  padding:38px 22px 40px 26px; border-right:1px solid var(--rule);
+}
+.side .brand{font-family:var(--serif); font-size:1.02rem; letter-spacing:.02em; margin:0 0 2px}
+.side .brand span{display:block; font-family:var(--sans); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:6px}
+.side .brandsub{font-size:.78rem; color:var(--ink-faint); margin:0 0 22px; line-height:1.45}
+nav ol{list-style:none; margin:0; padding:0; counter-reset:toc}
+nav li{counter-increment:toc; margin:0}
+nav a{
+  display:block; padding:5px 10px 5px 30px; position:relative; text-decoration:none;
+  color:var(--ink-soft); font-size:.845rem; line-height:1.4; border-radius:5px;
+}
+nav a::before{content:counter(toc); position:absolute; left:8px; top:5px; font-variant-numeric:tabular-nums; font-size:.72rem; color:var(--ink-faint)}
+nav a:hover{background:var(--rule-soft); color:var(--ink)}
+nav a.on{background:var(--accent-soft); color:var(--accent); font-weight:600}
+nav a.on::before{color:var(--accent)}
+.toc-m{display:none}
+
+main{padding:52px 46px 120px; max-width:860px}
+
+/* ---------- typography ---------- */
+.eyebrow{font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 10px}
+h1{font-family:var(--serif); font-size:2.45rem; line-height:1.14; font-weight:600; margin:0 0 10px; letter-spacing:-.01em}
+.subtitle{font-family:var(--serif); font-style:italic; font-size:1.12rem; color:var(--ink-soft); margin:0 0 26px}
+h2{
+  font-family:var(--serif); font-size:1.52rem; font-weight:600; line-height:1.25;
+  margin:64px 0 4px; padding-top:26px; border-top:1px solid var(--rule); letter-spacing:-.005em;
+}
+h2 .snum{display:block; font-family:var(--sans); font-size:.7rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:7px}
+h3{font-family:var(--serif); font-size:1.1rem; font-weight:600; margin:30px 0 8px}
+h4{font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:24px 0 6px; font-weight:700}
+p{margin:0 0 14px}
+main > section > p:first-of-type{margin-top:14px}
+strong{font-weight:650}
+em{font-style:italic}
+a.inline{color:var(--accent)}
+code{font-family:var(--mono); font-size:.87em; background:var(--code-bg); padding:1px 5px; border-radius:4px; color:var(--code-ink)}
+.lead{font-size:1.05rem; color:var(--ink-soft)}
+ul,ol{margin:0 0 14px; padding-left:22px}
+li{margin:0 0 6px}
+.tight li{margin:0 0 3px}
+.pts{list-style:none; padding-left:2px; margin:14px 0 16px}
+.pts li{position:relative; padding-left:23px; margin:0 0 9px; line-height:1.6}
+.pts li::before{content:"\25B8"; position:absolute; left:3px; top:-1px; color:var(--accent); font-size:.95em; font-weight:700}
+.pts li strong,.pts li b{font-weight:650; color:var(--ink)}
+.pts.sub{margin:9px 0 4px}
+.pts.sub li{margin-bottom:6px; font-size:.95em}
+
+/* ---------- boxes ---------- */
+.defn{
+  background:var(--panel); border:1px solid var(--rule); border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0; padding:15px 18px; margin:20px 0;
+}
+.defn .dt{font-family:var(--serif); font-size:1.03rem; font-weight:600; margin:0 0 4px}
+.defn p:last-child{margin-bottom:0}
+.note{
+  background:var(--accent-soft); border:1px solid var(--accent-line); border-radius:8px;
+  padding:13px 16px; margin:18px 0; font-size:.94rem;
+}
+.note p:last-child{margin-bottom:0}
+.warn{
+  background:var(--bad-soft); border:1px solid var(--bad-line); border-radius:8px;
+  padding:13px 16px; margin:18px 0; font-size:.94rem;
+}
+.warn .wt{font-weight:700; color:var(--bad); display:block; margin-bottom:4px; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase}
+.warn p:last-child{margin-bottom:0}
+
+/* ---------- collapsible depth ---------- */
+.deeper{
+  border:1px solid var(--rule); border-radius:8px; background:var(--panel);
+  margin:18px 0; overflow:hidden;
+}
+.deeper > summary{
+  cursor:pointer; list-style:none; padding:10px 15px;
+  font-family:var(--sans); font-size:.76rem; letter-spacing:.09em;
+  text-transform:uppercase; font-weight:700; color:var(--accent);
+  display:flex; align-items:center; gap:9px; user-select:none;
+}
+.deeper > summary::-webkit-details-marker{display:none}
+.deeper > summary::before{
+  content:"+"; font-size:.95rem; line-height:1; width:15px; height:15px;
+  display:inline-grid; place-items:center; border:1px solid var(--accent-line);
+  border-radius:4px; background:var(--accent-soft); flex:none;
+}
+.deeper[open] > summary::before{content:"\2212"}
+.deeper[open] > summary{border-bottom:1px solid var(--rule-soft)}
+.deeper > summary:hover{background:var(--accent-soft)}
+.deeper > summary .dtag{
+  font-weight:500; letter-spacing:0; text-transform:none;
+  color:var(--ink-faint); font-size:.86rem;
+}
+.dbody{padding:13px 16px 3px; font-size:.95rem}
+.dbody > *:first-child{margin-top:0}
+.dbody .pts{margin-top:6px}
+@media print{ .deeper{border:none} .deeper > summary{display:none} .dbody{padding:0} }
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto; margin:20px 0; border:1px solid var(--rule); border-radius:8px; background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:.885rem}
+th,td{text-align:left; padding:8px 13px; border-bottom:1px solid var(--rule-soft); vertical-align:top}
+thead th{background:var(--rule-soft); font-size:.74rem; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; border-bottom:1px solid var(--rule); white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+td code{font-size:.85em}
+.num{font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+tr.hl td{background:var(--accent-soft)}
+tr.hl td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+
+/* ---------- code ---------- */
+.codewrap{position:relative; margin:18px 0}
+.codewrap .cap{
+  font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint);
+  padding:0 0 6px 2px; font-weight:600;
+}
+pre{
+  margin:0; background:var(--code-bg); border:1px solid var(--rule); border-radius:8px;
+  padding:14px 16px; overflow-x:auto; font-family:var(--mono); font-size:.83rem; line-height:1.62; color:var(--code-ink);
+}
+pre code{background:none; padding:0; font-size:inherit}
+.copy{
+  position:absolute; top:22px; right:8px; border:1px solid var(--rule); background:var(--panel);
+  color:var(--ink-faint); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+  padding:3px 8px; border-radius:5px; cursor:pointer; opacity:0; transition:opacity .15s;
+}
+.codewrap:hover .copy{opacity:1}
+.copy:hover{color:var(--accent); border-color:var(--accent-line)}
+.out{
+  background:var(--panel); border:1px dashed var(--rule); border-radius:8px; padding:11px 15px;
+  font-family:var(--mono); font-size:.8rem; line-height:1.6; color:var(--ink-soft); overflow-x:auto; margin:-6px 0 18px;
+}
+.out .ol{font-size:.66rem; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); font-family:var(--sans); font-weight:700; display:block; margin-bottom:5px}
+.tok-kw{color:var(--kw)} .tok-str{color:var(--str)} .tok-com{color:var(--com); font-style:italic}
+.tok-num{color:var(--num)} .tok-dun{color:var(--dun); font-weight:600}
+
+/* ---------- figures ---------- */
+figure{margin:26px 0; padding:0}
+figure svg{display:block; width:100%; height:auto; overflow:visible}
+figcaption{font-size:.8rem; color:var(--ink-faint); margin-top:9px; font-style:italic; text-align:center}
+.svgbox{background:var(--panel); border:1px solid var(--rule); border-radius:8px; padding:18px 16px; overflow-x:auto}
+
+/* ---------- widgets ---------- */
+.widget{
+  background:var(--panel); border:1px solid var(--accent-line); border-radius:10px;
+  padding:0 0 16px; margin:26px 0; overflow:hidden;
+}
+.widget > h4{
+  margin:0; padding:9px 16px; background:var(--accent-soft); color:var(--accent);
+  border-bottom:1px solid var(--accent-line); font-size:.72rem; letter-spacing:.12em;
+}
+.widget > h4::before{content:"▶ "; font-size:.85em}
+.wbody{padding:16px 16px 0}
+.ctrls{display:flex; flex-wrap:wrap; gap:16px 24px; align-items:flex-end; margin-bottom:14px}
+.ctrl{display:flex; flex-direction:column; gap:5px}
+.ctrl label{font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); font-weight:700}
+.ctrl input[type=range]{width:190px; accent-color:var(--accent)}
+.ctrl select,.ctrl input[type=number]{
+  font-family:var(--sans); font-size:.9rem; padding:5px 8px; border:1px solid var(--rule);
+  border-radius:6px; background:var(--bg); color:var(--ink); min-width:88px;
+}
+.chk{display:flex; align-items:center; gap:7px; font-size:.88rem; color:var(--ink-soft); cursor:pointer; user-select:none}
+.chk input{accent-color:var(--accent); width:15px; height:15px; cursor:pointer}
+.btn{
+  font-family:var(--sans); font-size:.8rem; font-weight:600; padding:6px 13px; border-radius:6px;
+  border:1px solid var(--accent-line); background:var(--accent-soft); color:var(--accent); cursor:pointer;
+}
+.btn:hover{background:var(--accent); color:#fff; border-color:var(--accent)}
+.readout{
+  font-family:var(--mono); font-size:.82rem; background:var(--code-bg); border:1px solid var(--rule);
+  border-radius:7px; padding:10px 13px; color:var(--code-ink); overflow-x:auto; white-space:pre;
+}
+.summary{font-size:.85rem; color:var(--ink-soft); margin:12px 0 0}
+.summary b{color:var(--ink); font-variant-numeric:tabular-nums}
+
+.batches{display:flex; flex-direction:column; gap:9px; margin-top:4px}
+.batch{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.blab{font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; min-width:74px}
+.chip{
+  font-family:var(--mono); font-size:.78rem; font-weight:600; padding:4px 9px; border-radius:6px;
+  border:1px solid; display:inline-flex; align-items:center; gap:6px;
+}
+.chip.c0{background:var(--chip0); border-color:var(--chip0-line); color:var(--ink)}
+.chip.c1{background:var(--chip1); border-color:var(--chip1-line); color:var(--ink)}
+.chip .dot{width:6px; height:6px; border-radius:50%}
+.chip.c0 .dot{background:var(--chip0-line)} .chip.c1 .dot{background:var(--chip1-line)}
+.batch.dropped{opacity:.42}
+.batch.dropped .blab{text-decoration:line-through}
+.legend{font-size:.76rem; color:var(--ink-faint); margin-top:12px}
+.plotbox{background:var(--panel); border:1px solid var(--rule); border-radius:8px; padding:8px 6px 4px; margin-bottom:14px}
+#toyPlot{display:block; width:100%; height:auto}
+#toyPlot .pt{cursor:pointer}
+#toyPlot .pt:hover .mk{stroke:var(--accent); stroke-width:2.5}
+#toyPlot .pt.sel .mk{stroke:var(--accent); stroke-width:3}
+#toyPlot .pt.sel .lb{fill:var(--accent); font-weight:700}
+#toyPlot .ring{fill:none; stroke:var(--accent); stroke-width:1.6; opacity:.55}
+
+/* ---------- mcq ---------- */
+.mcq{
+  border:1px solid var(--rule); border-radius:10px; background:var(--panel);
+  padding:0 0 2px; margin:26px 0;
+}
+.mcq-h{
+  font-size:.7rem; letter-spacing:.13em; text-transform:uppercase; font-weight:700; color:var(--ink-faint);
+  padding:8px 16px; border-bottom:1px solid var(--rule-soft); background:var(--rule-soft);
+}
+.mcq-q{padding:13px 16px 4px; margin:0; font-weight:550}
+.mcq-opts{list-style:none; margin:0; padding:6px 16px 12px; display:flex; flex-direction:column; gap:7px}
+.mcq-opts li{margin:0}
+.mcq-opts button{
+  width:100%; text-align:left; font-family:var(--sans); font-size:.93rem; line-height:1.45;
+  padding:9px 12px 9px 38px; border:1px solid var(--rule); border-radius:7px; background:var(--bg);
+  color:var(--ink); cursor:pointer; position:relative; transition:border-color .12s,background .12s;
+}
+.mcq-opts button::before{
+  content:attr(data-opt); position:absolute; left:12px; top:9px; width:19px; height:19px; border-radius:50%;
+  border:1px solid var(--rule); display:flex; align-items:center; justify-content:center;
+  font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink-faint); line-height:1;
+}
+.mcq-opts button:hover:not(:disabled){border-color:var(--accent-line); background:var(--accent-soft)}
+.mcq-opts button:disabled{cursor:default}
+.mcq-opts button.correct{border-color:var(--ok-line); background:var(--ok-soft)}
+.mcq-opts button.correct::before{content:"✓"; background:var(--ok); border-color:var(--ok); color:#fff}
+.mcq-opts button.wrong{border-color:var(--bad-line); background:var(--bad-soft)}
+.mcq-opts button.wrong::before{content:"✕"; background:var(--bad); border-color:var(--bad); color:#fff}
+.mcq-opts button.dim{opacity:.55}
+.mcq-exp{
+  margin:0 16px 14px; padding:11px 14px; border-radius:7px; font-size:.9rem; line-height:1.55;
+  background:var(--accent-soft); border:1px solid var(--accent-line); color:var(--ink-soft);
+}
+.mcq-exp b{color:var(--ink)}
+
+/* ---------- quiz ---------- */
+.quiz{border:1px solid var(--rule); border-radius:10px; background:var(--panel); overflow:hidden; margin:24px 0}
+.quiz-item{padding:16px 18px; border-bottom:1px solid var(--rule-soft)}
+.quiz-item:last-of-type{border-bottom:none}
+.quiz-item.last-shown{border-bottom:none}
+.quiz-item[hidden]{display:none}
+.quiz-item .qn{font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 5px}
+.quiz-item .qt{margin:0 0 10px; font-weight:550}
+.quiz-opts{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+.quiz-opts label{
+  display:flex; gap:9px; align-items:flex-start; font-size:.92rem; line-height:1.45; padding:7px 11px;
+  border:1px solid var(--rule); border-radius:7px; background:var(--bg); cursor:pointer;
+}
+.quiz-opts label:hover{border-color:var(--accent-line)}
+.quiz-opts input{accent-color:var(--accent); margin-top:3px; flex:none}
+.quiz-opts label.correct{border-color:var(--ok-line); background:var(--ok-soft)}
+.quiz-opts label.wrong{border-color:var(--bad-line); background:var(--bad-soft)}
+.quiz-opts label.unattempted{border-color:var(--miss-line); background:var(--miss-soft); border-style:dashed}
+.quiz-item.skipped{background:var(--miss-soft)}
+.skip-tag{
+  display:inline-block; margin-left:8px; padding:1px 7px; border-radius:20px;
+  background:var(--miss-soft); border:1px solid var(--miss-line); color:var(--miss);
+  font-size:.62rem; letter-spacing:.09em; text-transform:uppercase; font-weight:700; vertical-align:1px;
+}
+#quizWarn{
+  font-size:.85rem; color:var(--miss); background:var(--miss-soft); border:1px solid var(--miss-line);
+  border-radius:7px; padding:7px 12px;
+}
+.score .miss{color:var(--miss); font-weight:600}
+.quiz-exp{margin:10px 0 0; padding:9px 12px; border-radius:6px; background:var(--accent-soft); border:1px solid var(--accent-line); font-size:.87rem; color:var(--ink-soft)}
+.quiz-bar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 18px; background:var(--rule-soft); border-top:1px solid var(--rule)}
+.score{font-family:var(--serif); font-size:1.15rem; font-weight:600}
+.score small{display:block; font-family:var(--sans); font-size:.8rem; font-weight:400; color:var(--ink-soft)}
+
+/* ---------- misc ---------- */
+.howto{
+  border:1px solid var(--rule); border-radius:10px; background:var(--panel); padding:14px 18px;
+  margin:0 0 10px; font-size:.9rem; color:var(--ink-soft);
+}
+.howto b{color:var(--ink)}
+.howto ul{margin:8px 0 0; padding-left:20px}
+.endnote{margin-top:60px; padding-top:20px; border-top:1px solid var(--rule); font-size:.82rem; color:var(--ink-faint); text-align:center}
+
+@media (max-width:980px){
+  .shell{grid-template-columns:1fr}
+  .side{display:none}
+  .toc-m{display:block; position:sticky; top:0; z-index:40; background:var(--bg); border-bottom:1px solid var(--rule)}
+  .toc-m summary{padding:11px 20px; cursor:pointer; font-size:.8rem; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--accent)}
+  .toc-m nav{padding:0 12px 12px; max-height:60vh; overflow-y:auto}
+  main{padding:26px 20px 90px}
+  h1{font-size:1.95rem}
+  .ctrl input[type=range]{width:150px}
+}
+
+@media print{
+  :root{--bg:#fff; --panel:#fff}
+  #progress,.side,.toc-m,.copy,.btn{display:none!important}
+  .shell{display:block; max-width:none}
+  main{padding:0; max-width:none}
+  body{font-size:11pt}
+  h2{page-break-after:avoid; margin-top:26px}
+  .mcq,.widget,.defn,.note,.warn,figure,.codewrap,.quiz-item{page-break-inside:avoid}
+  .mcq-exp,.quiz-exp{display:block!important; background:#f4f4f4!important}
+  .quiz-item[hidden]{display:block!important}
+  .mcq-opts button{background:#fff!important}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div class="shell">
+
+  <aside class="side">
+    <p class="brand"><span>Lab 7 · Deep Learning</span>Dataset &amp; DataLoader</p>
+    <p class="brandsub">Interactive study notes on the PyTorch data pipeline.</p>
+    <nav id="toc-d"></nav>
+  </aside>
+
+  <details class="toc-m">
+    <summary>Contents</summary>
+    <nav id="toc-m"></nav>
+  </details>
+
+  <main>
+
+    <header>
+      <p class="eyebrow">LAB 7: Deep Learning</p>
+      <h1>Datasets And Dataloaders in Pytorch</h1>
+      <p class="subtitle">An interactive study of <code>Dataset</code> and <code>DataLoader</code> — the PyTorch data pipeline</p>
+
+      <div class="howto">
+        <b>How to use these notes.</b> They are meant to be worked through, not only read.
+        <ul class="tight">
+          <li>Sections marked <b>▶</b> are live — move the controls and the output recomputes.</li>
+          <li>Blocks marked <b>+ Going deeper</b> are optional detail — open them only if you want the mechanism behind the rule.</li>
+          <li>Every multiple-choice question responds the moment you click an option, and explains itself.</li>
+          <li>The closing assessment draws <b>three questions at random</b> — submit, then fetch another three.</li>
+          <li>Every number below is derived from <em>one</em> ten-sample dataset, printed in Section 3, so nothing is asserted without being visible.</li>
+        </ul>
+      </div>
+    </header>
+
+    <!-- ================= 1 ================= -->
+    <section id="s1">
+      <h2><span class="snum">Section One</span>Why batching, and why a library</h2>
+
+      <p class="lead">Every training loop so far has pushed the <em>whole</em> dataset through the model in one forward pass, computed one loss, and taken one step. That is <strong>batch gradient descent</strong>. It is correct, and for any dataset of real size it is unusable.</p>
+
+      <ul class="pts">
+        <li><strong>Memory.</strong> A forward pass holds the inputs, every intermediate activation, and the autograd graph — peak memory scales with how many samples are in flight. 100,000 images at 224&times;224&times;3 is ~15&nbsp;GB before a single activation. The result is an out-of-memory crash, not slow training.</li>
+        <li><strong>Convergence.</strong> Full-batch buys <strong>one update per epoch</strong>. The same 25 epochs in batches of 32 gives hundreds of updates for the same total computation — and each batch gradient is noisy but unbiased, which helps the model escape shallow minima and saddle points.</li>
+      </ul>
+
+      <div class="note"><p><strong>The fix.</strong> Don't eat the whole pizza in one bite. Slice it. Push 32 or 64 samples through, compute the loss on the chunk, update, move on. That is <strong>mini-batch gradient descent</strong>; everything that follows is machinery for producing those chunks correctly and efficiently.</p></div>
+
+      <h3>Slicing by hand gets you most of the way</h3>
+
+      <div class="codewrap">
+        <div class="cap">Manual batching — correct, and insufficient</div>
+        <button class="copy">Copy</button>
+        <pre><code>batch_size = 2
+n_samples  = len(X_train_tensor)
+
+for epoch in range(epochs):
+    # Simply walk the dataset in chunks of `batch_size`
+    for start_idx in range(0, n_samples, batch_size):
+        end_idx = start_idx + batch_size
+        X_batch = X_train_tensor[start_idx:end_idx]
+        y_batch = y_train_tensor[start_idx:end_idx]
+
+        y_pred = model(X_batch)
+        loss   = loss_function(y_pred, y_batch.view(-1, 1))
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()</code></pre>
+      </div>
+
+      <p>The maths here is right and the memory is bounded, so the objection to this loop is <strong>architectural, not mathematical</strong>. Four things are missing: a <strong>standard interface</strong> (this assumes an in-memory, sliceable tensor — swap in images on disk and every line changes), a <strong>home for transformations</strong>, <strong>shuffling</strong> (real files are usually sorted by class), and <strong>parallelism</strong> (the GPU idles while the CPU decodes).</p>
+
+      <div class="note"><p>PyTorch's answer is to split the problem in two: an object that knows <em>what the data is</em>, and an object that knows <em>how to serve it</em>.</p></div>
+
+      <div class="mcq" data-answer="c">
+        <div class="mcq-h">Check yourself &middot; 1.1</div>
+        <p class="mcq-q">A dataset of 100,000 images crashes with an out-of-memory error on the very first forward pass. What is the direct cause?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">The model has too many parameters to fit in memory.</button></li>
+          <li><button data-opt="b">The learning rate is too high, so the gradients overflow.</button></li>
+          <li><button data-opt="c">All 100,000 inputs and their activations are held simultaneously, so peak memory scales with the number of samples in flight.</button></li>
+          <li><button data-opt="d">The dataset file itself is larger than the available RAM.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>C.</b> The parameter count is fixed and usually modest; it is the <em>activations and autograd graph</em>, which scale with the number of samples processed together, that exhaust memory. Note that (d) is a different problem with a different fix — reading each sample from disk only when it is needed, rather than batching.</div>
+      </div>
+
+      <div class="mcq" data-answer="b">
+        <div class="mcq-h">Check yourself &middot; 1.2</div>
+        <p class="mcq-q">The manual slicing loop already produces correct mini-batches. What does it fundamentally <em>not</em> provide?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">Correct gradients — slicing biases the gradient estimate.</button></li>
+          <li><button data-opt="b">A reusable interface, a home for transformations, shuffling, and parallel preparation.</button></li>
+          <li><button data-opt="c">Bounded memory usage — it still loads everything.</button></li>
+          <li><button data-opt="d">The ability to change the batch size.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>B.</b> The objection is engineering, not mathematics. The gradients are fine and the memory is bounded. What is missing is structure: a contract other code can depend on, a place to put preprocessing, a shuffling strategy, and any means of overlapping data preparation with computation.</div>
+      </div>
+    </section>
+
+    <!-- ================= 2 ================= -->
+    <section id="s2">
+      <h2><span class="snum">Section Two</span>Two abstractions, one division of labour</h2>
+
+      <p>PyTorch supplies two classes in <code>torch.utils.data</code>. They are deliberately narrow, and the discipline of keeping them narrow is the whole design.</p>
+
+      <div class="defn">
+        <p class="dt"><code>Dataset</code> — the catalogue</p>
+        <ul class="pts sub">
+          <li>Knows what your data <em>is</em>.</li>
+          <li>Answers exactly two questions: <strong>how many samples?</strong> and <strong>give me sample i</strong>.</li>
+          <li>Knows nothing about batches, shuffling or epochs — it is an indexed collection, nothing more.</li>
+        </ul>
+      </div>
+
+      <div class="defn">
+        <p class="dt"><code>DataLoader</code> — the logistics layer</p>
+        <ul class="pts sub">
+          <li>Knows how to <em>serve</em> data.</li>
+          <li>Decides the order indices are drawn, groups them into chunks, asks the <code>Dataset</code> for each index, stacks the results into a batch tensor.</li>
+          <li>Hands that batch to the training loop — and never inspects what the samples mean.</li>
+        </ul>
+      </div>
+
+      <details class="deeper">
+        <summary>Going deeper <span class="dtag">responsibility split, line by line</span></summary>
+        <div class="dbody">
+        <div class="tw">
+          <table>
+            <thead><tr><th>Responsibility</th><th><code>Dataset</code></th><th><code>DataLoader</code></th></tr></thead>
+            <tbody>
+              <tr><td>Knowing the total number of samples</td><td>✔ via <code>__len__</code></td><td>—</td></tr>
+              <tr><td>Retrieving one sample by index</td><td>✔ via <code>__getitem__</code></td><td>—</td></tr>
+              <tr><td>Applying per-sample transformations</td><td>✔ inside <code>__getitem__</code></td><td>—</td></tr>
+              <tr><td>Deciding the order indices are drawn</td><td>—</td><td>✔ via the sampler</td></tr>
+              <tr><td>Grouping indices into batches</td><td>—</td><td>✔ via <code>batch_size</code></td></tr>
+              <tr><td>Stacking samples into a batch tensor</td><td>—</td><td>✔ via <code>collate_fn</code></td></tr>
+              <tr><td>Parallel loading across processes</td><td>—</td><td>✔ via <code>num_workers</code></td></tr>
+              <tr><td>Preparing memory for fast GPU transfer</td><td>—</td><td>✔ via <code>pin_memory</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        </div>
+      </details>
+
+      <figure>
+        <div class="svgbox">
+        <svg viewBox="0 0 760 260" role="img" aria-label="Pipeline diagram from raw arrays through Dataset, sampler and collate function to the training loop">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="1.3" color="var(--ink-faint)">
+            <line x1="126" y1="60" x2="176" y2="60" marker-end="url(#ar)"/>
+            <line x1="306" y1="60" x2="356" y2="60" marker-end="url(#ar)"/>
+            <line x1="486" y1="60" x2="536" y2="60" marker-end="url(#ar)"/>
+            <line x1="616" y1="88" x2="616" y2="132" marker-end="url(#ar)"/>
+            <line x1="536" y1="160" x2="486" y2="160" marker-end="url(#ar)"/>
+            <line x1="356" y1="160" x2="306" y2="160" marker-end="url(#ar)"/>
+            <line x1="216" y1="188" x2="216" y2="215" marker-end="url(#ar)"/>
+          </g>
+
+          <g font-family="var(--sans)" font-size="11.5">
+            <rect x="16" y="36" width="110" height="48" rx="7" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="71" y="57" text-anchor="middle" fill="var(--ink)" font-weight="600">Raw arrays</text>
+            <text x="71" y="72" text-anchor="middle" fill="var(--ink-faint)" font-size="10">CSV · images · text</text>
+
+            <rect x="176" y="30" width="130" height="60" rx="7" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+            <text x="241" y="52" text-anchor="middle" fill="var(--accent)" font-weight="700">Dataset</text>
+            <text x="241" y="68" text-anchor="middle" fill="var(--ink-soft)" font-size="10">__len__ · __getitem__</text>
+            <text x="241" y="81" text-anchor="middle" fill="var(--ink-faint)" font-size="9.5">indexed 0 … 9</text>
+
+            <rect x="356" y="36" width="130" height="48" rx="7" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="421" y="57" text-anchor="middle" fill="var(--ink)" font-weight="600">Sampler</text>
+            <text x="421" y="72" text-anchor="middle" fill="var(--ink-faint)" font-size="10">order of indices</text>
+
+            <rect x="536" y="36" width="160" height="48" rx="7" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="616" y="57" text-anchor="middle" fill="var(--ink)" font-weight="600">Chunk by batch_size</text>
+            <text x="616" y="72" text-anchor="middle" fill="var(--ink-faint)" font-size="10">[2, 7] · [0, 4] · …</text>
+
+            <rect x="536" y="136" width="160" height="48" rx="7" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="616" y="157" text-anchor="middle" fill="var(--ink)" font-weight="600">__getitem__ × k</text>
+            <text x="616" y="172" text-anchor="middle" fill="var(--ink-faint)" font-size="10">one sample per index</text>
+
+            <rect x="356" y="136" width="130" height="48" rx="7" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="421" y="157" text-anchor="middle" fill="var(--ink)" font-weight="600">collate_fn</text>
+            <text x="421" y="172" text-anchor="middle" fill="var(--ink-faint)" font-size="10">list → tensor</text>
+
+            <rect x="146" y="136" width="140" height="52" rx="7" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+            <text x="216" y="157" text-anchor="middle" fill="var(--accent)" font-weight="700">Batch</text>
+            <text x="216" y="173" text-anchor="middle" fill="var(--ink-soft)" font-size="10">features [B, 2] · labels [B]</text>
+
+            <rect x="126" y="215" width="180" height="34" rx="7" fill="var(--panel)" stroke="var(--rule)" stroke-dasharray="4 3"/>
+            <text x="216" y="236" text-anchor="middle" fill="var(--ink)" font-weight="600">Training loop</text>
+
+            <text x="401" y="118" text-anchor="middle" fill="var(--ink-faint)" font-size="10" font-style="italic">— DataLoader, one iteration —</text>
+            <line x1="336" y1="14" x2="336" y2="200" stroke="var(--accent-line)" stroke-width="1" stroke-dasharray="3 4"/>
+            <line x1="716" y1="14" x2="716" y2="200" stroke="var(--accent-line)" stroke-width="1" stroke-dasharray="3 4"/>
+          </g>
+        </svg>
+        </div>
+        <figcaption>The pipeline. Everything between the dashed lines is the <code>DataLoader</code>'s work; the <code>Dataset</code> is consulted only at the <code>__getitem__</code> step.</figcaption>
+      </figure>
+
+      <div class="mcq" data-answer="d">
+        <div class="mcq-h">Check yourself · 2.1</div>
+        <p class="mcq-q">Which object actually calls <code>__getitem__</code>, and how many times per batch?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">The <code>Dataset</code> calls it on itself, once per batch.</button></li>
+          <li><button data-opt="b">The training loop calls it directly, once per epoch.</button></li>
+          <li><button data-opt="c">The model calls it during the forward pass, once per sample.</button></li>
+          <li><button data-opt="d">The <code>DataLoader</code> calls it, once for every index in the batch.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>D.</b> The <code>DataLoader</code> holds a list of indices for the batch and calls <code>dataset[i]</code> for each one — <code>batch_size</code> calls per batch. The <code>Dataset</code> is passive; it responds, it never initiates.</div>
+      </div>
+    </section>
+
+    <!-- ================= 3 ================= -->
+    <section id="s3">
+      <h2><span class="snum">Section Three</span>Writing a <code>Dataset</code>: the three methods</h2>
+
+      <p>A custom dataset subclasses <code>torch.utils.data.Dataset</code> and overrides three methods. There is no fourth. Everything else PyTorch gives you for free.</p>
+
+      <div class="codewrap">
+        <div class="cap">The complete custom Dataset</div>
+        <button class="copy">Copy</button>
+        <pre><code>from torch.utils.data import Dataset, DataLoader
+
+class CustomDataset(Dataset):
+
+    def __init__(self, features, labels):
+        self.features = features
+        self.labels   = labels
+
+    def __len__(self):
+        return self.features.shape[0]                    # how many samples
+
+    def __getitem__(self, index):
+        return self.features[index], self.labels[index]  # one (features, label) pair</code></pre>
+      </div>
+
+      <h3><code>__init__</code> — what you store</h3>
+      <ul class="pts">
+        <li>Stores what is needed to <strong>locate</strong> a sample — tensors, a dataframe, file paths, a database connection. Do whole-collection conversions here (cast, reshape): once beats ten thousand times.</li>
+        <li><strong>It need not load the data.</strong> Store filenames and read each file only when requested — that is what keeps memory bounded.</li>
+      </ul>
+
+      <h3><code>__len__</code> — the contract</h3>
+      <ul class="pts">
+        <li>Returns one integer: the number of samples.</li>
+        <li>The loader derives the legal index range and the batch count from it. If it lies, the loader either over-runs the data or silently ignores part of it.</li>
+      </ul>
+
+      <h3><code>__getitem__</code> — one sample, never a batch</h3>
+      <ul class="pts">
+        <li>Takes one index, returns <strong>one</strong> sample — conventionally <code>(features, label)</code>.</li>
+        <li>The batch dimension is added <strong>later</strong>, by collate. Return pre-batched data and it gets created twice — shapes silently become nonsense, with no error raised.</li>
+      </ul>
+
+      <h3>The dataset used throughout these notes</h3>
+      <p>Ten samples, two features each, two balanced classes, generated once with a fixed random seed. Small enough to print in full, which means every claim below can be checked against this table rather than taken on trust.</p>
+
+      <div class="tw">
+        <table id="toytable">
+          <thead><tr><th class="num">index</th><th class="num">feature 1</th><th class="num">feature 2</th><th class="num">label</th><th>class</th></tr></thead>
+          <tbody>
+            <tr id="row-0"><td class="num">0</td><td class="num">1.0683</td><td class="num">−0.9701</td><td class="num">1</td><td>positive</td></tr>
+            <tr id="row-1"><td class="num">1</td><td class="num">−1.1402</td><td class="num">−0.8388</td><td class="num">0</td><td>negative</td></tr>
+            <tr id="row-2"><td class="num">2</td><td class="num">−2.8954</td><td class="num">1.9769</td><td class="num">0</td><td>negative</td></tr>
+            <tr id="row-3"><td class="num">3</td><td class="num">−0.7206</td><td class="num">−0.9606</td><td class="num">0</td><td>negative</td></tr>
+            <tr id="row-4"><td class="num">4</td><td class="num">−1.9629</td><td class="num">−0.9923</td><td class="num">0</td><td>negative</td></tr>
+            <tr id="row-5"><td class="num">5</td><td class="num">−0.9382</td><td class="num">−0.5430</td><td class="num">1</td><td>positive</td></tr>
+            <tr id="row-6"><td class="num">6</td><td class="num">1.7273</td><td class="num">−1.1858</td><td class="num">1</td><td>positive</td></tr>
+            <tr id="row-7"><td class="num">7</td><td class="num">1.7774</td><td class="num">1.5116</td><td class="num">1</td><td>positive</td></tr>
+            <tr id="row-8"><td class="num">8</td><td class="num">1.8997</td><td class="num">0.8344</td><td class="num">1</td><td>positive</td></tr>
+            <tr id="row-9"><td class="num">9</td><td class="num">−0.5872</td><td class="num">−1.9717</td><td class="num">0</td><td>negative</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="codewrap">
+        <div class="cap">Instantiating and probing it</div>
+        <button class="copy">Copy</button>
+        <pre><code>toy_dataset = CustomDataset(X_toy, y_toy)
+print('len:', len(toy_dataset), '| sample[2]:', toy_dataset[2])</code></pre>
+      </div>
+      <div class="out"><span class="ol">Output</span>len: 10 | sample[2]: (tensor([-2.8954,  1.9769]), tensor(0))</div>
+
+      <ul class="pts">
+        <li><code>len(toy_dataset)</code> works because <code>__len__</code> is defined — Python's built-in <code>len</code> dispatches to it.</li>
+        <li><code>toy_dataset[2]</code> works because <code>__getitem__</code> is defined — square-bracket indexing dispatches to it.</li>
+        <li>These are <strong>ordinary Python protocols</strong>, not special PyTorch powers. That is exactly why the interface feels natural.</li>
+      </ul>
+
+      <div class="widget" id="w-probe">
+        <h4>Interactive · Index probe</h4>
+        <div class="wbody">
+          <div class="plotbox">
+            <svg id="toyPlot" viewBox="0 0 560 400" role="img"
+                 aria-label="Scatter plot of the ten toy samples in feature space; click a point to select that index"></svg>
+          </div>
+          <div class="ctrls">
+            <div class="ctrl">
+              <label for="probe">index passed to <code>__getitem__</code></label>
+              <input type="range" id="probe" min="0" max="9" value="2" step="1">
+            </div>
+            <div class="ctrl">
+              <label for="probeNum">value</label>
+              <input type="number" id="probeNum" min="0" max="9" value="2">
+            </div>
+          </div>
+          <div class="readout" id="probeOut"></div>
+          <p class="summary"><b>Click any point</b> in the plot, or drag the slider — the plot, the readout and the table row above all track the same index. Note that the returned object is a <b>tuple of two tensors</b>, not a tensor, and that the feature tensor has shape <b>[2]</b>, with no batch dimension anywhere in sight.</p>
+        </div>
+      </div>
+
+      <div class="mcq" data-answer="b">
+        <div class="mcq-h">Check yourself · 3.1</div>
+        <p class="mcq-q">What does <code>toy_dataset[3]</code> return?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">A batch of 3 samples.</button></li>
+          <li><button data-opt="b">One <code>(features, label)</code> pair — the single sample at index 3.</button></li>
+          <li><button data-opt="c">The number of samples in the dataset.</button></li>
+          <li><button data-opt="d">The entire feature tensor for all 10 samples.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>B.</b> Square-bracket indexing calls <code>__getitem__</code>, which returns exactly <em>one</em> sample as a tuple. The count comes from <code>__len__</code>, and batching happens later, in the <code>DataLoader</code>.</div>
+      </div>
+    </section>
+
+    <!-- ================= 4 ================= -->
+    <section id="s4">
+      <h2><span class="snum">Section Four</span>Transformations: where they belong</h2>
+
+      <p>Raw data is rarely in the form a model wants. The question is not <em>whether</em> to transform, but <em>where that code lives</em> — and the answer is <strong>inside <code>__getitem__</code></strong>. Three things follow, none available if you transform the whole array up front:</p>
+
+      <ul class="pts">
+        <li><strong>Lazy, per sample.</strong> Only the current batch is transformed, so memory stays bounded even when the transformed form is far larger than the raw one.</li>
+        <li><strong>Different every epoch.</strong> A random crop or flip gives a fresh version of sample 3 each epoch — exactly what augmentation needs. Transform up front and every epoch sees the identical image.</li>
+        <li><strong>Runs inside the workers.</strong> The cost is parallelised and hidden behind training; work done in <code>__init__</code> happens once, serially, in the main process.</li>
+      </ul>
+
+      <details class="deeper">
+        <summary>Going deeper <span class="dtag">typical transforms, by modality</span></summary>
+        <div class="dbody">
+        <div class="tw">
+          <table>
+            <thead><tr><th>Modality</th><th>Typical per-sample transformations</th><th>Random each epoch?</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Images</strong></td><td>resize to a fixed resolution · convert to tensor · normalise channels · random crop, flip, rotation, colour jitter</td><td>Yes — augmentation is the point</td></tr>
+              <tr><td><strong>Text</strong></td><td>lowercase · strip punctuation · tokenise · map tokens to ids · truncate or pad to a length</td><td>Usually not</td></tr>
+              <tr><td><strong>Tabular</strong></td><td>cast dtype · standardise or min–max scale · encode categoricals · reshape the label</td><td>No — must be deterministic</td></tr>
+            </tbody>
+          </table>
+        </div>
+        </div>
+      </details>
+
+      <div class="warn">
+        <span class="wt">The one pitfall that matters</span>
+        <ul class="pts sub">
+          <li>Transforms that depend on <em>statistics of the data</em> — standardisation, scaling, vocabulary building — must be fitted on the <strong>training split only</strong>, then applied unchanged to validation and test.</li>
+          <li>Fit before splitting and the test set has <strong>leaked into training</strong>. Nothing errors — your accuracy is simply wrong, in the <strong>flattering</strong> direction.</li>
+        </ul>
+      </div>
+
+      <div class="mcq" data-answer="c">
+        <div class="mcq-h">Check yourself · 4.1</div>
+        <p class="mcq-q">Which of these is <em>unsafe</em> to compute inside <code>__getitem__</code>?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">Resizing an image to 224×224.</button></li>
+          <li><button data-opt="b">Applying a random horizontal flip.</button></li>
+          <li><button data-opt="c">Computing the dataset mean and standard deviation and standardising with them.</button></li>
+          <li><button data-opt="d">Casting a NumPy array to a <code>float32</code> tensor.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>C.</b> Resize, flip and cast are stateless — they depend on the single sample and nothing else. Standardisation depends on statistics over a <em>collection</em>, which must be fitted on the training split only and then passed in. Computing it inside <code>__getitem__</code> is both wasteful and a route to leakage.</div>
+      </div>
+    </section>
+
+    <!-- ================= 5 ================= -->
+    <section id="s5">
+      <h2><span class="snum">Section Five</span>Wiring the <code>DataLoader</code></h2>
+
+      <p>With a <code>Dataset</code> in hand, batching requires one line and no batching code of your own.</p>
+
+      <div class="codewrap">
+        <div class="cap">Ten samples, batches of two</div>
+        <button class="copy">Copy</button>
+        <pre><code>toy_loader = DataLoader(toy_dataset, batch_size=2, shuffle=False)
+
+for batch_features, batch_labels in toy_loader:
+    print(batch_features.tolist(), '->', batch_labels.tolist())</code></pre>
+      </div>
+      <div class="out"><span class="ol">Output — five batches</span>[[1.0683, -0.9701], [-1.1402, -0.8388]] -> [1, 0]
+[[-2.8954, 1.9769], [-0.7206, -0.9606]] -> [0, 0]
+[[-1.9629, -0.9923], [-0.9382, -0.5430]] -> [0, 1]
+[[1.7273, -1.1858], [1.7774, 1.5116]] -> [1, 1]
+[[1.8997, 0.8344], [-0.5872, -1.9717]] -> [1, 0]</div>
+
+      <p>With <code>shuffle=False</code> the batches are indices <code>[0,1]</code>, <code>[2,3]</code>, <code>[4,5]</code>, <code>[6,7]</code>, <code>[8,9]</code> — check them against the table in Section 3 and every value matches. Ten samples divided into batches of two gives five iterations of the loop, and <code>len(toy_loader)</code> returns 5.</p>
+
+      <details class="deeper">
+        <summary>Going deeper <span class="dtag">the control flow, step by step</span></summary>
+        <div class="dbody">
+        <p>What happens between <code>for … in toy_loader</code> and the first batch arriving:</p>
+        <ol>
+          <li>At the start of each epoch the loader asks its <strong>sampler</strong> for an ordering of all indices <code>0…9</code>. With <code>shuffle=True</code> that ordering is a fresh permutation; with <code>shuffle=False</code> it is <code>0,1,2,…,9</code>.</li>
+          <li>That ordering is <strong>divided into chunks</strong> of <code>batch_size</code>.</li>
+          <li>For each index in the current chunk, the loader calls <code>dataset[i]</code>, receiving one <code>(features, label)</code> tuple per index.</li>
+          <li>The resulting <em>list</em> of tuples is passed to <strong><code>collate_fn</code></strong>, which stacks them into batch tensors.</li>
+          <li>The batch is <strong>yielded</strong> to your loop body. When the chunks are exhausted, the epoch ends and step 1 repeats with a new shuffle.</li>
+        </ol>
+        </div>
+      </details>
+
+      <h3>Where the batch dimension comes from</h3>
+      <ul class="pts">
+        <li><code>__getitem__</code> returns features of shape <strong><code>[2]</code></strong> — two features, <em>no batch axis</em>. Collate stacks two of those into <strong><code>[2, 2]</code></strong>, and the scalar labels (shape <code>[]</code>) into <strong><code>[2]</code></strong>.</li>
+        <li>So the batch dimension is <strong>created by stacking</strong>. It exists nowhere in the <code>Dataset</code> — and every shape bug is a confusion about which side of that line you are on.</li>
+      </ul>
+
+      <div class="widget" id="w-batch">
+        <h4>Interactive · Batch builder</h4>
+        <div class="wbody">
+          <div class="ctrls">
+            <div class="ctrl">
+              <label for="bs">batch_size</label>
+              <select id="bs">
+                <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option>
+                <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+              </select>
+            </div>
+            <div class="ctrl">
+              <label>options</label>
+              <label class="chk"><input type="checkbox" id="shuf"> shuffle=True</label>
+            </div>
+            <div class="ctrl">
+              <label>&nbsp;</label>
+              <label class="chk"><input type="checkbox" id="drop"> drop_last=True</label>
+            </div>
+            <div class="ctrl">
+              <label>&nbsp;</label>
+              <div style="display:flex; gap:8px">
+                <button class="btn" id="nextEpoch">Next epoch ↻</button>
+                <button class="btn" id="resetEpoch">Reset</button>
+              </div>
+            </div>
+          </div>
+          <div class="batches" id="batchOut"></div>
+          <p class="summary" id="batchSum"></p>
+          <p class="legend">Each chip is one dataset index; its colour is that sample's class. Press <em>Next epoch</em> with shuffling on to watch the partition change — a fresh permutation is drawn every epoch, which is precisely why the model never sees the same batch composition twice.</p>
+        </div>
+      </div>
+
+      <div class="mcq" data-answer="b">
+        <div class="mcq-h">Check yourself · 5.1</div>
+        <p class="mcq-q">Ten samples, <code>batch_size=3</code>, <code>drop_last=False</code>. How many batches per epoch, and what is the size of the last one?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">3 batches; the last one has 3 samples.</button></li>
+          <li><button data-opt="b">4 batches; the last one has 1 sample.</button></li>
+          <li><button data-opt="c">4 batches; the last one has 3 samples.</button></li>
+          <li><button data-opt="d">3 batches; the last one has 1 sample.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>B.</b> Ten divided by three is three full batches with a remainder of one, so <code>len(loader)</code> is ⌈10/3⌉ = 4 and the sizes are 3, 3, 3, 1. Set the widget above to <code>batch_size=3</code> and read it off directly.</div>
+      </div>
+
+      <div class="mcq" data-answer="d">
+        <div class="mcq-h">Check yourself · 5.2</div>
+        <p class="mcq-q">Same configuration, but now <code>drop_last=True</code>. How many samples does the model never see during that epoch?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">None — <code>drop_last</code> only reorders the batches.</button></li>
+          <li><button data-opt="b">Three.</button></li>
+          <li><button data-opt="c">Ten, because the whole epoch is discarded.</button></li>
+          <li><button data-opt="d">One — the single sample in the incomplete final batch.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>D.</b> <code>drop_last=True</code> discards the incomplete trailing batch, so one sample is skipped that epoch. With shuffling on it is a <em>different</em> sample each epoch, which is why the loss is usually acceptable — but on a small dataset, or with <code>drop_last</code> and no shuffling, you are permanently ignoring the tail of your data.</div>
+      </div>
+    </section>
+
+    <!-- ================= 6 ================= -->
+    <section id="s6">
+      <h2><span class="snum">Section Six</span>Shuffling and samplers</h2>
+
+      <p>Shuffling looks like a convenience flag. It is a correctness requirement, and the flag is thin shorthand over a real object.</p>
+
+      <h3>Why order matters</h3>
+      <ul class="pts">
+        <li>Real files arrive <strong>sorted</strong> — by class, date, patient, source.</li>
+        <li>Walk that order and consecutive batches are <strong>highly correlated</strong>: the model adjusts hard toward one class, then undoes it for the next, so the gradient signal <strong>oscillates instead of accumulating</strong>.</li>
+        <li>Batch statistics — the mean and variance batch normalisation relies on — become <strong>unrepresentative</strong> of the dataset.</li>
+      </ul>
+
+      <p>Our toy set is balanced 5 and 5, but not sorted. Here is what it would look like if it were — sorted by label, batches of two, no shuffling:</p>
+
+      <div class="widget" style="border-color:var(--rule)">
+        <h4 style="background:var(--rule-soft); color:var(--ink-soft); border-color:var(--rule)">Sorted data, shuffle=False — the pathological case</h4>
+        <div class="wbody">
+          <div class="batches" id="sortedDemo"></div>
+          <p class="summary">Four of the five batches are single-class. The gradient from batch 1 says <em>"everything is negative"</em>; the gradient from batch 4 says the opposite. Shuffling mixes the classes within each batch so that every gradient estimate points, approximately, in the direction the full-dataset gradient points.</p>
+        </div>
+      </div>
+
+      <h3>The sampler underneath the flag</h3>
+      <p>The <code>shuffle</code> argument does not implement shuffling. It selects a <strong>sampler</strong> — an object whose entire job is to produce the sequence of indices the loader will consume:</p>
+
+      <details class="deeper">
+        <summary>Going deeper <span class="dtag">the four sampler types</span></summary>
+        <div class="dbody">
+        <div class="tw">
+          <table>
+            <thead><tr><th>Sampler</th><th>Behaviour</th><th>Selected by</th></tr></thead>
+            <tbody>
+              <tr><td><code>SequentialSampler</code></td><td>Yields indices in the order they appear in the dataset: 0, 1, 2, …, n−1.</td><td><code>shuffle=False</code> (the default)</td></tr>
+              <tr><td><code>RandomSampler</code></td><td>Yields a fresh random permutation of all indices each epoch — sampling <em>without</em> replacement, so every sample appears exactly once.</td><td><code>shuffle=True</code></td></tr>
+              <tr><td><code>WeightedRandomSampler</code></td><td>Draws indices according to per-sample weights, so under-represented classes can be over-sampled.</td><td>Passed explicitly via <code>sampler=</code></td></tr>
+              <tr><td>Custom</td><td>Any object yielding indices — curriculum ordering, stratified draws, subset restriction.</td><td>Passed explicitly via <code>sampler=</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        </div>
+      </details>
+
+      <ul class="pts">
+        <li><code>shuffle=True</code> and <code>sampler=</code> are <strong>mutually exclusive</strong> — passing both is an error, since they specify the same thing.</li>
+        <li>Shuffle the <strong>training</strong> loader only. Evaluation uses <code>shuffle=False</code>: order does not affect the metric, but a stable order makes results reproducible.</li>
+      </ul>
+
+      <div class="mcq" data-answer="b">
+        <div class="mcq-h">Check yourself · 6.1</div>
+        <p class="mcq-q"><code>shuffle=True</code> is shorthand for which sampler, and what does it guarantee?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a"><code>SequentialSampler</code> — indices in dataset order.</button></li>
+          <li><button data-opt="b"><code>RandomSampler</code> — a fresh permutation each epoch, without replacement, so every sample appears exactly once per epoch.</button></li>
+          <li><button data-opt="c"><code>WeightedRandomSampler</code> — indices drawn in proportion to class frequency.</button></li>
+          <li><button data-opt="d">No sampler; the <code>Dataset</code> shuffles itself internally.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>B.</b> <em>Without replacement</em> is the part that matters. Every index is drawn exactly once per epoch, so shuffling changes the <em>order</em> and the <em>batch composition</em> but never the amount of data seen. The <code>Dataset</code> plays no part in this at all.</div>
+      </div>
+    </section>
+
+    <!-- ================= 7 ================= -->
+    <section id="s7">
+      <h2><span class="snum">Section Seven</span><code>collate_fn</code>: how a list becomes a batch</h2>
+
+      <p>After calling <code>__getitem__</code> for every index in the chunk, the loader holds a plain Python <strong>list</strong>. <code>collate_fn</code> turns it into tensors: it stacks <strong>position-wise</strong> — all features into one tensor, all labels into another — adding a <strong>leading batch dimension</strong> to each. Traced on the first toy batch:</p>
+
+      <div class="codewrap">
+        <div class="cap">Default collation, batch 1 of the toy loader</div>
+        <button class="copy">Copy</button>
+        <pre><code># What collate_fn receives — a list of two samples, each a tuple:
+[ (tensor([ 1.0683, -0.9701]), tensor(1)),
+  (tensor([-1.1402, -0.8388]), tensor(0)) ]
+
+# What collate_fn returns — one tuple of two stacked tensors:
+( tensor([[ 1.0683, -0.9701],
+          [-1.1402, -0.8388]]),   # shape [2, 2]  =  [batch, features]
+  tensor([1, 0]) )                # shape [2]     =  [batch]</code></pre>
+      </div>
+
+      <p>Purely structural — <em>a list of k tuples</em> becomes <em>a tuple of tensors with a leading dimension of k</em>: shapes <code>[2]</code> and <code>[]</code> became <code>[2, 2]</code> and <code>[2]</code>. This is the moment the batch dimension is born.</p>
+
+      <details class="deeper">
+        <summary>Going deeper <span class="dtag">when the default collate is not enough</span></summary>
+        <div class="dbody">
+        <p>The default calls <code>torch.stack</code>, which requires every tensor to have <strong>identical shape</strong>. Fine for tabular data and fixed-size images. It fails for:</p>
+        <ul class="pts">
+          <li><strong>Variable-length sequences.</strong> Sentences of length 7, 12 and 4 cannot be stacked. A custom collate pads each to the longest <em>in that batch</em> — not a global maximum, which is why padding belongs here and not in <code>__getitem__</code>.</li>
+          <li><strong>Images of differing size</strong>, where padding or bucketing beats a fixed resize.</li>
+          <li><strong>Structured payloads</strong> — dictionaries, graphs, variable bounding-box counts, or metadata that should stay a Python list.</li>
+        </ul>
+        <ul class="pts">
+          <li>Supply your own with <code>collate_fn=my_collate</code>. It receives the list, returns whatever your loop expects — that is the whole contract.</li>
+          <li>Right place for logic that must see the <strong>whole batch</strong>. Wrong place for anything concerning a <strong>single sample</strong>.</li>
+        </ul>
+        </div>
+      </details>
+
+      <div class="mcq" data-answer="a">
+        <div class="mcq-h">Check yourself · 7.1</div>
+        <p class="mcq-q">A text dataset returns token sequences of differing lengths. The default collate function raises an error. Why, and what is the fix?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">It calls <code>torch.stack</code>, which requires identical shapes; the fix is a custom <code>collate_fn</code> that pads every sequence to the longest one in that batch.</button></li>
+          <li><button data-opt="b">It cannot handle integer tensors; the fix is to cast tokens to <code>float32</code>.</button></li>
+          <li><button data-opt="c">The <code>Dataset</code> is returning a batch rather than a sample; the fix is in <code>__getitem__</code>.</button></li>
+          <li><button data-opt="d">The batch size does not divide the dataset size; the fix is <code>drop_last=True</code>.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>A.</b> Stacking is shape-strict by construction. Padding must happen at collate time, not in <code>__getitem__</code>, because a single sample has no way of knowing the longest length in the batch it will end up in — and padding to a global maximum wastes computation on every short sequence.</div>
+      </div>
+    </section>
+
+    <!-- ================= 8 ================= -->
+    <section id="s8">
+      <h2><span class="snum">Section Eight</span>Parallelism: <code>num_workers</code> and the pipeline effect</h2>
+
+      <p>Correctness is settled; this is about throughput — and one common waste: an expensive accelerator idling while one CPU thread decodes a JPEG. Take 10,000 samples, <code>batch_size=32</code>, <code>num_workers=4</code> → 313 batches per epoch.</p>
+
+      <details class="deeper">
+        <summary>Going deeper <span class="dtag">the four dispatch steps, in order</span></summary>
+        <div class="dbody">
+        <ul class="pts">
+          <li><strong>Queue the work.</strong> The sampler shuffles all 10,000 indices and groups them into 313 chunks of 32.</li>
+          <li><strong>Dispatch.</strong> The first four chunks go to the four workers, one each. Every worker calls <code>__getitem__</code> 32 times, applies transforms, and runs <code>collate_fn</code>.</li>
+          <li><strong>Overlap — the whole point.</strong> The first worker to finish hands its batch to your loop. While you run forward–backward–step on batch 1, the other three are still preparing batches 2, 3 and 4.</li>
+          <li><strong>Refill.</strong> A worker that finishes grabs the next chunk — whoever produced batch 1 picks up batch 5. Up to four batches are in preparation at any instant.</li>
+        </ul>
+        </div>
+      </details>
+
+      <figure>
+        <div class="svgbox">
+        <svg viewBox="0 0 700 220" role="img" aria-label="Timeline showing four worker processes preparing batches in parallel while the main process trains">
+          <g font-family="var(--sans)" font-size="10.5">
+            <text x="0" y="14" fill="var(--ink-faint)" font-size="9.5" letter-spacing="1.2">TIME →</text>
+
+            <text x="0" y="44" fill="var(--accent)" font-weight="700" font-size="10">main</text>
+            <text x="0" y="55" fill="var(--ink-faint)" font-size="9">(train)</text>
+            <rect x="120" y="30" width="118" height="26" rx="4" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+            <text x="179" y="47" text-anchor="middle" fill="var(--accent)" font-weight="600">step · batch 1</text>
+            <rect x="242" y="30" width="118" height="26" rx="4" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+            <text x="301" y="47" text-anchor="middle" fill="var(--accent)" font-weight="600">step · batch 2</text>
+            <rect x="364" y="30" width="118" height="26" rx="4" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+            <text x="423" y="47" text-anchor="middle" fill="var(--accent)" font-weight="600">step · batch 3</text>
+            <rect x="486" y="30" width="118" height="26" rx="4" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+            <text x="545" y="47" text-anchor="middle" fill="var(--accent)" font-weight="600">step · batch 4</text>
+
+            <line x1="0" y1="70" x2="700" y2="70" stroke="var(--rule)" stroke-width="1"/>
+
+            <text x="0" y="92" fill="var(--ink-soft)" font-weight="600" font-size="10">worker 1</text>
+            <rect x="60" y="80" width="112" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="116" y="94" text-anchor="middle" fill="var(--ink-soft)">prep 1</text>
+            <rect x="176" y="80" width="112" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="232" y="94" text-anchor="middle" fill="var(--ink-soft)">prep 5</text>
+            <rect x="292" y="80" width="112" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="348" y="94" text-anchor="middle" fill="var(--ink-soft)">prep 9</text>
+
+            <text x="0" y="120" fill="var(--ink-soft)" font-weight="600" font-size="10">worker 2</text>
+            <rect x="60" y="108" width="126" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="123" y="122" text-anchor="middle" fill="var(--ink-soft)">prep 2</text>
+            <rect x="190" y="108" width="126" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="253" y="122" text-anchor="middle" fill="var(--ink-soft)">prep 6</text>
+            <rect x="320" y="108" width="126" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="383" y="122" text-anchor="middle" fill="var(--ink-soft)">prep 10</text>
+
+            <text x="0" y="148" fill="var(--ink-soft)" font-weight="600" font-size="10">worker 3</text>
+            <rect x="60" y="136" width="104" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="112" y="150" text-anchor="middle" fill="var(--ink-soft)">prep 3</text>
+            <rect x="168" y="136" width="104" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="220" y="150" text-anchor="middle" fill="var(--ink-soft)">prep 7</text>
+            <rect x="276" y="136" width="104" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="328" y="150" text-anchor="middle" fill="var(--ink-soft)">prep 11</text>
+
+            <text x="0" y="176" fill="var(--ink-soft)" font-weight="600" font-size="10">worker 4</text>
+            <rect x="60" y="164" width="134" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="127" y="178" text-anchor="middle" fill="var(--ink-soft)">prep 4</text>
+            <rect x="198" y="164" width="134" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="265" y="178" text-anchor="middle" fill="var(--ink-soft)">prep 8</text>
+            <rect x="336" y="164" width="134" height="20" rx="4" fill="var(--panel)" stroke="var(--rule)"/>
+            <text x="403" y="178" text-anchor="middle" fill="var(--ink-soft)">prep 12</text>
+
+            <line x1="116" y1="80" x2="150" y2="58" stroke="var(--accent)" stroke-width="1.1" stroke-dasharray="3 2"/>
+            <text x="0" y="208" fill="var(--ink-faint)" font-size="9.5" font-style="italic">Preparation happens underneath computation. With num_workers=0 these four rows collapse onto the main row and the accelerator waits.</text>
+          </g>
+        </svg>
+        </div>
+        <figcaption>The pipeline effect: worker preparation overlaps with training, so the main process rarely waits for data.</figcaption>
+      </figure>
+
+      <h3>Choosing the values</h3>
+      <ul class="pts">
+        <li><code>num_workers=0</code> (the default) loads inline in the main process — every millisecond decoding is a millisecond the <strong>GPU sits idle</strong>. Free for in-memory tensors; often the dominant cost for image and audio.</li>
+        <li><strong>More is not uniformly better.</strong> Each worker is a real process with memory overhead, and every batch must be serialised back. Once preparation is hidden behind computation, extra workers add overhead and nothing else.</li>
+        <li><code>pin_memory=True</code> speeds the host→GPU copy. Only meaningful on <strong>CUDA</strong> — on a CPU-only machine, leave it <code>False</code>.</li>
+      </ul>
+
+      <details class="deeper">
+        <summary>Going deeper <span class="dtag">why pinned memory is faster</span></summary>
+        <div class="dbody">
+          <ul class="pts">
+            <li>Ordinary host memory is <strong>pageable</strong> — the OS may move it, so a GPU transfer needs an intermediate staging copy.</li>
+            <li><strong>Pinned</strong> (page-locked) memory cannot be moved, so the DMA engine transfers it <strong>directly and asynchronously</strong>, overlapping with computation.</li>
+          </ul>
+        </div>
+      </details>
+
+      <div class="mcq" data-answer="c">
+        <div class="mcq-h">Check yourself · 8.1</div>
+        <p class="mcq-q">What is the characteristic symptom that you are <em>data-loading bound</em> rather than compute bound?</p>
+        <ul class="mcq-opts">
+          <li><button data-opt="a">The loss decreases very slowly across epochs.</button></li>
+          <li><button data-opt="b">Memory usage grows steadily until the process is killed.</button></li>
+          <li><button data-opt="c">GPU utilisation is low and spiky while epoch time stays high — the accelerator is waiting for batches.</button></li>
+          <li><button data-opt="d">Training accuracy is high but test accuracy is poor.</button></li>
+        </ul>
+        <div class="mcq-exp" hidden><b>C.</b> A data-bound pipeline shows an idle, sawtoothing accelerator: it finishes a batch, then waits. Slow convergence (a) is an optimisation problem, a memory leak (b) is a resource problem, and the gap in (d) is overfitting — none of them is fixed by <code>num_workers</code>.</div>
+      </div>
+    </section>
+
+    <!-- ================= 9 ================= -->
+    <section id="s9">
+      <h2><span class="snum">Section Nine</span>Parameter reference</h2>
+
+      <p>Every argument you will realistically use, and the question each one answers.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Parameter</th><th>Default</th><th>What it does, and when to change it</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>dataset</code></td><td><em>required</em></td>
+              <td>The source of samples. Must implement <code>__len__</code> and <code>__getitem__</code>. This is the only mandatory argument.</td>
+            </tr>
+            <tr>
+              <td><code>batch_size</code></td><td><code>1</code></td>
+              <td>Samples per batch. Larger batches use the accelerator better and give smoother gradients, but cost memory and yield fewer updates per epoch. Start at 32 or 64.</td>
+            </tr>
+            <tr>
+              <td><code>shuffle</code></td><td><code>False</code></td>
+              <td>Reorders indices afresh each epoch. Set <code>True</code> for training, <code>False</code> for validation and test. Mutually exclusive with <code>sampler</code>.</td>
+            </tr>
+            <tr>
+              <td><code>num_workers</code></td><td><code>0</code></td>
+              <td>Worker processes preparing batches in parallel. Raise it when data preparation is expensive — decoding, augmentation, disk reads. Leave at 0 for small in-memory tensors.</td>
+            </tr>
+            <tr>
+              <td><code>pin_memory</code></td><td><code>False</code></td>
+              <td>Allocates batches in page-locked memory for faster, asynchronous host-to-device transfer. Meaningful only when training on CUDA.</td>
+            </tr>
+            <tr>
+              <td><code>drop_last</code></td><td><code>False</code></td>
+              <td>Discards the final batch when it is smaller than <code>batch_size</code>. Useful when a fixed batch size is required — some batch-normalisation configurations misbehave on a batch of one.</td>
+            </tr>
+            <tr>
+              <td><code>collate_fn</code></td><td>default stack</td>
+              <td>Turns the list of fetched samples into a batch. Replace it for variable-length sequences, padding, or non-tensor payloads.</td>
+            </tr>
+            <tr>
+              <td><code>sampler</code></td><td><code>None</code></td>
+              <td>Explicit index-drawing strategy — class-balanced sampling, curriculum ordering, subset restriction. Overrides <code>shuffle</code>.</td>
+            </tr>
+            <tr>
+              <td><code>batch_sampler</code></td><td><code>None</code></td>
+              <td>Like <code>sampler</code>, but yields whole lists of indices, controlling batch composition directly. Mutually exclusive with <code>batch_size</code>, <code>shuffle</code>, <code>sampler</code> and <code>drop_last</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note"><p>In practice most loaders use four: <code>dataset</code>, <code>batch_size</code>, <code>shuffle</code>, and — once the data is non-trivial — <code>num_workers</code>. The rest are levers for specific problems.</p></div>
+    </section>
+
+    <!-- ================= 10 ================= -->
+    <section id="s10">
+      <h2><span class="snum">Section Ten</span>The training pipeline, restructured</h2>
+
+      <p>Introducing the loader changes the shape of the training code itself. What was one loop becomes two, nested.</p>
+
+      <div class="codewrap">
+        <div class="cap">Before — one loop, one update per epoch</div>
+        <button class="copy">Copy</button>
+        <pre><code>for epoch in range(epochs):
+    y_pred = model(X_train_tensor)               # the entire dataset
+    loss   = loss_function(y_pred, y_train_tensor.view(-1, 1))
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()                             # 1 update per epoch</code></pre>
+      </div>
+
+      <div class="codewrap">
+        <div class="cap">After — epochs outside, batches inside</div>
+        <button class="copy">Copy</button>
+        <pre><code>for epoch in range(epochs):
+    model.train()                                # training mode
+    epoch_loss = 0.0
+
+    for batch_features, batch_labels in train_loader:    # INNER: one iteration per batch
+
+        y_pred = model(batch_features)                   # 1. forward
+        loss   = loss_function(y_pred, batch_labels.view(-1, 1))   # 2. loss
+        epoch_loss += loss.item()
+
+        optimizer.zero_grad()                            # 3. clear old gradients
+        loss.backward()                                  # 4. backpropagate
+        optimizer.step()                                 # 5. update — once per BATCH
+
+    print(f'Epoch {epoch + 1} | loss = {epoch_loss / len(train_loader):.4f}')</code></pre>
+      </div>
+
+      <ul class="pts">
+        <li>The inner body runs <code>len(train_loader)</code> times per epoch, each a full <strong>forward–backward–update</strong> cycle.</li>
+        <li>Updates per epoch go from <strong>one</strong> to <strong>the number of batches</strong> — at no extra total computation. The same data is processed either way.</li>
+        <li>Divide by <code>len(train_loader)</code> when printing. Bare <code>loss.item()</code> reports the <strong>last batch only</strong> — noisy and not comparable across runs.</li>
+      </ul>
+
+      <div class="widget" id="w-updates">
+        <h4>Interactive · Update counter</h4>
+        <div class="wbody">
+          <div class="ctrls">
+            <div class="ctrl">
+              <label for="ubs">batch_size (dataset of 10)</label>
+              <select id="ubs">
+                <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option>
+                <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+              </select>
+            </div>
+            <div class="ctrl">
+              <label for="uep">epochs</label>
+              <input type="number" id="uep" min="1" max="500" value="25">
+            </div>
+          </div>
+          <div class="readout" id="updOut"></div>
+          <p class="summary" id="updSum"></p>
+        </div>
+      </div>
+
+      <p>Push that batch size to its extremes and the three named regimes fall out of one mechanism:</p>
+      <ul class="pts">
+        <li><code>batch_size=10</code> (the whole set) → <strong>batch gradient descent</strong>, one update per epoch.</li>
+        <li><code>batch_size=1</code> → <strong>stochastic gradient descent</strong>, ten noisy updates per epoch.</li>
+        <li>Anything between → <strong>mini-batch gradient descent</strong>.</li>
+        <li>Not three algorithms. <strong>One algorithm, one knob.</strong></li>
+      </ul>
+    </section>
+
+    <!-- ================= 11 ================= -->
+    <section id="s11">
+      <h2><span class="snum">Section Eleven</span>Final assessment</h2>
+
+      <p><strong>Three questions, drawn at random</strong> from across the document. Answer them, submit for a score and per-question explanations, then fetch another three — the draw differs each time, so it is worth repeating.</p>
+
+      <div class="quiz" id="quiz">
+        <div class="quiz-item" data-answer="b">
+          <p class="qn">Question 1</p>
+          <p class="qt">Which method does the <code>DataLoader</code> read in order to know how many batches an epoch contains?</p>
+          <ul class="quiz-opts">
+            <li><label><input type="radio" name="q1" value="a"><span><code>__init__</code></span></label></li>
+            <li><label><input type="radio" name="q1" value="b"><span><code>__len__</code></span></label></li>
+            <li><label><input type="radio" name="q1" value="c"><span><code>__getitem__</code></span></label></li>
+            <li><label><input type="radio" name="q1" value="d"><span><code>forward</code></span></label></li>
+          </ul>
+          <div class="quiz-exp" hidden><b>__len__.</b> The loader divides the sample count by <code>batch_size</code> to determine the epoch length, which is also what <code>len(loader)</code> reports.</div>
+        </div>
+
+        <div class="quiz-item" data-answer="c">
+          <p class="qn">Question 2</p>
+          <p class="qt">A dataset of 250 samples is loaded with <code>batch_size=32</code> and <code>drop_last=False</code>. How many batches per epoch, and what is the last batch's size?</p>
+          <ul class="quiz-opts">
+            <li><label><input type="radio" name="q2" value="a"><span>7 batches; last has 32</span></label></li>
+            <li><label><input type="radio" name="q2" value="b"><span>8 batches; last has 32</span></label></li>
+            <li><label><input type="radio" name="q2" value="c"><span>8 batches; last has 26</span></label></li>
+            <li><label><input type="radio" name="q2" value="d"><span>7 batches; last has 26</span></label></li>
+          </ul>
+          <div class="quiz-exp" hidden><b>8 batches, last of 26.</b> 250 = 7×32 + 26, so ⌈250/32⌉ = 8 and the trailing batch is incomplete. With <code>drop_last=True</code> it would be 7 batches and 26 samples skipped.</div>
+        </div>
+
+        <div class="quiz-item" data-answer="a">
+          <p class="qn">Question 3</p>
+          <p class="qt">Where is the batch dimension created?</p>
+          <ul class="quiz-opts">
+            <li><label><input type="radio" name="q3" value="a"><span>In the collate step, by stacking the individually fetched samples</span></label></li>
+            <li><label><input type="radio" name="q3" value="b"><span>In <code>__getitem__</code>, which returns pre-batched data</span></label></li>
+            <li><label><input type="radio" name="q3" value="c"><span>In <code>__init__</code>, when the tensors are first stored</span></label></li>
+            <li><label><input type="radio" name="q3" value="d"><span>In the model's <code>forward</code> method</span></label></li>
+          </ul>
+          <div class="quiz-exp" hidden><b>The collate step.</b> Samples enter as shape <code>[features]</code> and leave stacked as <code>[batch, features]</code>. Nothing before collate has a batch axis.</div>
+        </div>
+
+        <div class="quiz-item" data-answer="d">
+          <p class="qn">Question 4</p>
+          <p class="qt">Which statement about <code>shuffle=True</code> is correct?</p>
+          <ul class="quiz-opts">
+            <li><label><input type="radio" name="q4" value="a"><span>It samples with replacement, so some samples repeat within an epoch</span></label></li>
+            <li><label><input type="radio" name="q4" value="b"><span>It shuffles once at construction and reuses that order every epoch</span></label></li>
+            <li><label><input type="radio" name="q4" value="c"><span>It should be used on training and test loaders alike</span></label></li>
+            <li><label><input type="radio" name="q4" value="d"><span>It selects <code>RandomSampler</code>, drawing a fresh permutation each epoch without replacement</span></label></li>
+          </ul>
+          <div class="quiz-exp" hidden><b>D.</b> A new permutation is drawn every epoch, without replacement, so every sample is seen exactly once per epoch. Test loaders use <code>shuffle=False</code> for reproducible ordering.</div>
+        </div>
+
+        <div class="quiz-item" data-answer="b">
+          <p class="qn">Question 5</p>
+          <p class="qt">Why must padding of variable-length sequences happen in <code>collate_fn</code> rather than <code>__getitem__</code>?</p>
+          <ul class="quiz-opts">
+            <li><label><input type="radio" name="q5" value="a"><span><code>__getitem__</code> cannot return tensors of type <code>long</code></span></label></li>
+            <li><label><input type="radio" name="q5" value="b"><span>A single sample cannot know the longest length in the batch it will join; padding to a global maximum wastes computation</span></label></li>
+            <li><label><input type="radio" name="q5" value="c"><span>Padding is a statistics-dependent transformation and would leak test information</span></label></li>
+            <li><label><input type="radio" name="q5" value="d"><span>Workers cannot execute padding operations</span></label></li>
+          </ul>
+          <div class="quiz-exp" hidden><b>B.</b> Padding is inherently a batch-level decision. Collate is the first point at which the whole batch is visible, so it is the only place the correct target length is known.</div>
+        </div>
+
+        <div class="quiz-item" data-answer="c">
+          <p class="qn">Question 6</p>
+          <p class="qt">Raising <code>num_workers</code> from 0 to 4 improves throughput most when:</p>
+          <ul class="quiz-opts">
+            <li><label><input type="radio" name="q6" value="a"><span>The model is very large and the forward pass dominates</span></label></li>
+            <li><label><input type="radio" name="q6" value="b"><span>The dataset is a small tensor already resident in memory</span></label></li>
+            <li><label><input type="radio" name="q6" value="c"><span>Each sample requires expensive per-sample work — file reads, decoding, augmentation</span></label></li>
+            <li><label><input type="radio" name="q6" value="d"><span>The learning rate is too low and convergence is slow</span></label></li>
+          </ul>
+          <div class="quiz-exp" hidden><b>C.</b> Workers parallelise <code>__getitem__</code>. If that method is nearly free (b) there is nothing to hide; if computation already dominates (a) the pipeline is not data-bound; and (d) is unrelated to loading entirely.</div>
+        </div>
+
+        <div class="quiz-item" data-answer="d">
+          <p class="qn">Question 7</p>
+          <p class="qt">A colleague replaces a tabular <code>Dataset</code> with one that reads images from disk. Which parts of the codebase must change?</p>
+          <ul class="quiz-opts">
+            <li><label><input type="radio" name="q7" value="a"><span>The <code>DataLoader</code> construction and the training loop</span></label></li>
+            <li><label><input type="radio" name="q7" value="b"><span>The training loop and the evaluation loop</span></label></li>
+            <li><label><input type="radio" name="q7" value="c"><span>Every component, since the data type is different</span></label></li>
+            <li><label><input type="radio" name="q7" value="d"><span>Only the <code>Dataset</code> subclass — everything downstream is untouched</span></label></li>
+          </ul>
+          <div class="quiz-exp" hidden><b>D.</b> This is the payoff of the decoupling. The loader, model and loops depend on tensor shapes, not on where the tensors came from. Only <code>__init__</code> and <code>__getitem__</code> are rewritten.</div>
+        </div>
+
+        <div class="quiz-bar">
+          <button class="btn" id="submitQuiz">Submit answers</button>
+          <div id="quizWarn" hidden></div>
+          <button class="btn" id="retryQuiz" style="display:none">Fetch 3 more ↻</button>
+          <div class="score" id="scoreOut" style="display:none"></div>
+        </div>
+      </div>
+
+      <p class="endnote">LAB 7 · Deep Learning — Dataset &amp; DataLoader · Interactive study notes</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- toy data: the single source of truth ---------- */
+  var TOY = [
+    {i:0, f:[ 1.0683, -0.9701], y:1},
+    {i:1, f:[-1.1402, -0.8388], y:0},
+    {i:2, f:[-2.8954,  1.9769], y:0},
+    {i:3, f:[-0.7206, -0.9606], y:0},
+    {i:4, f:[-1.9629, -0.9923], y:0},
+    {i:5, f:[-0.9382, -0.5430], y:1},
+    {i:6, f:[ 1.7273, -1.1858], y:1},
+    {i:7, f:[ 1.7774,  1.5116], y:1},
+    {i:8, f:[ 1.8997,  0.8344], y:1},
+    {i:9, f:[-0.5872, -1.9717], y:0}
+  ];
+  var N = TOY.length;
+
+  /* ---------- table of contents + scroll spy ---------- */
+  var sections = [].slice.call(document.querySelectorAll('main section[id]'));
+  function buildToc(el){
+    var ol = document.createElement('ol');
+    sections.forEach(function(s){
+      var h = s.querySelector('h2');
+      var txt = h.cloneNode(true);
+      var sn = txt.querySelector('.snum'); if(sn) sn.remove();
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + s.id;
+      a.textContent = txt.textContent.trim();
+      a.dataset.for = s.id;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    el.appendChild(ol);
+  }
+  buildToc(document.getElementById('toc-d'));
+  buildToc(document.getElementById('toc-m'));
+
+  var links = [].slice.call(document.querySelectorAll('nav a'));
+  var bar = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+
+    var cur = sections[0].id, mid = window.innerHeight * 0.32;
+    for(var i=0;i<sections.length;i++){
+      if(sections[i].getBoundingClientRect().top <= mid) cur = sections[i].id;
+    }
+    links.forEach(function(a){ a.classList.toggle('on', a.dataset.for === cur); });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  /* ---------- python syntax highlighting (single-pass, safe) ---------- */
+  var KW = 'class|def|return|for|in|if|elif|else|import|from|as|self|None|True|False|with|not|and|or|while|print|len|range|super|lambda';
+  var RE = new RegExp(
+    "(#[^\\n]*)" +                      // comment
+    "|('[^'\\n]*'|\"[^\"\\n]*\")" +      // string
+    "|(__[A-Za-z_]+__)" +                // dunder
+    "|\\b(" + KW + ")\\b" +              // keyword
+    "|(-?\\b\\d+\\.?\\d*\\b)",           // number
+    'g');
+  [].forEach.call(document.querySelectorAll('pre code'), function(code){
+    var esc = code.textContent
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    code.innerHTML = esc.replace(RE, function(m, c, s, d, k, n){
+      if(c) return '<span class="tok-com">' + c + '</span>';
+      if(s) return '<span class="tok-str">' + s + '</span>';
+      if(d) return '<span class="tok-dun">' + d + '</span>';
+      if(k) return '<span class="tok-kw">'  + k + '</span>';
+      if(n) return '<span class="tok-num">' + n + '</span>';
+      return m;
+    });
+  });
+
+  /* ---------- collapsibles: open for print, restore after ---------- */
+  var deeper = [].slice.call(document.querySelectorAll('details.deeper'));
+  var wasOpen = [];
+  function openAll(){ wasOpen = deeper.map(function(d){ var o = d.open; d.open = true; return o; }); }
+  function restoreAll(){ deeper.forEach(function(d,i){ d.open = wasOpen[i]; }); }
+  window.addEventListener('beforeprint', openAll);
+  window.addEventListener('afterprint', restoreAll);
+  if(window.matchMedia){
+    var mq = window.matchMedia('print');
+    if(mq.addEventListener) mq.addEventListener('change', function(e){ e.matches ? openAll() : restoreAll(); });
+  }
+  /* a link into a collapsed block should reveal it */
+  window.addEventListener('hashchange', function(){
+    var t = document.getElementById(location.hash.slice(1));
+    while(t){ if(t.tagName === 'DETAILS') t.open = true; t = t.parentElement; }
+  });
+
+  /* ---------- copy buttons ---------- */
+  [].forEach.call(document.querySelectorAll('.copy'), function(btn){
+    btn.addEventListener('click', function(){
+      var code = btn.parentNode.querySelector('code');
+      var done = function(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1400); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(code.textContent).then(done, function(){});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = code.textContent; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); done(); }catch(e){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  /* ---------- inline MCQs ---------- */
+  [].forEach.call(document.querySelectorAll('.mcq'), function(box){
+    var answer = box.dataset.answer;
+    var btns = [].slice.call(box.querySelectorAll('.mcq-opts button'));
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){
+        var pick = b.dataset.opt;
+        btns.forEach(function(o){
+          o.disabled = true;
+          if(o.dataset.opt === answer) o.classList.add('correct');
+          else if(o.dataset.opt === pick) o.classList.add('wrong');
+          else o.classList.add('dim');
+        });
+        box.querySelector('.mcq-exp').hidden = false;
+      });
+    });
+  });
+
+  /* ---------- widget 1: index probe ---------- */
+  /* ---------- scatter plot, drawn from the same TOY array ---------- */
+  var selectPlot = (function(){
+    var svg = document.getElementById('toyPlot');
+    if(!svg) return function(){};
+
+    var NS = 'http://www.w3.org/2000/svg';
+    var W = 560, H = 400, mL = 54, mR = 18, mT = 18, mB = 48;
+    var xmin = -3.4, xmax = 2.4, ymin = -2.4, ymax = 2.4;
+
+    function X(v){ return mL + (v - xmin) / (xmax - xmin) * (W - mL - mR); }
+    function Y(v){ return H - mB - (v - ymin) / (ymax - ymin) * (H - mT - mB); }
+    function el(tag, a){
+      var e = document.createElementNS(NS, tag);
+      for(var k in a) e.setAttribute(k, a[k]);
+      return e;
+    }
+
+    // gridlines and ticks
+    for(var gx = -3; gx <= 2; gx++){
+      svg.appendChild(el('line', {x1:X(gx), y1:mT, x2:X(gx), y2:H-mB, stroke:'var(--grid)', 'stroke-width':1}));
+      var tx = el('text', {x:X(gx), y:H-mB+18, 'text-anchor':'middle', fill:'var(--ink-faint)', 'font-size':11});
+      tx.textContent = gx; svg.appendChild(tx);
+    }
+    for(var gy = -2; gy <= 2; gy++){
+      svg.appendChild(el('line', {x1:mL, y1:Y(gy), x2:W-mR, y2:Y(gy), stroke:'var(--grid)', 'stroke-width':1}));
+      var ty = el('text', {x:mL-9, y:Y(gy)+4, 'text-anchor':'end', fill:'var(--ink-faint)', 'font-size':11});
+      ty.textContent = gy.toFixed(1); svg.appendChild(ty);
+    }
+
+    // axes
+    svg.appendChild(el('line', {x1:mL, y1:H-mB, x2:W-mR, y2:H-mB, stroke:'var(--rule)', 'stroke-width':1.4}));
+    svg.appendChild(el('line', {x1:mL, y1:mT, x2:mL, y2:H-mB, stroke:'var(--rule)', 'stroke-width':1.4}));
+
+    var ax = el('text', {x:(mL+W-mR)/2, y:H-8, 'text-anchor':'middle', fill:'var(--ink-soft)', 'font-size':12.5});
+    ax.textContent = 'Feature 1'; svg.appendChild(ax);
+    var ay = el('text', {x:14, y:(mT+H-mB)/2, 'text-anchor':'middle', fill:'var(--ink-soft)', 'font-size':12.5,
+                         transform:'rotate(-90 14 ' + ((mT+H-mB)/2) + ')'});
+    ay.textContent = 'Feature 2'; svg.appendChild(ay);
+
+    // legend (bottom-left, where no sample sits)
+    var lg = el('g', {});
+    lg.appendChild(el('circle', {cx:76, cy:308, r:7, fill:'var(--pt0)', stroke:'var(--ink)', 'stroke-width':1}));
+    var l0 = el('text', {x:92, y:312, fill:'var(--ink-soft)', 'font-size':11.5}); l0.textContent = 'class 0';
+    lg.appendChild(l0);
+    lg.appendChild(el('path', {d:'M76,329 L84,343 L68,343 Z', fill:'var(--pt1)', stroke:'var(--ink)', 'stroke-width':1}));
+    var l1 = el('text', {x:92, y:342, fill:'var(--ink-soft)', 'font-size':11.5}); l1.textContent = 'class 1';
+    lg.appendChild(l1);
+    svg.appendChild(lg);
+
+    // one group per sample
+    var groups = TOY.map(function(r){
+      var px = X(r.f[0]), py = Y(r.f[1]);
+      var g = el('g', {class:'pt'});
+
+      var mk = r.y === 0
+        ? el('circle', {cx:px, cy:py, r:8, class:'mk', fill:'var(--pt0)', stroke:'var(--ink)', 'stroke-width':1.1})
+        : el('path', {d:'M' + px + ',' + (py-9) + ' L' + (px+8.5) + ',' + (py+6) +
+                          ' L' + (px-8.5) + ',' + (py+6) + ' Z',
+                      class:'mk', fill:'var(--pt1)', stroke:'var(--ink)', 'stroke-width':1.1});
+      g.appendChild(mk);
+
+      // Index 1 sits just below-left of index 5; nudge its label away so the two do not collide.
+      var off = (r.i === 1) ? {dx:-13, dy:13, anchor:'end'} : {dx:12, dy:-8, anchor:'start'};
+      var lb = el('text', {x:px+off.dx, y:py+off.dy, class:'lb', 'text-anchor':off.anchor,
+                           fill:'var(--ink-faint)', 'font-size':11.5});
+      lb.textContent = r.i;
+      g.appendChild(lb);
+
+      var t = document.createElementNS(NS, 'title');
+      t.textContent = 'index ' + r.i + '  (' + r.f[0].toFixed(4) + ', ' + r.f[1].toFixed(4) + ')  label ' + r.y;
+      g.appendChild(t);
+
+      g.addEventListener('click', function(){
+        probe.value = r.i; probeNum.value = r.i; renderProbe(r.i);
+      });
+
+      svg.appendChild(g);
+      return {g:g, x:px, y:py};
+    });
+
+    var ring = el('circle', {class:'ring', r:15, cx:-99, cy:-99});
+    svg.appendChild(ring);
+
+    return function(i){
+      groups.forEach(function(o, k){ o.g.classList.toggle('sel', k === i); });
+      ring.setAttribute('cx', groups[i].x);
+      ring.setAttribute('cy', groups[i].y);
+    };
+  })();
+
+  var probe = document.getElementById('probe'),
+      probeNum = document.getElementById('probeNum'),
+      probeOut = document.getElementById('probeOut');
+
+  function fmt(v){ return (v < 0 ? '' : ' ') + v.toFixed(4); }
+  function renderProbe(i){
+    var r = TOY[i];
+    probeOut.textContent =
+      '>>> toy_dataset[' + i + ']\n' +
+      '(tensor([' + fmt(r.f[0]).trim() + ', ' + fmt(r.f[1]).trim() + ']), tensor(' + r.y + '))\n\n' +
+      'features .shape  ->  torch.Size([2])      # no batch dimension\n' +
+      'label    .shape  ->  torch.Size([])       # a scalar tensor\n' +
+      'type(...)        ->  tuple of 2 tensors';
+    for(var k=0;k<N;k++){
+      var row = document.getElementById('row-' + k);
+      if(row) row.classList.toggle('hl', k === i);
+    }
+    selectPlot(i);
+  }
+  probe.addEventListener('input', function(){ probeNum.value = probe.value; renderProbe(+probe.value); });
+  probeNum.addEventListener('input', function(){
+    var v = Math.max(0, Math.min(N-1, parseInt(probeNum.value, 10) || 0));
+    probe.value = v; renderProbe(v);
+  });
+  renderProbe(2);
+
+  /* ---------- seeded shuffle ---------- */
+  function rng(seed){
+    return function(){
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function shuffled(seed){
+    var a = TOY.map(function(r){ return r.i; }), rand = rng(seed);
+    for(var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(rand() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function chip(idx){
+    var r = TOY[idx];
+    var s = document.createElement('span');
+    s.className = 'chip c' + r.y;
+    s.innerHTML = '<span class="dot"></span>' + idx;
+    s.title = 'index ' + idx + ' · label ' + r.y;
+    return s;
+  }
+  function renderBatches(container, groups, droppedFrom){
+    container.innerHTML = '';
+    groups.forEach(function(g, k){
+      var row = document.createElement('div');
+      row.className = 'batch' + (droppedFrom !== null && k >= droppedFrom ? ' dropped' : '');
+      var lab = document.createElement('span');
+      lab.className = 'blab';
+      lab.textContent = 'batch ' + (k + 1);
+      row.appendChild(lab);
+      g.forEach(function(i){ row.appendChild(chip(i)); });
+      if(droppedFrom !== null && k >= droppedFrom){
+        var d = document.createElement('span');
+        d.className = 'blab'; d.style.textDecoration = 'none'; d.style.minWidth = '0';
+        d.textContent = '· dropped';
+        row.appendChild(d);
+      }
+      container.appendChild(row);
+    });
+  }
+
+  /* ---------- widget 2: batch builder ---------- */
+  var bs = document.getElementById('bs'),
+      shuf = document.getElementById('shuf'),
+      drop = document.getElementById('drop'),
+      out = document.getElementById('batchOut'),
+      sum = document.getElementById('batchSum'),
+      nextEp = document.getElementById('nextEpoch'),
+      resetEp = document.getElementById('resetEpoch'),
+      epoch = 1;
+
+  function renderBuilder(){
+    var b = parseInt(bs.value, 10);
+    var order = shuf.checked ? shuffled(epoch * 977 + 42) : TOY.map(function(r){ return r.i; });
+    var groups = [];
+    for(var i = 0; i < order.length; i += b) groups.push(order.slice(i, i + b));
+
+    var incomplete = groups.length && groups[groups.length - 1].length < b;
+    var droppedFrom = (drop.checked && incomplete) ? groups.length - 1 : null;
+    renderBatches(out, groups, droppedFrom);
+
+    var kept = droppedFrom === null ? groups.length : groups.length - 1;
+    var yielded = groups.slice(0, kept);
+    var seen = yielded.reduce(function(a, g){ return a + g.length; }, 0);
+    var sizes = yielded.map(function(g){ return g.length; }).join(', ') || '—';
+
+    sum.innerHTML =
+      'epoch <b>' + epoch + '</b> &nbsp;·&nbsp; <code>len(loader)</code> = <b>' + kept + '</b>' +
+      ' &nbsp;·&nbsp; batch sizes yielded <b>' + sizes + '</b>' +
+      ' &nbsp;·&nbsp; incomplete final batch: <b>' + (incomplete ? (drop.checked ? 'yes — dropped' : 'yes — kept') : 'no') + '</b>' +
+      ' &nbsp;·&nbsp; samples seen this epoch: <b>' + seen + ' of ' + N + '</b>' +
+      ' &nbsp;·&nbsp; parameter updates: <b>' + kept + '</b>';
+  }
+  [bs, shuf, drop].forEach(function(el){ el.addEventListener('change', renderBuilder); });
+  nextEp.addEventListener('click', function(){ epoch++; renderBuilder(); });
+  resetEp.addEventListener('click', function(){
+    epoch = 1;
+    bs.value = '3'; shuf.checked = false; drop.checked = false;
+    renderBuilder();
+  });
+  renderBuilder();
+
+  /* ---------- sorted-data demonstration ---------- */
+  var sortedOrder = TOY.slice().sort(function(a, b){ return a.y - b.y || a.i - b.i; })
+                       .map(function(r){ return r.i; });
+  var sg = [];
+  for(var i = 0; i < sortedOrder.length; i += 2) sg.push(sortedOrder.slice(i, i + 2));
+  renderBatches(document.getElementById('sortedDemo'), sg, null);
+
+  /* ---------- widget 3: update counter ---------- */
+  var ubs = document.getElementById('ubs'),
+      uep = document.getElementById('uep'),
+      updOut = document.getElementById('updOut'),
+      updSum = document.getElementById('updSum');
+
+  function renderUpdates(){
+    var b = parseInt(ubs.value, 10);
+    var e = Math.max(1, Math.min(500, parseInt(uep.value, 10) || 1));
+    var perEpoch = Math.ceil(N / b);
+    var total = perEpoch * e;
+    var regime = b === N ? 'batch (full-batch) gradient descent'
+               : b === 1 ? 'stochastic gradient descent'
+               : 'mini-batch gradient descent';
+
+    updOut.textContent =
+      'dataset size          : ' + N + '\n' +
+      'batch_size            : ' + b + '\n' +
+      'len(train_loader)     : ' + perEpoch + '      # inner-loop iterations per epoch\n' +
+      'epochs                : ' + e + '\n' +
+      '-----------------------------------------------\n' +
+      'parameter updates     : ' + total + '\n' +
+      'samples per gradient  : ' + b;
+
+    updSum.innerHTML = 'Regime: <b>' + regime + '</b>. ' +
+      'Full-batch training on this dataset would give <b>' + e + '</b> updates in total; ' +
+      'this configuration gives <b>' + total + '</b> — the same data, ' +
+      (total === e ? 'the same number of' : (total / e).toFixed(0) + '× as many') + ' opportunities to improve the weights.';
+  }
+  ubs.addEventListener('change', renderUpdates);
+  uep.addEventListener('input', renderUpdates);
+  renderUpdates();
+
+  /* ---------- final quiz: 3 drawn at random from the bank ---------- */
+  var PER_SET = 3;
+
+  var quiz = document.getElementById('quiz'),
+      pool = [].slice.call(quiz.querySelectorAll('.quiz-item')),
+      submit = document.getElementById('submitQuiz'),
+      retry = document.getElementById('retryQuiz'),
+      scoreOut = document.getElementById('scoreOut'),
+      warn = document.getElementById('quizWarn');
+
+  var active = [];     // the questions currently on screen
+  var prevKey = '';    // guards against drawing an identical consecutive set
+  var armed = false;   // becomes true once the user has been warned about blanks
+
+  // remember each question's position in the bank, for the "Question n of 8" label
+  pool.forEach(function(it, i){ it.dataset.bankNo = i + 1; });
+
+  function resetItem(it){
+    [].forEach.call(it.querySelectorAll('.quiz-opts label'), function(lab){
+      lab.classList.remove('correct','wrong','unattempted');
+      var inp = lab.querySelector('input');
+      inp.disabled = false; inp.checked = false;
+    });
+    it.classList.remove('skipped');
+    var tag = it.querySelector('.skip-tag');
+    if(tag) tag.remove();
+    it.querySelector('.quiz-exp').hidden = true;
+  }
+
+  function drawSet(){
+    var picked, key, guard = 0;
+    do {
+      var bag = pool.slice();
+      for(var i = bag.length - 1; i > 0; i--){        // Fisher-Yates
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = bag[i]; bag[i] = bag[j]; bag[j] = t;
+      }
+      picked = bag.slice(0, Math.min(PER_SET, pool.length));
+      key = picked.map(function(it){ return it.dataset.bankNo; }).sort().join(',');
+    } while(key === prevKey && ++guard < 20);
+    prevKey = key;
+
+    active = picked;
+    pool.forEach(function(it){
+      it.hidden = true;
+      it.classList.remove('last-shown');
+      resetItem(it);
+    });
+    active.forEach(function(it, i){
+      it.hidden = false;
+      it.querySelector('.qn').textContent = 'Question ' + (i + 1) + ' of ' + PER_SET;
+      quiz.insertBefore(it, quiz.querySelector('.quiz-bar'));   // keep screen order = draw order
+    });
+    active[active.length - 1].classList.add('last-shown');
+
+    armed = false;
+    warn.hidden = true;
+    scoreOut.style.display = 'none';
+    retry.style.display = 'none';
+    submit.textContent = 'Submit answers';
+    submit.style.display = 'inline-block';
+  }
+
+  function blanks(){
+    return active.filter(function(it){ return !it.querySelector('input:checked'); });
+  }
+
+  submit.addEventListener('click', function(){
+    var missing = blanks();
+
+    // First click with unanswered questions: warn instead of submitting.
+    if(missing.length && !armed){
+      armed = true;
+      var nums = missing.map(function(it){ return active.indexOf(it) + 1; });
+      warn.textContent = missing.length === 1
+        ? 'Question ' + nums[0] + ' is unanswered. Answer it, or press again to submit anyway.'
+        : missing.length + ' questions are unanswered (' + nums.join(', ') +
+          '). Answer them, or press again to submit anyway.';
+      warn.hidden = false;
+      submit.textContent = 'Submit anyway';
+      missing[0].scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+
+    var score = 0;
+    active.forEach(function(it){
+      var ans = it.dataset.answer;
+      var picked = it.querySelector('input:checked');
+      var skipped = !picked;
+
+      [].slice.call(it.querySelectorAll('.quiz-opts label')).forEach(function(lab){
+        var inp = lab.querySelector('input');
+        inp.disabled = true;
+        if(inp.value === ans) lab.classList.add(skipped ? 'unattempted' : 'correct');
+        else if(inp.checked) lab.classList.add('wrong');
+      });
+
+      if(skipped){
+        it.classList.add('skipped');
+        var qn = it.querySelector('.qn');
+        if(!qn.querySelector('.skip-tag')){
+          var tag = document.createElement('span');
+          tag.className = 'skip-tag';
+          tag.textContent = 'not answered';
+          qn.appendChild(tag);
+        }
+      } else if(picked.value === ans){
+        score++;
+      }
+
+      it.querySelector('.quiz-exp').hidden = false;
+    });
+
+    var n = active.length;
+    var band = score === n ? 'Clean sweep — fetch another three.'
+             : score >= n - 1 ? 'Solid — revisit the section you missed.'
+             : score > 0 ? 'Partial. Re-read Sections 3, 5 and 10 in particular.'
+             : 'Work back through the document; the interactive widgets are the fastest route.';
+
+    var tail = missing.length
+      ? '<span class="miss">' + missing.length + ' not answered</span> — counted as incorrect. ' + band
+      : band;
+
+    scoreOut.innerHTML = score + ' / ' + n + '<small>' + tail + '</small>';
+    scoreOut.style.display = 'block';
+    warn.hidden = true;
+    submit.style.display = 'none';
+    submit.textContent = 'Submit answers';
+    retry.style.display = 'inline-block';
+    scoreOut.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+
+  retry.addEventListener('click', function(){
+    drawSet();
+    quiz.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  drawSet();
+
+})();
+</script>
+</body>
+</html>
