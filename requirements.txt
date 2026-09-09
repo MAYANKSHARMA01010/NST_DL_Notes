@@ -1,11 +1,29 @@
+# Jupyter & Interactive Notebook Environment
 jupyterlab
+notebook
 ipykernel
+ipywidgets
+
+# Deep Learning Frameworks
 torch
 torchvision
 torchaudio
+keras
+
+# Data Science & Numerical Computing
 numpy
 pandas
+scipy
+scikit-learn
+
+# Visualization & Plotting
 matplotlib
 seaborn
-scikit-learn
-scipy
+plotly
+graphviz
+torchviz
+
+# Utilities, Image Processing & Networking
+Pillow
+tqdm
+requests

@@ -23,16 +23,17 @@ DL/
 ├── 02_Worksheets/             # Worksheets 01 to 08 (PDFs & interactive HTML worksheets)
 │   └── Solved/                # Solved worksheet answer keys
 ├── 03_HTML_Visualizations/    # Web-based explorables, interactive tools, & visual analogies
-├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 08)
-│   ├── Lab_00_PyTorch_Basics/                  # (includes Solved/)
-│   ├── Lab_01_Perceptrons_and_XOR/              # (includes Solved/)
-│   ├── Lab_02_Activation_Functions/             # (includes Solved/)
-│   ├── Lab_03_ReLU_ELU_Softmax_and_Autograd/    # (includes Solved/)
-│   ├── Lab_04_Loss_Functions/                   # (includes Solved/)
-│   ├── Lab_05_nn_Module_and_Pipelines/          # (includes Solved/)
-│   ├── Lab_06_Gradient_Descent_and_DataLoaders/ # (includes Solved/)
-│   ├── Lab_07_The_Optimizer_Zoo/                # (includes Solved/)
-│   ├── Lab_08_Face_Recognition_MLP_Pipeline/    # (includes Solved/)
+├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 09)
+│   ├── Lab_00_PyTorch_Basics/                           # (includes Solved/)
+│   ├── Lab_01_Perceptrons_and_XOR/                       # (includes Solved/)
+│   ├── Lab_02_Activation_Functions/                      # (includes Solved/)
+│   ├── Lab_03_ReLU_ELU_Softmax_and_Autograd/             # (includes Solved/)
+│   ├── Lab_04_Loss_Functions/                            # (includes Solved/)
+│   ├── Lab_05_nn_Module_and_Pipelines/                   # (includes Solved/)
+│   ├── Lab_06_Gradient_Descent_and_DataLoaders/          # (includes Solved/)
+│   ├── Lab_07_The_Optimizer_Zoo/                         # (includes Solved/)
+│   ├── Lab_08_Face_Recognition_MLP_Pipeline/             # (includes Solved/)
+│   ├── Lab_09_Overfitting_Underfitting_and_Regularization/ # (includes Solved/)
 │   └── Pratice/
 └── docs/                      # Course documentation and guides
 ```
@@ -146,6 +147,18 @@ DL/
 
 ---
 
+### Module 7: Overfitting, Underfitting & Regularization
+*Analyzing model capacity, bias-variance tradeoff, decision boundaries on overlapping classes, and repairing high-variance networks using L2 weight decay, L1 sparsity, and Dropout.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Worksheet / Web** | [Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html](02_Worksheets/Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Worksheet 09: Interactive Model Capacity, Bias–Variance Tradeoff & Double Descent Lab |
+| **Visualization** | [Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html](03_HTML_Visualizations/Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Interactive model capacity dial, training timeline, resampling & double descent explorer |
+| **Lab Notebook** | [Lab_09_Overfitting_Underfitting_and_Regularization.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Lab_09_Overfitting_Underfitting_and_Regularization.ipynb) | Lab 9: Underfitting, Overfitting, and Regularisation on Moons dataset (Student) |
+| **Lab Notebook (Solved)** | [Lab_09_Overfitting_Underfitting_and_Regularization_Solved.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Solved/Lab_09_Overfitting_Underfitting_and_Regularization_Solved.ipynb) | Lab 9: Complete reference key with Model 1, Model 2, Model 3, L2, L1, and Dropout |
+
+---
+
 ## How to Use These Materials
 
 1. **Viewing HTML Visualizations & Interactive Labs**:
@@ -162,3 +175,4 @@ DL/
    - Slides, Notes & Worksheets: [DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)
    - Lab Notebooks: [DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)
    - Course Labs Repository: [Newton Deep Learning Labs GitHub](https://github.com/sparshbansal-newton/deep-learning-labs)
+   - Interactive Class Visualizations: [Arun Chauhan GitHub Repository](https://github.com/arunChauhan-coder/arunChauhan-coder.github.io)
