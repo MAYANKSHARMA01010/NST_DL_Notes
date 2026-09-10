@@ -159,6 +159,29 @@ DL/
 
 ---
 
+### Contest 1 Preparation: Comprehensive Practice Quiz
+*50 interactive practice questions provided by the instructor testing all core deep learning concepts leading into Contest 1, featuring timer, progress dots, score tracking, difficulty tiers, and instant explanations.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Interactive Quiz** | [Deep_Learning_Contest_1_Practice_Quiz.html](02_Worksheets/Deep_Learning_Contest_1_Practice_Quiz.html) | Contest 1 Practice Quiz: 50 questions across 15 DL topics with instant justifications |
+| **Worksheet / Web** | [Worksheet_10_Deep_Learning_Contest_1_Practice_Quiz.html](02_Worksheets/Worksheet_10_Deep_Learning_Contest_1_Practice_Quiz.html) | Worksheet 10: Complete self-contained Contest 1 preparation assessment |
+| **Visualization** | [Deep_Learning_Contest_1_Practice_Quiz.html](03_HTML_Visualizations/Deep_Learning_Contest_1_Practice_Quiz.html) | Standalone dark-mode quiz interface for browser-based contest revision |
+
+---
+
+### Module 8: Hardware Acceleration, Scaling & Overfitting on Fashion-MNIST
+*Benchmarking CPU vs GPU training speed with PyTorch DataLoader, scaling up to the full 60,000 Fashion-MNIST dataset, and diagnosing real-world high-capacity overfitting.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Lab Notebook (Part 1)** | [Lab_10_Part_1_Fashion_MNIST_CPU_vs_GPU_Speed.ipynb](04_Notebooks/Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/Lab_10_Part_1_Fashion_MNIST_CPU_vs_GPU_Speed.ipynb) | Lab 10 Part 1: CPU vs GPU training speed benchmark on Fashion-MNIST subset (Student) |
+| **Lab Notebook (Part 1 Solved)** | [Lab_10_Part_1_Fashion_MNIST_CPU_vs_GPU_Speed_Solved.ipynb](04_Notebooks/Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/Solved/Lab_10_Part_1_Fashion_MNIST_CPU_vs_GPU_Speed_Solved.ipynb) | Lab 10 Part 1: Solved reference with CPU vs GPU timing benchmark outputs & bar plots |
+| **Lab Notebook (Part 2)** | [Lab_10_Part_2_Fashion_MNIST_GPU_Full_Dataset_Scaling.ipynb](04_Notebooks/Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/Lab_10_Part_2_Fashion_MNIST_GPU_Full_Dataset_Scaling.ipynb) | Lab 10 Part 2: GPU training on full 60k dataset across 10 epochs & overfitting check (Student) |
+| **Lab Notebook (Part 2 Solved)** | [Lab_10_Part_2_Fashion_MNIST_GPU_Full_Dataset_Scaling_Solved.ipynb](04_Notebooks/Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/Solved/Lab_10_Part_2_Fashion_MNIST_GPU_Full_Dataset_Scaling_Solved.ipynb) | Lab 10 Part 2: Solved key with 98.2% train vs 88.9% test accuracy diagnosis |
+
+---
+
 ## How to Use These Materials
 
 1. **Viewing HTML Visualizations & Interactive Labs**:

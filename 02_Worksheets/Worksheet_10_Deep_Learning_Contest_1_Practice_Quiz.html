@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Learning Fundamentals — Quiz</title>
+<style>
+  :root{
+    --bg-a: #0B0F1A;
+    --bg-b: #141B30;
+    --panel: rgba(22,29,46,0.78);
+    --panel-border: rgba(139,92,246,0.18);
+    --text: #ECEFFA;
+    --muted: #8891AC;
+    --violet: #8B5CF6;
+    --cyan: #22D3EE;
+    --gradient: linear-gradient(90deg, var(--violet), var(--cyan));
+    --correct: #34D399;
+    --correct-dim: rgba(52,211,153,0.12);
+    --incorrect: #FB7185;
+    --incorrect-dim: rgba(251,113,133,0.12);
+    --amber: #FBBF24;
+    --track: #2B3554;
+    --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{ margin:0; padding:0; min-height: 100vh; }
+
+  body{
+    background: radial-gradient(circle at 15% 0%, var(--bg-b) 0%, var(--bg-a) 55%);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: var(--sans);
+    display:flex;
+    justify-content:center;
+    padding: 40px 20px 80px;
+  }
+
+  .app{ width:100%; max-width: 700px; }
+
+  header.top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  h1.title{
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.55rem;
+    letter-spacing: 0.2px;
+    margin:0;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .header-right{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+  }
+
+  .counter, .timer{
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .timer{ color: var(--cyan); }
+  .timer .label{ color: var(--muted); margin-right: 4px; }
+
+  .dots{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 6px;
+    margin-bottom: 26px;
+  }
+
+  .dot{
+    width: 13px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--track);
+    transition: background 0.25s ease, transform 0.2s ease;
+  }
+  .dot.current{ background: var(--gradient); transform: scaleY(1.6); }
+  .dot.correct{ background: var(--correct); }
+  .dot.incorrect{ background: var(--incorrect); }
+
+  .card{
+    background: var(--panel);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 28px 28px 24px;
+    box-shadow: 0 12px 34px rgba(0,0,0,0.35);
+    animation: rise 0.32s ease;
+  }
+
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(8px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .meta-row{ display:flex; align-items:center; gap:10px; margin-bottom: 14px; flex-wrap: wrap; }
+
+  .tag{
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--panel-border);
+    color: var(--muted);
+  }
+  .tag.difficulty-easy{ color:#34D399; border-color: rgba(52,211,153,.4); background: rgba(52,211,153,.08); }
+  .tag.difficulty-medium{ color:#FBBF24; border-color: rgba(251,191,36,.4); background: rgba(251,191,36,.08); }
+  .tag.difficulty-hard{ color:#FB7185; border-color: rgba(251,113,133,.4); background: rgba(251,113,133,.08); }
+
+  .prompt{ font-size: 1.12rem; line-height: 1.5; margin: 0 0 22px; max-width: 62ch; }
+
+  .options{ display:flex; flex-direction:column; gap:10px; margin-bottom: 6px; }
+
+  .option{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    text-align:left;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--panel-border);
+    color: var(--text);
+    padding: 13px 15px;
+    border-radius: 10px;
+    font-size: 0.98rem;
+    line-height: 1.4;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .option:hover:not(:disabled){ border-color: var(--violet); background: rgba(139,92,246,0.08); }
+  .option:disabled{ cursor: default; }
+
+  .option .marker{ font-family: var(--mono); font-size: 0.8rem; color: var(--muted); flex-shrink:0; padding-top: 1px; }
+
+  .option.selected-correct{ border-color: var(--correct); background: var(--correct-dim); }
+  .option.selected-correct .marker{ color: var(--correct); }
+
+  .option.selected-incorrect{ border-color: var(--incorrect); background: var(--incorrect-dim); }
+  .option.selected-incorrect .marker{ color: var(--incorrect); }
+
+  .option.reveal-correct{ border-color: var(--correct); }
+
+  .feedback{ margin-top: 18px; padding: 16px 18px; border-radius: 10px; display:none; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+
+  .feedback.show{ display:block; }
+  .feedback.correct{ background: var(--correct-dim); border: 1px solid rgba(52,211,153,0.35); }
+  .feedback.incorrect{ background: var(--incorrect-dim); border: 1px solid rgba(251,113,133,0.35); }
+
+  .feedback .verdict{ font-family: var(--mono); font-size: 0.82rem; margin-bottom: 6px; }
+  .feedback.correct .verdict{ color: var(--correct); }
+  .feedback.incorrect .verdict{ color: var(--incorrect); }
+
+  .feedback .justification{ font-size: 0.95rem; line-height: 1.55; color: var(--text); }
+
+  .controls{ display:flex; justify-content:flex-end; margin-top: 22px; }
+
+  button.primary{
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    background: var(--gradient);
+    color: #0B0F1A;
+    border: none;
+    padding: 11px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+  button.primary:hover{ filter: brightness(1.08); }
+  button.primary:active{ transform: translateY(1px); }
+  button.primary:disabled{ background: var(--track); color: var(--muted); cursor: not-allowed; }
+
+  button.ghost{
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--panel-border);
+    padding: 9px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  button.ghost:hover{ color: var(--text); border-color: var(--violet); }
+
+  .results{ display:none; }
+  .results.show{ display:block; }
+  .quiz-body.hidden{ display:none; }
+
+  .score-hero{ text-align:center; padding: 10px 0 22px; }
+  .score-hero .big{
+    font-family: var(--serif);
+    font-size: 3.2rem;
+    line-height:1;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .score-hero .sub{ color: var(--muted); margin-top: 8px; font-size: 0.95rem; }
+  .score-hero .time-taken{ color: var(--cyan); font-family: var(--mono); font-size: 0.9rem; margin-top: 10px; }
+
+  .breakdown{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0 8px; }
+  .breakdown .cell{ border: 1px solid var(--panel-border); border-radius: 10px; padding: 14px 10px; text-align:center; background: rgba(255,255,255,0.02); }
+  .breakdown .cell .n{ font-family: var(--mono); font-size: 1.3rem; }
+  .breakdown .cell.easy .n{ color: var(--correct); }
+  .breakdown .cell.medium .n{ color: var(--amber); }
+  .breakdown .cell.hard .n{ color: var(--incorrect); }
+  .breakdown .cell .lbl{ color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+
+  .footer-note{ text-align:center; color: var(--muted); font-size: 0.8rem; margin-top: 34px; line-height: 1.6; }
+
+  @media (prefers-reduced-motion: reduce){ .card, .feedback{ animation: none; } }
+
+  @media (max-width: 480px){
+    .card{ padding: 20px 18px; }
+    .score-hero .big{ font-size: 2.4rem; }
+    .breakdown{ gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <h1 class="title">Deep Learning Fundamentals</h1>
+    <div class="header-right">
+      <div class="timer" id="timer"><span class="label">Time</span>00:00</div>
+      <div class="counter" id="counter">1 / 50</div>
+    </div>
+  </header>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="quiz-body" id="quizBody">
+    <div class="card">
+      <div class="meta-row">
+        <span class="tag" id="topicTag">Topic</span>
+        <span class="tag" id="difficultyTag">Difficulty</span>
+      </div>
+      <p class="prompt" id="promptText"></p>
+      <div class="options" id="optionsList"></div>
+      <div class="feedback" id="feedback">
+        <div class="verdict" id="verdict"></div>
+        <div class="justification" id="justification"></div>
+      </div>
+      <div class="controls">
+        <button class="primary" id="nextBtn" disabled>Check answer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="card">
+      <div class="score-hero">
+        <div class="big" id="scoreBig">0 / 50</div>
+        <div class="sub" id="scoreSub">correct</div>
+        <div class="time-taken" id="timeTaken">Completed in 00:00</div>
+      </div>
+      <div class="breakdown">
+        <div class="cell easy"><div class="n" id="easyScore">0/20</div><div class="lbl">Easy</div></div>
+        <div class="cell medium"><div class="n" id="mediumScore">0/15</div><div class="lbl">Medium</div></div>
+        <div class="cell hard"><div class="n" id="hardScore">0/15</div><div class="lbl">Hard</div></div>
+      </div>
+      <div class="controls">
+        <button class="ghost" id="restartBtn">Restart quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Based on your Deep Learning lab notebooks — Tensors &amp; PyTorch operations, Activations, Loss functions, Optimizers, Data pipelines &amp; Training loops.</div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {id:"e1", difficulty:"easy", topic:"Tensors", prompt:"Which PyTorch function creates a tensor filled with random values without any explicit fixed pattern?",
+   options:["torch.zeros(2,3)","torch.rand(2,3)","torch.eye(5)","torch.full((2,3),5)"], correct:1,
+   explanation:"torch.rand() generates a tensor with values drawn uniformly from [0,1). zeros, eye, and full all produce deterministic, fixed patterns."},
+  {id:"e2", difficulty:"easy", topic:"Tensors", prompt:"Why would a developer call torch.manual_seed(42) before generating random tensors or initializing a model?",
+   options:["To speed up GPU computation","To make random number generation reproducible across runs","To reduce memory usage","To automatically normalize the data"], correct:1,
+   explanation:"Setting a manual seed fixes the state of the random number generator so results (weight init, shuffling, etc.) are identical every time the code runs."},
+  {id:"e3", difficulty:"easy", topic:"Tensors", prompt:"What is a key difference between torch.from_numpy(arr) and torch.tensor(arr)?",
+   options:["from_numpy() shares memory with the original array; tensor() copies the data","tensor() shares memory; from_numpy() copies data","They are functionally identical in every way","from_numpy() only works with integer arrays"], correct:0,
+   explanation:"torch.from_numpy() creates a tensor that shares the same underlying memory as the NumPy array, while torch.tensor() always makes a copy."},
+  {id:"e4", difficulty:"easy", topic:"Perceptrons", prompt:"A single-layer perceptron (like nn.Linear(2,1) with a threshold) can correctly implement AND and OR gates but fails on which logic gate?",
+   options:["NOT","NAND","XOR","OR"], correct:2,
+   explanation:"XOR is not linearly separable, so a single perceptron (one straight decision boundary) cannot represent it — a multi-layer network is required."},
+  {id:"e5", difficulty:"easy", topic:"Activations", prompt:"What is the output range of the sigmoid activation function?",
+   options:["(-1, 1)","(0, 1)","(-∞, ∞)","[0, ∞)"], correct:1,
+   explanation:"Sigmoid squashes any real-valued input into the open interval (0, 1), making it useful for representing probabilities."},
+  {id:"e6", difficulty:"easy", topic:"Activations", prompt:"A hard step function (outputs exactly 0 or 1) is a poor activation choice for gradient-based training. Why?",
+   options:["It is too computationally expensive","Its gradient is zero almost everywhere and undefined at the jump, so backpropagation gets no useful signal","It only works with integer inputs","It cannot be implemented in PyTorch at all"], correct:1,
+   explanation:"Since the derivative of a step function is 0 everywhere except an undefined point at z=0, gradient descent receives no direction to update weights."},
+  {id:"e7", difficulty:"easy", topic:"Activations", prompt:"What commonly causes a ReLU neuron to 'die' during training?",
+   options:["A very small learning rate","A large gradient update that pushes the neuron's weighted sum permanently below zero","Using too few training epochs","Applying dropout"], correct:1,
+   explanation:"If a large weight update shifts the pre-activation value z = Wx+b to consistently negative territory, ReLU outputs 0 and its gradient is also 0, so the neuron stops updating."},
+  {id:"e8", difficulty:"easy", topic:"Activations", prompt:"How does Leaky ReLU address the 'dying neuron' problem compared to standard ReLU?",
+   options:["It caps the maximum output value","It allows a small non-zero gradient for negative inputs instead of exactly zero","It converts negative inputs to their absolute value","It removes the need for a bias term"], correct:1,
+   explanation:"Leaky ReLU multiplies negative inputs by a small slope (e.g., 0.01) instead of zeroing them out, so the gradient never fully vanishes."},
+  {id:"e9", difficulty:"easy", topic:"Activations", prompt:"What does the Softmax function do that distinguishes it from activations like sigmoid or ReLU?",
+   options:["It operates on a single scalar at a time","It converts a vector of scores into probabilities that sum to 1 across all classes","It only outputs binary values","It is used exclusively during evaluation, never training"], correct:1,
+   explanation:"Unlike sigmoid/ReLU which map one number to one number, Softmax takes a full vector of class scores and normalizes them into a probability distribution summing to 1."},
+  {id:"e10", difficulty:"easy", topic:"Loss functions", prompt:"Which formula correctly represents Mean Squared Error (MSE)?",
+   options:["MSE = (1/N) Σ |yᵢ − ŷᵢ|","MSE = (1/N) Σ (yᵢ − ŷᵢ)²","MSE = −(1/N) Σ [yᵢ log(ŷᵢ)]","MSE = Σ (yᵢ − ŷᵢ)² / (N−1)"], correct:1,
+   explanation:"MSE averages the squared differences between true and predicted values, which heavily penalizes large errors due to squaring."},
+  {id:"e11", difficulty:"easy", topic:"Loss functions", prompt:"Compared to MSE, why is MAE considered more robust to outliers?",
+   options:["MAE squares the errors, amplifying large ones","MAE takes the absolute value of errors, so large deviations aren't disproportionately amplified","MAE ignores outliers completely","MAE only works on classification tasks"], correct:1,
+   explanation:"Because MAE uses absolute differences rather than squared ones, an outlier contributes proportionally to its size rather than quadratically."},
+  {id:"e12", difficulty:"easy", topic:"Loss functions", prompt:"Which PyTorch loss function expects raw logits as input and applies sigmoid internally in a numerically stable way?",
+   options:["nn.BCELoss()","nn.MSELoss()","nn.BCEWithLogitsLoss()","nn.L1Loss()"], correct:2,
+   explanation:"nn.BCEWithLogitsLoss() combines a sigmoid layer and BCE loss into one numerically stable operation, so you feed it raw logits, not pre-sigmoided probabilities."},
+  {id:"e13", difficulty:"easy", topic:"Preprocessing", prompt:"What is the primary purpose of applying StandardScaler to input features before training a neural network?",
+   options:["To remove missing values","To rescale features to zero mean and unit variance so they're on comparable scales","To convert categorical labels into numbers","To increase the number of training samples"], correct:1,
+   explanation:"Features with very different scales make gradient descent unstable; StandardScaler normalizes them to comparable ranges, aiding convergence."},
+  {id:"e14", difficulty:"easy", topic:"Preprocessing", prompt:"When splitting a dataset and scaling features, why should you fit the StandardScaler only on the training set and merely transform the test set?",
+   options:["It's faster computationally","Fitting on the full dataset would leak information from the test set into the training process","The test set typically has different columns","transform() is not available for test data"], correct:1,
+   explanation:"If the scaler is fit on all data including test, statistics from the test set influence training-time scaling — a form of data leakage that inflates evaluation performance."},
+  {id:"e15", difficulty:"easy", topic:"Model architecture", prompt:"A custom binary classifier is built as an nn.Module with one nn.Linear layer followed by nn.Sigmoid. What does this architecture represent?",
+   options:["A convolutional neural network","Logistic regression","A decision tree","K-means clustering"], correct:1,
+   explanation:"A single linear transformation followed by a sigmoid squashing function to produce a probability is exactly the formulation of logistic regression."},
+  {id:"e16", difficulty:"easy", topic:"PyTorch pitfalls", prompt:"Feeding a NumPy float64 array directly into an nn.Linear layer (which uses float32 weights by default) typically causes what?",
+   options:["Silent incorrect results with no error","A RuntimeError due to dtype mismatch (Double vs Float)","Automatic and seamless conversion","The model trains faster"], correct:1,
+   explanation:"PyTorch layers expect matching dtypes; passing float64 (Double) data into float32 (Float) layers raises a RuntimeError unless explicitly cast first."},
+  {id:"e17", difficulty:"easy", topic:"Data pipeline", prompt:"What two methods must a custom PyTorch Dataset class implement at minimum?",
+   options:["__init__ and __call__","__len__ and __getitem__","__str__ and __repr__","forward and backward"], correct:1,
+   explanation:"__len__ tells the DataLoader how many samples exist, and __getitem__ returns a single (features, label) pair at a given index."},
+  {id:"e18", difficulty:"easy", topic:"Gradient descent", prompt:"If a training loop sets batch_size equal to the entire training set size, what type of gradient descent is being performed?",
+   options:["Stochastic Gradient Descent","Batch Gradient Descent","Mini-batch Gradient Descent","Momentum-based Gradient Descent"], correct:1,
+   explanation:"Using the entire dataset for a single gradient computation per epoch is the definition of full Batch Gradient Descent — one update per epoch."},
+  {id:"e19", difficulty:"easy", topic:"Training loop", prompt:"Why is optimizer.zero_grad() typically called before loss.backward() in a training loop?",
+   options:["To initialize the model weights randomly","Because gradients accumulate by default, so skipping this would add new gradients on top of old ones","To reset the learning rate","It is purely optional and has no effect"], correct:1,
+   explanation:"PyTorch accumulates gradients in .grad by default across backward() calls; without zeroing them first, each step's gradient mixes with previous ones."},
+  {id:"e20", difficulty:"easy", topic:"Loss functions", prompt:"For a multi-class classification problem (predicting one of 40 categories), which PyTorch loss function combines softmax and negative log-likelihood into a single step?",
+   options:["nn.BCELoss()","nn.MSELoss()","nn.CrossEntropyLoss()","nn.L1Loss()"], correct:2,
+   explanation:"nn.CrossEntropyLoss() internally applies log-softmax followed by negative log-likelihood, so it's fed raw logits for multi-class problems."},
+
+  {id:"m1", difficulty:"medium", topic:"Loss functions", prompt:"A model has 3 outlier data points that are much farther from the true value than the rest. Comparing MSE and MAE loss landscapes for this data, which statement is most accurate?",
+   options:["MSE and MAE will show identical loss curves regardless of outliers","The MSE curve will sit noticeably higher than the clean-data curve almost everywhere, since squaring a few large errors adds a large near-constant penalty across most weight values","MAE will spike sharply while MSE stays flat","Outliers only affect the bias term, not the weight"], correct:1,
+   explanation:"Because squaring amplifies large errors disproportionately, even a few outliers raise the MSE loss surface broadly, whereas MAE's linear penalty is far less sensitive to those same points."},
+  {id:"m2", difficulty:"medium", topic:"Training loop", prompt:"A model's output has shape [batch_size, 1] but the batch labels are a flat tensor of shape [batch_size]. If these are passed directly into nn.BCELoss() without reshaping, what typically goes wrong?",
+   options:["PyTorch automatically reshapes them correctly with no issue","Broadcasting expands the shapes into an unintended [batch_size, batch_size] comparison, producing an incorrect loss","The program crashes immediately with no output","The loss becomes exactly zero"], correct:1,
+   explanation:"Mismatched shapes like [B,1] vs [B] cause broadcasting to silently expand into [B,B], comparing every prediction against every label rather than pairwise. Reshaping labels with .view(-1,1) avoids this."},
+  {id:"m3", difficulty:"medium", topic:"Optimizers", prompt:"In SGD with Momentum, a velocity term v is updated as v ← βv + ∇f(w) before updating weights. What role does the β (beta) hyperparameter play?",
+   options:["It sets the learning rate directly","It controls how much of the previous velocity (past gradient direction) is retained, smoothing out oscillations","It determines the batch size","It has no effect on training dynamics"], correct:1,
+   explanation:"β acts like inertia — a higher β retains more of the previous update direction, helping the optimizer push through small oscillations and flat regions."},
+  {id:"m4", difficulty:"medium", topic:"Model evaluation", prompt:"In a medical screening classifier where missing a positive (malignant) case is far more costly than a false alarm, how should the classification decision threshold typically be adjusted from the default 0.5?",
+   options:["Raise it above 0.5 to require more confidence before flagging positive","Lower it below 0.5, trading some precision for higher recall so fewer positives are missed","The threshold has no effect on precision or recall","Set it to exactly 1.0 for maximum safety"], correct:1,
+   explanation:"Lowering the threshold makes the model flag more cases as positive, increasing recall at the cost of more false positives — reasonable when missing a positive is the costlier error."},
+  {id:"m5", difficulty:"medium", topic:"Activations", prompt:"Given the same input z=0 for both sigmoid and tanh in a one-neuron gradient update, why does the tanh-based weight update end up several times larger than the sigmoid-based one?",
+   options:["tanh has a larger learning rate by default","Both the prediction's error term and the derivative term differ between the two activations at z=0, compounding into a larger overall step for tanh","Sigmoid cannot be used with gradient descent at all","tanh ignores the bias term"], correct:1,
+   explanation:"At z=0, sigmoid predicts 0.5 with slope 0.25, while tanh predicts 0 with slope 1. Since both the error magnitude and the local slope differ, the combined effect compounds into a much larger update for tanh."},
+  {id:"m6", difficulty:"medium", topic:"PyTorch operations", prompt:"A tensor x needs to be reshaped for a matrix multiplication. x.view(...) fails with an error, but x.reshape(...) on the exact same tensor succeeds. What's the most likely reason?",
+   options:["reshape() and view() never accept the same shape argument","view() requires the tensor's data to be contiguous in memory, while reshape() can fall back to making a copy when necessary","view() is deprecated in modern PyTorch, so it always fails","reshape() only works on 1-dimensional tensors"], correct:1,
+   explanation:"view() only works when the tensor's memory layout is contiguous, since it returns a new view onto the same underlying data. reshape() uses a view when possible, or transparently copies otherwise."},
+  {id:"m7", difficulty:"medium", topic:"PyTorch operations", prompt:"You have five tensors of shape [3, 4] and want a single tensor of shape [5, 3, 4], preserving each original tensor as a separate entry along a brand-new dimension. Which function should be used?",
+   options:["torch.cat(tensors, dim=0), giving shape [15, 4]","torch.stack(tensors, dim=0), giving shape [5, 3, 4]","torch.cat(tensors, dim=1)","torch.flatten(tensors)"], correct:1,
+   explanation:"torch.stack() introduces a new dimension and stacks tensors along it — exactly what's needed to go from five [3,4] tensors to one [5,3,4] tensor. torch.cat() only concatenates along an existing dimension."},
+  {id:"m8", difficulty:"medium", topic:"PyTorch operations", prompt:"A tensor w is created with requires_grad=True and used to compute a scalar loss. After calling loss.backward(), where does the computed gradient of the loss with respect to w get stored?",
+   options:["It's printed to the console automatically","In w.grad","It replaces the value of w directly","It's discarded unless explicitly saved"], correct:1,
+   explanation:"backward() populates the .grad attribute of every leaf tensor with requires_grad=True involved in computing the loss, accumulating dL/dw there."},
+  {id:"m9", difficulty:"medium", topic:"Activations", prompt:"Unlike ReLU, ELU produces a smooth, non-zero output for negative inputs that approaches a fixed negative value as the input becomes very negative. What practical benefit does this give during training?",
+   options:["It makes the network incapable of overfitting","It keeps some gradient flowing for negative pre-activations and can push the mean activation output closer to zero, helping mitigate the dying-neuron problem","It removes the need for a bias term","It forces all activations to be exactly zero"], correct:1,
+   explanation:"ELU's smooth negative saturation keeps gradients non-zero for negative inputs and helps center activations nearer to zero, unlike ReLU's hard cutoff."},
+  {id:"m10", difficulty:"medium", topic:"Loss functions", prompt:"A multi-class classifier is trained with nn.CrossEntropyLoss(). The labels tensor passed in is one-hot encoded, e.g. [0,0,1,0] for a 4-class problem, and PyTorch raises an error. What's the fix?",
+   options:["Convert the model's output to probabilities first","Pass the plain integer class index (e.g., 2) instead of a one-hot vector, since CrossEntropyLoss expects class indices as a LongTensor","Multiply the one-hot vector by the learning rate","Switch to nn.MSELoss() instead"], correct:1,
+   explanation:"nn.CrossEntropyLoss() expects raw integer class indices, not one-hot vectors — it applies log-softmax and negative log-likelihood internally."},
+  {id:"m11", difficulty:"medium", topic:"Optimizers", prompt:"During training, the loss value oscillates wildly and increases over epochs instead of decreasing. Assuming the code and data are correct, what hyperparameter is the most likely culprit?",
+   options:["The learning rate is too high, causing overshooting past the minimum on each update","The batch size is too small to compute any gradient","The activation function is missing","The dataset has too many samples"], correct:0,
+   explanation:"An excessively high learning rate causes each update to overshoot the minimum, often making the loss diverge or oscillate instead of steadily decreasing."},
+  {id:"m12", difficulty:"medium", topic:"Model evaluation", prompt:"A network reaches near-zero loss on the training set but has a much higher loss on the held-out test set, and the gap widens as training continues. What is this behavior called?",
+   options:["Underfitting","Overfitting — the model is memorizing training data rather than learning generalizable patterns","Vanishing gradients","Gradient explosion"], correct:1,
+   explanation:"A widening gap between near-perfect training performance and poor test performance is the classic signature of overfitting."},
+  {id:"m13", difficulty:"medium", topic:"Data pipeline", prompt:"A training DataLoader is created with shuffle=True, but the corresponding test/validation DataLoader uses shuffle=False. Why is this asymmetry generally fine, and even desirable?",
+   options:["Shuffling is needed for evaluation but not training","Shuffling training data each epoch prevents the model from learning spurious patterns tied to sample order, while evaluation order doesn't affect metrics like accuracy or loss","shuffle=False makes the model train faster during evaluation","It has no real effect either way and is just convention"], correct:1,
+   explanation:"Shuffling during training avoids the model picking up on sample-order artifacts across epochs; evaluation metrics are order-independent, so shuffling there adds no value."},
+  {id:"m14", difficulty:"medium", topic:"Gradient descent", prompt:"Compared to full-batch gradient descent (one update per epoch using all data) and pure stochastic gradient descent (one update per single sample), what makes mini-batch gradient descent a common practical compromise?",
+   options:["It never converges, unlike the other two","It balances gradient estimate stability against computational efficiency, updating more often than full-batch while being less noisy than single-sample SGD","It requires no learning rate","It only works for classification tasks"], correct:1,
+   explanation:"Mini-batches give a less noisy gradient estimate than single-sample SGD while still allowing many more updates per epoch than full-batch GD, balancing stability and speed."},
+  {id:"m15", difficulty:"medium", topic:"Activations", prompt:"Before applying the exponential function in a manual softmax implementation, it's common practice to subtract the maximum logit value from all logits first. Why?",
+   options:["It changes the final probability distribution to be more accurate","It prevents numerical overflow from exponentiating large numbers, without changing the resulting probabilities, since the shift cancels out in the ratio","It makes the function run on the GPU instead of CPU","It converts the output to log-probabilities"], correct:1,
+   explanation:"Subtracting the max logit keeps exponent arguments ≤ 0, avoiding overflow, while the shift cancels out when normalizing, leaving the probabilities unchanged."},
+
+  {id:"h1", difficulty:"hard", topic:"Optimizers", prompt:"On a ravine-shaped loss surface (steep in one direction, flat in another), a comparison shows AdaGrad and RMSProp reaching a lower final loss than Adam within a fixed number of steps. What best explains why Adam doesn't necessarily win?",
+   options:["Adam is fundamentally incapable of converging on any loss surface","Adam's momentum term can carry it past the optimum before its adaptive scaling fully stabilizes, so given the same fixed step budget it may still be catching up while a well-tuned adaptive method converges faster","AdaGrad and RMSProp always outperform Adam on every possible surface","The comparison must be due to a coding error since Adam is provably best"], correct:1,
+   explanation:"Adam combines momentum and adaptive scaling, but the momentum component can cause it to overshoot before its variance estimates settle, so it isn't guaranteed to be fastest on every surface/step-budget combination."},
+  {id:"h2", difficulty:"hard", topic:"Activations", prompt:"A ReLU neuron has 'died' (its weights now always produce z ≤ 0 for all training inputs). Why can it not recover on its own through further gradient descent?",
+   options:["ReLU's gradient for z ≤ 0 is exactly zero, so no gradient flows back to update that neuron's weights, regardless of how many more training steps run","The learning rate automatically resets to zero for dead neurons","PyTorch permanently locks the weights of any neuron that outputs zero","Dead neurons are automatically removed from the network"], correct:0,
+   explanation:"Since ReLU's derivative is 0 for any z ≤ 0, no error signal propagates back through that neuron once it's stuck in the negative region — its weights simply stop changing."},
+  {id:"h3", difficulty:"hard", topic:"Activations", prompt:"For a one-neuron sigmoid model with x=2, w=1, b=0, target y=0, and learning rate α=0.5, a single gradient descent step is performed using L = 0.5(ŷ−y)². What is the updated weight w (to 3 decimal places)?",
+   options:["0.907","0.500","1.185","0.750"], correct:0,
+   explanation:"z=wx+b=2, ŷ=sigmoid(2)≈0.8808. dL/dŷ=ŷ−y=0.8808. dŷ/dz=ŷ(1−ŷ)≈0.1050. dz/dw=x=2. So dL/dw≈0.8808×0.1050×2≈0.185. New w = 1 − 0.5×0.185 ≈ 0.9075."},
+  {id:"h4", difficulty:"hard", topic:"Optimizers", prompt:"Nesterov Accelerated Gradient (NAG) modifies standard momentum by computing the gradient at a 'lookahead' position rather than the current position. What practical benefit does this provide over plain momentum?",
+   options:["It eliminates the need for a learning rate entirely","It lets the optimizer anticipate the curve ahead and correct course earlier, reducing overshoot past the optimum","It guarantees convergence to the global minimum on any loss surface","It removes the momentum term altogether"], correct:1,
+   explanation:"By evaluating the gradient at the position momentum is about to carry the weights to, NAG can detect an upcoming change in the loss surface sooner and adjust before fully overshooting."},
+  {id:"h5", difficulty:"hard", topic:"Data pipeline", prompt:"A custom Dataset with 10 samples is wrapped in a DataLoader with batch_size=3 and shuffle=False. How many batches will be produced in one epoch, and what will the size of the last batch be?",
+   options:["4 batches; last batch has 3 samples","3 batches; last batch has 1 sample","4 batches; last batch has 1 sample","3 batches; last batch has 3 samples"], correct:2,
+   explanation:"10 samples / batch_size 3 = 3 full batches of 3 (9 samples) plus a final partial batch of the 1 remaining sample, giving 4 batches total by default."},
+  {id:"h6", difficulty:"hard", topic:"Autograd", prompt:"Calling loss.backward() twice in a row on the same loss tensor, without passing retain_graph=True the first time, raises a RuntimeError. Why?",
+   options:["PyTorch only allows two backward calls per program","By default, PyTorch frees the intermediate computation graph after the first backward() call to save memory, so a second call has nothing to traverse","Gradients can only be computed once per epoch","backward() can only be called on tensors with requires_grad=False"], correct:1,
+   explanation:"PyTorch discards the computation graph after backward() by default to free memory; retain_graph=True must be passed if backward() will be called again on the same graph."},
+  {id:"h7", difficulty:"hard", topic:"Weight initialization", prompt:"All weights in a multi-layer network are initialized to exactly zero (biases too). What problem does this cause during training via backpropagation?",
+   options:["The network trains normally, just starting from a neutral point","Every neuron in a given layer computes identical outputs and receives identical gradients, so they update identically and never differentiate — a symmetry problem","The loss becomes undefined immediately","Only the output layer is affected, not hidden layers"], correct:1,
+   explanation:"With all weights equal, every neuron in a layer computes the same output and receives the same gradient, so they stay identical forever — the network can't learn diverse features."},
+  {id:"h8", difficulty:"hard", topic:"Optimizers", prompt:"Adam maintains exponential moving averages of past gradients (m) and squared gradients (v), then computes bias-corrected versions m̂ and v̂ before the weight update. Why is this bias correction needed?",
+   options:["To make the optimizer run faster","Because m and v are initialized at zero, so early estimates are biased toward zero, especially during the first few steps; correction rescales them to be unbiased","To prevent the learning rate from ever changing","It's purely a legacy PyTorch requirement with no mathematical basis"], correct:1,
+   explanation:"Since m and v start at zero and are updated via exponential moving averages, early estimates are systematically biased toward zero; the correction divides out this bias."},
+  {id:"h9", difficulty:"hard", topic:"Loss functions", prompt:"For a 3-class problem, a model outputs softmax probabilities [0.7, 0.2, 0.1] for a sample whose true class corresponds to the 0.2 entry. Using CE = −log(p_correct), what is the cross-entropy loss for this sample (rounded to 3 decimals)?",
+   options:["1.609","0.200","0.357","3.219"], correct:0,
+   explanation:"CE = −log(0.2) ≈ 1.609."},
+  {id:"h10", difficulty:"hard", topic:"Data pipeline", prompt:"A face-recognition dataset has 40 people with only 10 images each. If the train/test split is done by randomly shuffling all 400 images together (not per-person), what risk does this introduce for a fair evaluation given such a small per-class sample count?",
+   options:["None — random shuffling across the whole dataset is always the safest approach regardless of size","Some classes could end up with very few or zero training or test examples purely by chance, since a random global split doesn't guarantee even per-class representation","It guarantees perfectly balanced classes in both splits","It causes the model to only ever predict one class"], correct:1,
+   explanation:"With only 10 samples per class, a purely random split isn't guaranteed to preserve per-class balance; a stratified split ensures each person is proportionally represented in both sets."},
+  {id:"h11", difficulty:"hard", topic:"Gradient descent", prompt:"On a loss surface with a saddle point (near-zero gradient in one direction, but curving up and down in perpendicular directions), plain SGD without momentum can stall for a long time nearby. Why?",
+   options:["SGD's update is proportional to the gradient, so a near-zero gradient in one direction produces a near-zero update, causing very slow progress until it happens to escape","Saddle points don't exist in real neural network loss surfaces","SGD always converges instantly regardless of local geometry","The loss function becomes undefined at a saddle point"], correct:0,
+   explanation:"Since plain SGD's step size is proportional to the local gradient, a near-flat direction produces tiny updates, so the optimizer can crawl along a saddle region for many steps."},
+  {id:"h12", difficulty:"hard", topic:"Activations", prompt:"A dataset causes many pre-activation values to be negative for a particular layer, and plain ReLU there leads to a large fraction of permanently dead neurons. Both Leaky ReLU and ELU are proposed as fixes. Which statement best captures a genuine difference between the two?",
+   options:["Leaky ReLU uses a small constant slope for negative inputs (a straight line), while ELU uses a smooth exponential curve that saturates to a fixed negative value — both keep gradients flowing but shape the negative region differently","ELU is a linear function while Leaky ReLU is exponential","They are mathematically identical for negative inputs","Leaky ReLU cannot be implemented in PyTorch"], correct:0,
+   explanation:"Leaky ReLU's negative region is a straight line with a small fixed slope; ELU's negative region is a smooth curve that saturates, which can help center activations closer to zero."},
+  {id:"h13", difficulty:"hard", topic:"Optimizers", prompt:"Using SGD with momentum where v ← βv + ∇f(w) and w ← w − α·v, given w=2, a computed gradient ∇f(w)=1, previous velocity v=0.4, β=0.9, and learning rate α=0.1, what is the updated weight after one step?",
+   options:["1.864","1.900","1.640","2.136"], correct:0,
+   explanation:"v_new = β·v + ∇f(w) = 0.9×0.4 + 1 = 1.36. w_new = w − α·v_new = 2 − 0.1×1.36 = 1.864."},
+  {id:"h14", difficulty:"hard", topic:"Data pipeline", prompt:"A DataLoader is created with 100 samples, batch_size=32, and drop_last=True. How many batches are produced per epoch, and what happens to the leftover samples?",
+   options:["4 batches; the final 4 leftover samples are silently dropped from that epoch","3 batches; the final 4 samples are silently dropped from that epoch","4 batches; the final 4 samples are padded with zeros","3 batches; the leftover samples are added to the next epoch"], correct:1,
+   explanation:"100 / 32 = 3 full batches (96 samples) with 4 left over. drop_last=True discards that incomplete final batch instead of keeping a smaller one."},
+  {id:"h15", difficulty:"hard", topic:"Training loop", prompt:"To simulate a larger effective batch size without more memory, a training loop calls loss.backward() every mini-batch but only calls optimizer.step() and optimizer.zero_grad() every N mini-batches. Why does this approximate training with an N-times larger batch?",
+   options:["Gradients accumulate in .grad across the N backward() calls since they aren't zeroed, so the eventual optimizer.step() uses a sum reflecting all N mini-batches' gradients, similar to computing the gradient over a bigger combined batch","backward() automatically increases the batch size internally","optimizer.step() ignores accumulated gradients, only using the very last mini-batch","This technique has no relation to batch size at all"], correct:0,
+   explanation:"Because gradients accumulate in .grad by default across multiple backward() calls, delaying zero_grad()/step() for N mini-batches sums their gradients, approximating one update over an N-times larger batch."}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let startTime = null;
+let timerInterval = null;
+let finalElapsedSeconds = 0;
+
+const dotsEl = document.getElementById('dots');
+const counterEl = document.getElementById('counter');
+const timerEl = document.getElementById('timer');
+const topicTag = document.getElementById('topicTag');
+const difficultyTag = document.getElementById('difficultyTag');
+const promptText = document.getElementById('promptText');
+const optionsList = document.getElementById('optionsList');
+const feedback = document.getElementById('feedback');
+const verdict = document.getElementById('verdict');
+const justification = document.getElementById('justification');
+const nextBtn = document.getElementById('nextBtn');
+const quizBody = document.getElementById('quizBody');
+const resultsEl = document.getElementById('results');
+
+function formatTime(totalSeconds){
+  const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+  return m + ':' + s;
+}
+
+function startTimer(){
+  startTime = Date.now();
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    timerEl.innerHTML = '<span class="label">Time</span>' + formatTime(elapsed);
+  }, 1000);
+}
+
+function stopTimer(){
+  clearInterval(timerInterval);
+  finalElapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+}
+
+function buildDots(){
+  dotsEl.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + i;
+    dotsEl.appendChild(d);
+  });
+}
+
+function refreshDots(){
+  QUESTIONS.forEach((q, i) => {
+    const d = document.getElementById('dot-' + i);
+    d.className = 'dot';
+    if (i === current) d.classList.add('current');
+    if (answers[i] === true) d.classList.add('correct');
+    if (answers[i] === false) d.classList.add('incorrect');
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  counterEl.textContent = (current + 1) + ' / ' + QUESTIONS.length;
+  topicTag.textContent = q.topic;
+  difficultyTag.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+  difficultyTag.className = 'tag difficulty-' + q.difficulty;
+  promptText.textContent = q.prompt;
+
+  optionsList.innerHTML = '';
+  const letters = ['A','B','C','D','E'];
+  q.options.forEach((optText, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = '<span class="marker">' + letters[idx] + '</span><span>' + optText + '</span>';
+    btn.addEventListener('click', () => selectOption(idx));
+    optionsList.appendChild(btn);
+  });
+
+  feedback.className = 'feedback';
+  nextBtn.textContent = 'Check answer';
+  nextBtn.disabled = true;
+  nextBtn.onclick = null;
+
+  refreshDots();
+}
+
+function selectOption(idx){
+  if (nextBtn.textContent === 'Next question' || nextBtn.textContent === 'See results') return;
+  Array.from(optionsList.children).forEach((el, i) => {
+    el.style.outline = i === idx ? '2px solid var(--violet)' : 'none';
+  });
+  nextBtn.disabled = false;
+  nextBtn.onclick = () => checkAnswer(idx);
+}
+
+function checkAnswer(idx){
+  const q = QUESTIONS[current];
+  const isCorrect = idx === q.correct;
+  answers[current] = isCorrect;
+
+  Array.from(optionsList.children).forEach((el, i) => {
+    el.disabled = true;
+    el.style.outline = 'none';
+    if (i === idx && isCorrect) el.classList.add('selected-correct');
+    if (i === idx && !isCorrect) el.classList.add('selected-incorrect');
+    if (i === q.correct && !isCorrect) el.classList.add('reveal-correct');
+  });
+
+  feedback.className = 'feedback show ' + (isCorrect ? 'correct' : 'incorrect');
+  verdict.textContent = isCorrect ? 'Correct' : 'Not quite';
+  justification.textContent = q.explanation;
+
+  nextBtn.disabled = false;
+  nextBtn.textContent = current === QUESTIONS.length - 1 ? 'See results' : 'Next question';
+  nextBtn.onclick = advance;
+
+  refreshDots();
+}
+
+function advance(){
+  if (current === QUESTIONS.length - 1){
+    showResults();
+    return;
+  }
+  current += 1;
+  renderQuestion();
+}
+
+function showResults(){
+  stopTimer();
+  quizBody.classList.add('hidden');
+  dotsEl.style.display = 'none';
+  counterEl.style.display = 'none';
+  timerEl.style.display = 'none';
+  resultsEl.classList.add('show');
+
+  const total = answers.filter(a => a === true).length;
+  document.getElementById('scoreBig').textContent = total + ' / ' + QUESTIONS.length;
+  document.getElementById('scoreSub').textContent = total === QUESTIONS.length ? 'Perfect score' : 'correct answers';
+  document.getElementById('timeTaken').textContent = 'Completed in ' + formatTime(finalElapsedSeconds);
+
+  const byDiff = {easy:{c:0,t:0}, medium:{c:0,t:0}, hard:{c:0,t:0}};
+  QUESTIONS.forEach((q, i) => {
+    byDiff[q.difficulty].t += 1;
+    if (answers[i] === true) byDiff[q.difficulty].c += 1;
+  });
+  document.getElementById('easyScore').textContent = byDiff.easy.c + '/' + byDiff.easy.t;
+  document.getElementById('mediumScore').textContent = byDiff.medium.c + '/' + byDiff.medium.t;
+  document.getElementById('hardScore').textContent = byDiff.hard.c + '/' + byDiff.hard.t;
+}
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  quizBody.classList.remove('hidden');
+  dotsEl.style.display = 'flex';
+  counterEl.style.display = 'block';
+  timerEl.style.display = 'inline';
+  resultsEl.classList.remove('show');
+  renderQuestion();
+  startTimer();
+});
+
+buildDots();
+renderQuestion();
+startTimer();
+</script>
+</body>
+</html>
