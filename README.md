@@ -11,7 +11,6 @@ All materials have been categorized into dedicated folders and cross-referenced 
 * 📂 **[DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)** — Official lecture slides, reading notes, and worksheets.
 * 📓 **[DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)** — Official lab notebooks and reference solutions.
 * 🐙 **[Newton Deep Learning Labs GitHub](https://github.com/sparshbansal-newton/deep-learning-labs)** — Course lab repository by Sparsh Bansal with notebooks and interactive labs.
-* 📄 **[Dataset & DataLoader Lab (GitHub)](https://github.com/sparshbansal-newton/deep-learning-labs/blob/main/dataset-dataloader-lab.html)** — PyTorch Dataset & DataLoader interactive lab source on GitHub.
 
 ---
 
