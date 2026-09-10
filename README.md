@@ -197,4 +197,3 @@ DL/
    - Slides, Notes & Worksheets: [DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)
    - Lab Notebooks: [DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)
    - Course Labs Repository: [Newton Deep Learning Labs GitHub](https://github.com/sparshbansal-newton/deep-learning-labs)
-   - Interactive Class Visualizations: [Arun Chauhan GitHub Repository](https://github.com/arunChauhan-coder/arunChauhan-coder.github.io)
