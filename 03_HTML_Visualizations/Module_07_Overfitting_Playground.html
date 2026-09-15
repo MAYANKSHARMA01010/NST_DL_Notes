@@ -1,0 +1,1130 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overfitting Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Schibsted+Grotesk:wght@600;700;800&display=swap">
+<style>
+  :root {
+    --bg: #F4F6F8;
+    --surface: #FFFFFF;
+    --ink: #18212B;
+    --muted: #586473;
+    --rule: #D9DFE6;
+    --control-bg: #E9EEF3;
+    --class-a: #2F6DB5;
+    --class-b: #D08A0E;
+    --good: #1E7A4C;
+    --good-bg: #E2F2E9;
+    --bad: #B42D2D;
+    --bad-bg: #F8E3E1;
+    --under: #6A4FB6;
+    --under-bg: #ECE7F8;
+
+    --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Atkinson Hyperlegible", "Segoe UI", Roboto, Arial, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11151B;
+      --surface: #181E26;
+      --ink: #E4E9EF;
+      --muted: #9AA6B4;
+      --rule: #2A333E;
+      --control-bg: #1F2630;
+      --class-a: #6FA6EC;
+      --class-b: #F0B43C;
+      --good: #5CC48A;
+      --good-bg: #15301F;
+      --bad: #EE7B73;
+      --bad-bg: #3A1C1C;
+      --under: #A98EF0;
+      --under-bg: #2A2340;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11151B;
+    --surface: #181E26;
+    --ink: #E4E9EF;
+    --muted: #9AA6B4;
+    --rule: #2A333E;
+    --control-bg: #1F2630;
+    --class-a: #6FA6EC;
+    --class-b: #F0B43C;
+    --good: #5CC48A;
+    --good-bg: #15301F;
+    --bad: #EE7B73;
+    --bad-bg: #3A1C1C;
+    --under: #A98EF0;
+    --under-bg: #2A2340;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  main {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 36px 20px 72px;
+    display: grid;
+    gap: 22px;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; }
+  h2 { font-size: 1.25rem; font-weight: 700; }
+  h3 { font-size: 0.8rem; font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  p { margin: 0; }
+  code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+  button:focus-visible, input:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  header { display: grid; gap: 8px; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .lede { color: var(--muted); max-width: 70ch; font-size: 1.05rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+
+  /* ---------- main app grid ---------- */
+  .app {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 880px) { .app { grid-template-columns: 1fr; } }
+
+  .plot-card { padding: 16px; display: grid; gap: 14px; }
+  .plot-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+  .plot-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .axis-tag {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 0 5px;
+    border-radius: 3px;
+  }
+  .axis-tag.x { right: 8px; bottom: 6px; }
+  .axis-tag.y { left: 8px; top: 6px; }
+  .status {
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    background: var(--ink);
+    color: var(--surface);
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 0.84rem;
+    color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot.a { background: var(--class-a); }
+  .dot.b { background: var(--class-b); }
+  .ring { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-block; }
+  .swatch-line { width: 18px; height: 0; border-top: 2.5px solid var(--ink); display: inline-block; }
+  .swatch-dash { width: 18px; height: 0; border-top: 2px dashed var(--muted); display: inline-block; }
+
+  .toggles { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.88rem; }
+  .toggles label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .toggles input { accent-color: var(--ink); }
+
+  /* ---------- stats ---------- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .stat { background: var(--surface); padding: 10px 12px; display: grid; gap: 2px; }
+  .stat .k { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+  .stat .v { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  @media (max-width: 480px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+  .verdict {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: var(--control-bg);
+  }
+  .pill {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .pill.under { background: var(--under-bg); color: var(--under); }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  .pill.over { background: var(--bad-bg); color: var(--bad); }
+  .verdict p { font-size: 0.92rem; }
+
+  /* ---------- controls ---------- */
+  .controls { padding: 16px 18px; display: grid; gap: 18px; }
+  .presets { display: grid; gap: 8px; }
+  .preset-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .preset {
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    text-align: left;
+    display: grid;
+    gap: 1px;
+  }
+  .preset small { font-weight: 400; font-size: 0.76rem; color: var(--muted); }
+  .preset:hover { border-color: var(--ink); }
+  .preset[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+  .preset[aria-pressed="true"] small { color: var(--surface); opacity: 0.8; }
+
+  .group { display: grid; gap: 12px; padding-top: 14px; border-top: 1px solid var(--rule); }
+  .ctrl { display: grid; gap: 4px; }
+  .ctrl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .ctrl-top label { font-weight: 700; font-size: 0.93rem; }
+  .ctrl-top output {
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    background: var(--control-bg);
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .hint { font-size: 0.8rem; color: var(--muted); }
+  input[type="range"] { width: 100%; accent-color: var(--ink); margin: 2px 0; }
+
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+  .seg button {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    background: var(--surface);
+    color: var(--ink);
+    border: 0;
+    padding: 3px 14px;
+    cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--rule); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+
+  .btn {
+    font: inherit;
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--ink); }
+
+  /* ---------- timeline ---------- */
+  .timeline { padding: 16px 18px; display: grid; gap: 12px; }
+  .timeline-head { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 10px; }
+  .timeline-head p { color: var(--muted); font-size: 0.9rem; max-width: 70ch; }
+  .curve-box { position: relative; width: 100%; height: 250px; cursor: ew-resize; touch-action: none; }
+  .curve-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .scrub { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+  .scrub output {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    min-width: 11ch;
+    text-align: right;
+  }
+  .strip-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; color: var(--muted); }
+  .strip-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sq { width: 14px; height: 8px; border-radius: 2px; display: inline-block; }
+
+  /* ---------- explain ---------- */
+  .explain { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 880px) { .explain { grid-template-columns: 1fr; } }
+  .explain .card { padding: 16px 18px; display: grid; gap: 10px; align-content: start; }
+  .explain ul, .explain ol { margin: 0; padding-left: 1.2em; display: grid; gap: 7px; font-size: 0.93rem; }
+  .cause-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .cause-table th, .cause-table td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .cause-table th { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .cause-table tr:last-child td { border-bottom: none; }
+  .tag { font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+  .tag.over { background: var(--bad-bg); color: var(--bad); }
+  .tag.under { background: var(--under-bg); color: var(--under); }
+  .table-wrap { overflow-x: auto; }
+
+  footer { font-size: 0.82rem; color: var(--muted); }
+</style>
+
+<main>
+  <header>
+    <div class="eyebrow">Deep Learning 2026 · Lab 9 · Interactive</div>
+    <h1>Overfitting playground</h1>
+    <p class="lede">A small neural network learns to separate two classes using two features, x₁ and x₂. Change the controls and watch the decision boundary go from <strong>too simple</strong> to <strong>just right</strong> to <strong>memorizing noise</strong>. It retrains live in your browser.</p>
+  </header>
+
+  <div class="app">
+    <!-- ============ PLOT ============ -->
+    <div class="card plot-card">
+      <div class="plot-box">
+        <canvas id="plot" role="img" aria-label="Decision boundary plot"></canvas>
+        <span class="axis-tag x">x₁ →</span>
+        <span class="axis-tag y">↑ x₂</span>
+        <span class="status" id="status" hidden>Training…</span>
+      </div>
+
+      <div class="legend">
+        <span><i class="dot a"></i>blue class</span>
+        <span><i class="dot b"></i>amber class</span>
+        <span><i class="swatch-line"></i>model's boundary</span>
+        <span><i class="swatch-dash"></i>true pattern</span>
+        <span><i class="ring"></i>noisy label (flipped)</span>
+      </div>
+
+      <div class="toggles">
+        <label><input type="checkbox" id="showTrue" checked> True pattern</label>
+        <label><input type="checkbox" id="showNoisy" checked> Mark noisy labels</label>
+        <label><input type="checkbox" id="showTest"> Show test points</label>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span class="k">Train acc</span><span class="v" id="sTrain">–</span></div>
+        <div class="stat"><span class="k">Test acc</span><span class="v" id="sTest">–</span></div>
+        <div class="stat"><span class="k">Gap</span><span class="v" id="sGap">–</span></div>
+        <div class="stat"><span class="k">Best possible</span><span class="v" id="sBest">–</span></div>
+      </div>
+
+      <div class="verdict" aria-live="polite">
+        <span class="pill good" id="vPill">–</span>
+        <p id="vText">Training…</p>
+      </div>
+    </div>
+
+    <!-- ============ CONTROLS ============ -->
+    <div class="card controls">
+      <div class="presets">
+        <h3>Jump to</h3>
+        <div class="preset-row">
+          <button type="button" class="preset" data-preset="under" aria-pressed="false">Too simple<small>1 neuron → underfit</small></button>
+          <button type="button" class="preset" data-preset="good" aria-pressed="false">Good fit<small>big model + L2</small></button>
+          <button type="button" class="preset" data-preset="over" aria-pressed="false">Overfit<small>big model, no regularization</small></button>
+          <button type="button" class="preset" data-preset="toomuch" aria-pressed="false">Too much L2<small>big model, λ too high</small></button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Model size</h3>
+        <div class="ctrl">
+          <div class="ctrl-top">
+            <label>Hidden layers</label>
+            <div class="seg" id="layers">
+              <button type="button" data-v="1" aria-pressed="false">1</button>
+              <button type="button" data-v="2" aria-pressed="false">2</button>
+            </div>
+          </div>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="neurons">Neurons per layer</label><output id="neuronsOut"></output></div>
+          <input type="range" id="neurons" min="0" max="6" step="1">
+          <span class="hint">More neurons = more freedom to bend the boundary.</span>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Data</h3>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="points">Training points</label><output id="pointsOut"></output></div>
+          <input type="range" id="points" min="0" max="3" step="1">
+          <span class="hint">Fewer points = easier to memorize every single one.</span>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="noise">Label noise</label><output id="noiseOut"></output></div>
+          <input type="range" id="noise" min="0" max="3" step="1">
+          <span class="hint">Wrong labels in the data are exactly what an overfit model memorizes.</span>
+        </div>
+        <button type="button" class="btn" id="resample" style="justify-self:start">New data sample</button>
+      </div>
+
+      <div class="group">
+        <h3>Regularization</h3>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="l2">L2 · weight_decay (λ)</label><output id="l2Out"></output></div>
+          <input type="range" id="l2" min="0" max="4" step="1">
+          <span class="hint">Pulls weights towards 0, giving a smoother boundary.</span>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="dropout">Dropout (p)</label><output id="dropoutOut"></output></div>
+          <input type="range" id="dropout" min="0" max="3" step="1">
+          <span class="hint">Randomly switches off neurons while training.</span>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Training</h3>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="epochs">Epochs</label><output id="epochsOut"></output></div>
+          <input type="range" id="epochs" min="0" max="4" step="1">
+          <span class="hint">Train longer = more time to memorize. Scrub the timeline below to see every epoch.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TIMELINE ============ -->
+  <div class="card timeline">
+    <div class="timeline-head">
+      <div style="display:grid;gap:4px">
+        <h2>Epoch by epoch</h2>
+        <p>Drag across the chart or use the slider. The boundary above shows the model at that epoch. Solid = train accuracy, dashed = test accuracy, shaded = gap.</p>
+      </div>
+      <button type="button" class="btn" id="replay">▶ Replay training</button>
+    </div>
+    <div class="curve-box" id="curveBox">
+      <canvas id="curve" role="img" aria-label="Train and test accuracy per epoch"></canvas>
+    </div>
+    <div class="scrub">
+      <label for="scrub" class="hint">Epoch</label>
+      <input type="range" id="scrub" min="0" max="0" step="1" value="0">
+      <output id="scrubOut">0</output>
+    </div>
+    <div class="strip-legend">
+      <span>Bar under the chart:</span>
+      <span><i class="sq" style="background:var(--under)"></i>underfitting</span>
+      <span><i class="sq" style="background:var(--good)"></i>good fit</span>
+      <span><i class="sq" style="background:var(--bad)"></i>overfitting</span>
+      <span>◆ = epoch with the best test accuracy (where early stopping would stop)</span>
+    </div>
+  </div>
+
+  <!-- ============ EXPLAIN ============ -->
+  <div class="explain">
+    <div class="card">
+      <h2>What pushes a model each way</h2>
+      <div class="table-wrap">
+        <table class="cause-table">
+          <thead><tr><th>Cause</th><th>Pushes towards</th><th>Try it</th></tr></thead>
+          <tbody>
+            <tr><td>Model too big (many neurons or layers)</td><td><span class="tag over">overfit</span></td><td>Neurons → 64</td></tr>
+            <tr><td>Too few training points</td><td><span class="tag over">overfit</span></td><td>Points → 30</td></tr>
+            <tr><td>Noisy or wrong labels</td><td><span class="tag over">overfit</span></td><td>Noise → 20%</td></tr>
+            <tr><td>Training for too many epochs</td><td><span class="tag over">overfit</span></td><td>Epochs → 2000</td></tr>
+            <tr><td>No regularization</td><td><span class="tag over">overfit</span></td><td>L2 and Dropout → 0</td></tr>
+            <tr><td>Model too small</td><td><span class="tag under">underfit</span></td><td>Neurons → 1</td></tr>
+            <tr><td>Too few epochs</td><td><span class="tag under">underfit</span></td><td>Epochs → 50</td></tr>
+            <tr><td>Too much regularization</td><td><span class="tag under">underfit</span></td><td>L2 → 0.03</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Try this</h2>
+      <ol>
+        <li>Click <strong>Overfit</strong>, then drag the epoch timeline from the left. The boundary goes from a straight-ish line (underfit), to following the wave (good), to wrapping around ringed noisy points (overfit).</li>
+        <li>Still on Overfit, move <strong>L2</strong> to 0.003. The islands around noisy points disappear and the gap shrinks.</li>
+        <li>Now push L2 to <strong>0.03</strong>. The gap is tiny, but test accuracy falls too. That's <em>underfitting from too much regularization</em>.</li>
+        <li>Back on Overfit, compare <strong>30</strong> training points with <strong>300</strong>. More data makes memorizing harder.</li>
+        <li>Set <strong>Label noise</strong> to 0%. With nothing wrong to memorize, even the big model does fine.</li>
+        <li>Click <strong>New data sample</strong> a few times on Overfit, then on Good fit. The overfit boundary changes wildly with each sample; the good one barely moves.</li>
+      </ol>
+    </div>
+  </div>
+
+  <footer>Companion to <span class="mono">ANN_Regularization_updated.ipynb</span>. Same idea as <span class="mono">MyNN</span>, shrunk to 2 input features so the boundary can be drawn. Network: tanh hidden layers, sigmoid output, Adam (lr 0.01), full-batch training. Test accuracy uses 500 separate points with the same label noise.</footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     Settings
+  ------------------------------------------------------------------ */
+  var STOPS = {
+    neurons: [1, 2, 4, 8, 16, 32, 64],
+    points: [30, 60, 150, 300],
+    noise: [0, 0.05, 0.10, 0.20],
+    l2: [0, 0.001, 0.003, 0.01, 0.03],
+    dropout: [0, 0.1, 0.3, 0.5],
+    epochs: [50, 150, 500, 1000, 2000]
+  };
+  var PRESETS = {
+    under:   { layers: 1, neurons: 1,  points: 150, noise: 0.10, l2: 0,     dropout: 0, epochs: 1000 },
+    good:    { layers: 2, neurons: 64, points: 150, noise: 0.10, l2: 0.003, dropout: 0, epochs: 1000 },
+    over:    { layers: 2, neurons: 64, points: 150, noise: 0.10, l2: 0,     dropout: 0, epochs: 1000 },
+    toomuch: { layers: 2, neurons: 64, points: 150, noise: 0.10, l2: 0.03,  dropout: 0, epochs: 1000 }
+  };
+  var AMP = 0.55, FREQ = 4.0;          // true pattern: x2 = 0.55 * sin(4 * x1)
+  var POOL = 300, TEST_N = 500;
+  var LR = 0.01, B1 = 0.9, B2 = 0.999;
+  var GRID = 64;                       // boundary resolution
+  var EXTENT = 1.08;                   // plot shows [-1.08, 1.08] on both axes
+
+  var cfg = Object.assign({}, PRESETS.over);
+  var dataSeed = 7;
+
+  /* ------------------------------------------------------------------
+     Random numbers (seeded, so every run is reproducible)
+  ------------------------------------------------------------------ */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(rng) {
+    var u = 0; while (u === 0) u = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+  }
+  function trueBoundary(x1) { return AMP * Math.sin(FREQ * x1); }
+
+  /* ------------------------------------------------------------------
+     Data: a fixed pool, so changing noise / count keeps the same points
+  ------------------------------------------------------------------ */
+  function makePool(n, seed) {
+    var rng = mulberry32(seed), pts = [];
+    for (var i = 0; i < n; i++) {
+      var x1 = rng() * 2 - 1, x2 = rng() * 2 - 1;
+      pts.push({ x1: x1, x2: x2, clean: x2 > trueBoundary(x1) ? 1 : 0, u: rng() });
+    }
+    return pts;
+  }
+  function label(p, noise) { return p.u < noise ? 1 - p.clean : p.clean; }
+
+  var pool = makePool(POOL, dataSeed);
+  var testPool = makePool(TEST_N, 424242);
+
+  function buildSet(pts, noise) {
+    var X = new Float64Array(pts.length * 2), Y = new Float64Array(pts.length);
+    pts.forEach(function (p, i) { X[2 * i] = p.x1; X[2 * i + 1] = p.x2; Y[i] = label(p, noise); });
+    return { X: X, Y: Y, n: pts.length };
+  }
+
+  /* ------------------------------------------------------------------
+     Tiny MLP: tanh hidden layers, sigmoid output, BCE loss, Adam
+  ------------------------------------------------------------------ */
+  function createNet(sizes, rng) {
+    var L = sizes.length - 1, net = { sizes: sizes, L: L, t: 0, W: [], b: [], gW: [], gb: [], mW: [], vW: [], mb: [], vb: [], A: [], H: [], M: [], D: [], evA: [] };
+    for (var l = 0; l < L; l++) {
+      var inN = sizes[l], outN = sizes[l + 1], W = new Float64Array(inN * outN), s = Math.sqrt(1 / inN);
+      for (var i = 0; i < W.length; i++) W[i] = gauss(rng) * s;
+      net.W.push(W); net.b.push(new Float64Array(outN));
+      net.gW.push(new Float64Array(inN * outN)); net.gb.push(new Float64Array(outN));
+      net.mW.push(new Float64Array(inN * outN)); net.vW.push(new Float64Array(inN * outN));
+      net.mb.push(new Float64Array(outN)); net.vb.push(new Float64Array(outN));
+      net.H.push(new Float64Array(outN)); net.M.push(new Float64Array(outN)); net.D.push(new Float64Array(outN));
+    }
+    for (var k = 0; k <= L; k++) { net.A.push(new Float64Array(sizes[k])); net.evA.push(new Float64Array(sizes[k])); }
+    return net;
+  }
+
+  // evaluation-mode forward pass (no dropout) with any set of weights
+  function predict(net, Ws, bs, x1, x2) {
+    var sizes = net.sizes, L = net.L, a = net.evA[0];
+    a[0] = x1; a[1] = x2;
+    for (var l = 0; l < L; l++) {
+      var inN = sizes[l], outN = sizes[l + 1], w = Ws[l], bb = bs[l], out = net.evA[l + 1];
+      for (var j = 0; j < outN; j++) {
+        var z = bb[j], row = j * inN;
+        for (var k = 0; k < inN; k++) z += w[row + k] * a[k];
+        out[j] = l < L - 1 ? Math.tanh(z) : 1 / (1 + Math.exp(-z));
+      }
+      a = out;
+    }
+    return a[0];
+  }
+
+  function trainEpoch(net, data, l2, dropout, rng) {
+    var sizes = net.sizes, L = net.L, n = data.n, l, j, k, i;
+    for (l = 0; l < L; l++) { net.gW[l].fill(0); net.gb[l].fill(0); }
+
+    for (var s = 0; s < n; s++) {
+      var A = net.A;
+      A[0][0] = data.X[2 * s]; A[0][1] = data.X[2 * s + 1];
+      // forward (training mode: dropout on hidden layers)
+      for (l = 0; l < L; l++) {
+        var inN = sizes[l], outN = sizes[l + 1], w = net.W[l], bb = net.b[l], a = A[l], out = A[l + 1];
+        for (j = 0; j < outN; j++) {
+          var z = bb[j], row = j * inN;
+          for (k = 0; k < inN; k++) z += w[row + k] * a[k];
+          if (l < L - 1) {
+            var h = Math.tanh(z), m = 1;
+            if (dropout > 0) m = rng() < dropout ? 0 : 1 / (1 - dropout);
+            net.H[l][j] = h; net.M[l][j] = m; out[j] = h * m;
+          } else {
+            out[j] = 1 / (1 + Math.exp(-z));
+          }
+        }
+      }
+      // backward (sigmoid + BCE -> delta = p - y)
+      net.D[L - 1][0] = (A[L][0] - data.Y[s]) / n;
+      for (l = L - 1; l >= 0; l--) {
+        var inN2 = sizes[l], outN2 = sizes[l + 1], w2 = net.W[l], a2 = A[l], dl = net.D[l], gw = net.gW[l], gbb = net.gb[l];
+        for (j = 0; j < outN2; j++) {
+          var dj = dl[j], row2 = j * inN2;
+          gbb[j] += dj;
+          for (k = 0; k < inN2; k++) gw[row2 + k] += dj * a2[k];
+        }
+        if (l > 0) {
+          var prev = net.D[l - 1], hp = net.H[l - 1], mp = net.M[l - 1];
+          for (k = 0; k < inN2; k++) {
+            var sum = 0;
+            for (j = 0; j < outN2; j++) sum += dl[j] * w2[j * inN2 + k];
+            prev[k] = sum * mp[k] * (1 - hp[k] * hp[k]);
+          }
+        }
+      }
+    }
+
+    // Adam step, L2 added to weight gradients only
+    net.t++;
+    var c1 = 1 - Math.pow(B1, net.t), c2 = 1 - Math.pow(B2, net.t);
+    for (l = 0; l < L; l++) {
+      var W = net.W[l], gW = net.gW[l], mW = net.mW[l], vW = net.vW[l];
+      for (i = 0; i < W.length; i++) {
+        var g = gW[i] + l2 * W[i];
+        mW[i] = B1 * mW[i] + (1 - B1) * g;
+        vW[i] = B2 * vW[i] + (1 - B2) * g * g;
+        W[i] -= LR * (mW[i] / c1) / (Math.sqrt(vW[i] / c2) + 1e-8);
+      }
+      var bv = net.b[l], gb = net.gb[l], mb = net.mb[l], vb = net.vb[l];
+      for (i = 0; i < bv.length; i++) {
+        var gg = gb[i];
+        mb[i] = B1 * mb[i] + (1 - B1) * gg;
+        vb[i] = B2 * vb[i] + (1 - B2) * gg * gg;
+        bv[i] -= LR * (mb[i] / c1) / (Math.sqrt(vb[i] / c2) + 1e-8);
+      }
+    }
+  }
+
+  function accuracy(net, Ws, bs, data) {
+    var correct = 0;
+    for (var s = 0; s < data.n; s++) {
+      var p = predict(net, Ws, bs, data.X[2 * s], data.X[2 * s + 1]);
+      if ((p > 0.5 ? 1 : 0) === data.Y[s]) correct++;
+    }
+    return correct / data.n;
+  }
+
+  function verdictOf(trainAcc, testAcc, noise) {
+    var best = 1 - noise, gap = trainAcc - testAcc;
+    if (gap > 0.06) return 'over';
+    if (testAcc < best - 0.075) return 'under';
+    return 'good';
+  }
+
+  var VERDICT_TEXT = {
+    under: ['Underfitting', 'The boundary is too simple to follow the wave. Train and test accuracy are both low.'],
+    good:  ['Good fit', 'The boundary follows the true wave and ignores most noisy points. Train ≈ test.'],
+    over:  ['Overfitting', 'The boundary bends around individual (often noisy) training points. Train is much higher than test.']
+  };
+
+  /* ------------------------------------------------------------------
+     Training job + snapshots for the timeline
+  ------------------------------------------------------------------ */
+  var job = null;            // current training run
+  var viewIndex = 0;         // snapshot shown
+  var follow = true;         // follow the newest snapshot while training
+  var jobCounter = 0;
+
+  function shouldSnap(e, maxE) {
+    return e <= 50 || (e <= 300 && e % 5 === 0) || e % 20 === 0 || e === maxE;
+  }
+
+  function snapshot(j) {
+    var net = j.net;
+    var Ws = net.W.map(function (w) { return Float32Array.from(w); });
+    var bs = net.b.map(function (b) { return Float32Array.from(b); });
+    var tr = accuracy(net, net.W, net.b, j.train);
+    var te = accuracy(net, net.W, net.b, j.test);
+    j.snaps.push({ epoch: j.epoch, W: Ws, b: bs, train: tr, test: te, verdict: verdictOf(tr, te, j.cfg.noise) });
+  }
+
+  function startTraining() {
+    var id = ++jobCounter;
+    var c = Object.assign({}, cfg);
+    var sizes = [2];
+    for (var i = 0; i < c.layers; i++) sizes.push(c.neurons);
+    sizes.push(1);
+    var rng = mulberry32(1234 + dataSeed);
+    job = {
+      id: id, cfg: c, epoch: 0, done: false,
+      net: createNet(sizes, rng), rng: rng,
+      trainPts: pool.slice(0, c.points),
+      train: buildSet(pool.slice(0, c.points), c.noise),
+      test: buildSet(testPool, c.noise),
+      snaps: []
+    };
+    snapshot(job);
+    follow = true;
+    viewIndex = 0;
+    stopReplay();
+    statusEl.hidden = false;
+    lastPlotDraw = 0;
+    requestAnimationFrame(function (ts) { step(id, ts); });
+  }
+
+  var lastPlotDraw = 0;
+  function step(id, ts) {
+    if (!job || job.id !== id) return;
+    var t0 = performance.now(), c = job.cfg;
+    while (job.epoch < c.epochs && performance.now() - t0 < 14) {
+      trainEpoch(job.net, job.train, c.l2, c.dropout, job.rng);
+      job.epoch++;
+      if (shouldSnap(job.epoch, c.epochs)) snapshot(job);
+    }
+    if (follow) viewIndex = job.snaps.length - 1;
+    scrubEl.max = String(job.snaps.length - 1);
+    scrubEl.value = String(viewIndex);
+    statusEl.textContent = 'Training… epoch ' + job.epoch + ' / ' + c.epochs;
+
+    var finished = job.epoch >= c.epochs;
+    if (finished || ts - lastPlotDraw > 120) {
+      lastPlotDraw = ts;
+      renderView();
+    } else {
+      drawCurve();
+    }
+    if (finished) {
+      job.done = true;
+      statusEl.hidden = true;
+    } else {
+      requestAnimationFrame(function (t) { step(id, t); });
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     Colors from CSS tokens (re-read when the theme changes)
+  ------------------------------------------------------------------ */
+  var C = {};
+  function hexToRgb(hex) {
+    hex = hex.trim().replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(function (ch) { return ch + ch; }).join('');
+    var n = parseInt(hex, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function readColors() {
+    var cs = getComputedStyle(document.documentElement);
+    ['surface', 'ink', 'muted', 'rule', 'class-a', 'class-b', 'good', 'bad', 'under'].forEach(function (k) {
+      var v = cs.getPropertyValue('--' + k).trim();
+      C[k] = v; C[k + '-rgb'] = hexToRgb(v);
+    });
+  }
+  function rgba(key, a) { var c = C[key + '-rgb']; return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
+
+  /* ------------------------------------------------------------------
+     Decision boundary plot
+  ------------------------------------------------------------------ */
+  var plotEl = document.getElementById('plot');
+  var plotCtx = plotEl.getContext('2d');
+  var off = document.createElement('canvas');
+  off.width = GRID; off.height = GRID;
+  var offCtx = off.getContext('2d');
+  var probs = new Float64Array(GRID * GRID);
+
+  function sizeCanvas(canvas) {
+    var r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    var w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    return { w: r.width, h: r.height, dpr: dpr };
+  }
+
+  function drawPlot() {
+    if (!job) return;
+    var snap = job.snaps[viewIndex], net = job.net;
+    var dim = sizeCanvas(plotEl), S = dim.w, ctx = plotCtx;
+    ctx.setTransform(dim.dpr, 0, 0, dim.dpr, 0, 0);
+
+    var toPx = function (v) { return (v + EXTENT) / (2 * EXTENT) * S; };
+    var toPy = function (v) { return (EXTENT - v) / (2 * EXTENT) * S; };
+    var cell = 2 * EXTENT / GRID;
+
+    // 1. probability grid -> tinted regions
+    var img = offCtx.createImageData(GRID, GRID), d = img.data;
+    var bg = C['surface-rgb'], ca = C['class-a-rgb'], cb = C['class-b-rgb'];
+    for (var gy = 0; gy < GRID; gy++) {
+      var x2 = EXTENT - (gy + 0.5) * cell;
+      for (var gx = 0; gx < GRID; gx++) {
+        var x1 = -EXTENT + (gx + 0.5) * cell;
+        var p = predict(net, snap.W, snap.b, x1, x2);
+        probs[gy * GRID + gx] = p;
+        var col = p > 0.5 ? ca : cb, conf = Math.abs(p - 0.5) * 2;
+        var alpha = 0.10 + 0.30 * conf, o = (gy * GRID + gx) * 4;
+        d[o] = bg[0] + (col[0] - bg[0]) * alpha;
+        d[o + 1] = bg[1] + (col[1] - bg[1]) * alpha;
+        d[o + 2] = bg[2] + (col[2] - bg[2]) * alpha;
+        d[o + 3] = 255;
+      }
+    }
+    offCtx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(off, 0, 0, S, S);
+
+    // 2. axes through the origin (subtle)
+    ctx.strokeStyle = rgba('muted', 0.25); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(toPx(0), 0); ctx.lineTo(toPx(0), S); ctx.moveTo(0, toPy(0)); ctx.lineTo(S, toPy(0)); ctx.stroke();
+
+    // 3. model boundary (p = 0.5) via marching squares
+    var step = S / GRID;
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 2.2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (var cy = 0; cy < GRID - 1; cy++) {
+      for (var cx = 0; cx < GRID - 1; cx++) {
+        var v0 = probs[cy * GRID + cx] - 0.5, v1 = probs[cy * GRID + cx + 1] - 0.5;
+        var v2 = probs[(cy + 1) * GRID + cx + 1] - 0.5, v3 = probs[(cy + 1) * GRID + cx] - 0.5;
+        var px0 = (cx + 0.5) * step, py0 = (cy + 0.5) * step, pts = [];
+        if ((v0 > 0) !== (v1 > 0)) pts.push([px0 + step * v0 / (v0 - v1), py0]);
+        if ((v1 > 0) !== (v2 > 0)) pts.push([px0 + step, py0 + step * v1 / (v1 - v2)]);
+        if ((v3 > 0) !== (v2 > 0)) pts.push([px0 + step * v3 / (v3 - v2), py0 + step]);
+        if ((v0 > 0) !== (v3 > 0)) pts.push([px0, py0 + step * v0 / (v0 - v3)]);
+        for (var q = 0; q + 1 < pts.length; q += 2) {
+          ctx.moveTo(pts[q][0], pts[q][1]); ctx.lineTo(pts[q + 1][0], pts[q + 1][1]);
+        }
+      }
+    }
+    ctx.stroke();
+
+    // 4. true pattern
+    if (showTrueEl.checked) {
+      ctx.save();
+      ctx.setLineDash([7, 6]); ctx.strokeStyle = C.muted; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      for (var i = 0; i <= 160; i++) {
+        var xx = -1 + 2 * i / 160, X = toPx(xx), Y = toPy(trueBoundary(xx));
+        if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 5. test points
+    var noise = job.cfg.noise, r = Math.max(3.2, S / 110);
+    if (showTestEl.checked) {
+      testPool.forEach(function (p) {
+        ctx.fillStyle = rgba(label(p, noise) ? 'class-a' : 'class-b', 0.45);
+        ctx.beginPath(); ctx.arc(toPx(p.x1), toPy(p.x2), r * 0.5, 0, Math.PI * 2); ctx.fill();
+      });
+    }
+
+    // 6. training points (+ ring around flipped labels)
+    job.trainPts.forEach(function (p) {
+      var X = toPx(p.x1), Y = toPy(p.x2), lab = label(p, noise);
+      ctx.fillStyle = lab ? C['class-a'] : C['class-b'];
+      ctx.strokeStyle = C.surface; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(X, Y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      if (showNoisyEl.checked && lab !== p.clean) {
+        ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(X, Y, r + 4, 0, Math.PI * 2); ctx.stroke();
+      }
+    });
+
+    plotEl.setAttribute('aria-label', 'Decision boundary at epoch ' + snap.epoch + ': ' + VERDICT_TEXT[snap.verdict][0]);
+  }
+
+  /* ------------------------------------------------------------------
+     Learning curve (log-scaled epochs so early epochs get room)
+  ------------------------------------------------------------------ */
+  var curveEl = document.getElementById('curve');
+  var curveCtx = curveEl.getContext('2d');
+  var CURVE_PAD = { l: 46, r: 92, t: 14, b: 44 };
+
+  function curveGeom() {
+    var dim = sizeCanvas(curveEl);
+    var maxE = job ? job.cfg.epochs : 1000;
+    var w = dim.w - CURVE_PAD.l - CURVE_PAD.r, h = dim.h - CURVE_PAD.t - CURVE_PAD.b;
+    var logMax = Math.log10(maxE + 1);
+    return {
+      dim: dim, w: w, h: h, maxE: maxE,
+      x: function (e) { return CURVE_PAD.l + Math.log10(e + 1) / logMax * w; },
+      y: function (a) { return CURVE_PAD.t + (1 - (Math.max(0.5, Math.min(1, a)) - 0.5) / 0.5) * h; }
+    };
+  }
+
+  function drawCurve() {
+    if (!job) return;
+    var g = curveGeom(), ctx = curveCtx, snaps = job.snaps, i;
+    ctx.setTransform(g.dim.dpr, 0, 0, g.dim.dpr, 0, 0);
+    ctx.clearRect(0, 0, g.dim.w, g.dim.h);
+    ctx.font = '11px ' + getComputedStyle(document.body).getPropertyValue('--font-mono');
+
+    // y grid + labels
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (var a = 0.5; a <= 1.0001; a += 0.1) {
+      var yy = g.y(a);
+      ctx.strokeStyle = C.rule; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(CURVE_PAD.l, yy); ctx.lineTo(CURVE_PAD.l + g.w, yy); ctx.stroke();
+      ctx.fillStyle = C.muted; ctx.fillText(a.toFixed(1), CURVE_PAD.l - 8, yy);
+    }
+    // x ticks
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    var ticks = [0, 1, 10, 100, 1000].filter(function (t) { return t <= g.maxE; });
+    if (ticks.indexOf(g.maxE) < 0) ticks.push(g.maxE);
+    ticks.forEach(function (t) {
+      var xx = g.x(t);
+      if (t !== g.maxE && g.x(g.maxE) - xx < 26) return;
+      ctx.fillStyle = C.muted; ctx.fillText(String(t), xx, CURVE_PAD.t + g.h + 18);
+    });
+    ctx.fillText('epoch (log scale)', CURVE_PAD.l + g.w / 2, CURVE_PAD.t + g.h + 31);
+
+    // best possible line
+    var best = 1 - job.cfg.noise, by = g.y(best);
+    ctx.save(); ctx.setLineDash([2, 4]); ctx.strokeStyle = C.muted; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(CURVE_PAD.l, by); ctx.lineTo(CURVE_PAD.l + g.w, by); ctx.stroke(); ctx.restore();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = C.muted;
+    ctx.fillText('best possible', CURVE_PAD.l + g.w + 8, by);
+
+    if (snaps.length > 1) {
+      // gap shading
+      ctx.fillStyle = rgba('bad', 0.14);
+      ctx.beginPath();
+      for (i = 0; i < snaps.length; i++) { var X = g.x(snaps[i].epoch), Y = g.y(snaps[i].train); if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y); }
+      for (i = snaps.length - 1; i >= 0; i--) ctx.lineTo(g.x(snaps[i].epoch), g.y(snaps[i].test));
+      ctx.closePath(); ctx.fill();
+
+      // train (solid) and test (dashed)
+      [['train', []], ['test', [6, 5]]].forEach(function (spec) {
+        ctx.save(); ctx.setLineDash(spec[1]); ctx.strokeStyle = C.ink; ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (var k = 0; k < snaps.length; k++) { var X2 = g.x(snaps[k].epoch), Y2 = g.y(snaps[k][spec[0]]); if (k === 0) ctx.moveTo(X2, Y2); else ctx.lineTo(X2, Y2); }
+        ctx.stroke(); ctx.restore();
+      });
+
+      // right-edge labels
+      var last = snaps[snaps.length - 1];
+      ctx.fillStyle = C.ink; ctx.textAlign = 'left';
+      var ty = g.y(last.train), sy = g.y(last.test);
+      if (Math.abs(ty - sy) < 14) { ty -= 7; sy += 7; }
+      if (Math.abs(ty - by) < 10 || Math.abs(sy - by) < 10) { /* keep; small overlap is acceptable */ }
+      ctx.fillText('train', CURVE_PAD.l + g.w + 8, ty);
+      ctx.fillText('test', CURVE_PAD.l + g.w + 8, sy);
+    }
+
+    // verdict strip
+    var stripY = CURVE_PAD.t + g.h + 5;
+    for (i = 0; i < snaps.length; i++) {
+      var x0 = g.x(snaps[i].epoch), x1 = i + 1 < snaps.length ? g.x(snaps[i + 1].epoch) : x0 + 2;
+      ctx.fillStyle = C[{ under: 'under', good: 'good', over: 'bad' }[snaps[i].verdict]];
+      ctx.fillRect(x0, stripY, Math.max(1, x1 - x0), 7);
+    }
+
+    // best test epoch marker
+    var bi = 0;
+    for (i = 1; i < snaps.length; i++) if (snaps[i].test > snaps[bi].test) bi = i;
+    var bx = g.x(snaps[bi].epoch), bty = g.y(snaps[bi].test);
+    ctx.fillStyle = C.good;
+    ctx.beginPath(); ctx.moveTo(bx, bty - 6); ctx.lineTo(bx + 6, bty); ctx.lineTo(bx, bty + 6); ctx.lineTo(bx - 6, bty); ctx.closePath(); ctx.fill();
+
+    // current view marker
+    var v = snaps[viewIndex], vx = g.x(v.epoch);
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(vx, CURVE_PAD.t); ctx.lineTo(vx, CURVE_PAD.t + g.h); ctx.stroke();
+    [v.train, v.test].forEach(function (val) {
+      ctx.fillStyle = C.surface; ctx.strokeStyle = C.ink; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(vx, g.y(val), 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     Stats + verdict for the viewed snapshot
+  ------------------------------------------------------------------ */
+  var sTrain = document.getElementById('sTrain'), sTest = document.getElementById('sTest');
+  var sGap = document.getElementById('sGap'), sBest = document.getElementById('sBest');
+  var vPill = document.getElementById('vPill'), vText = document.getElementById('vText');
+  var statusEl = document.getElementById('status');
+  var scrubEl = document.getElementById('scrub'), scrubOut = document.getElementById('scrubOut');
+
+  function updateStats() {
+    var s = job.snaps[viewIndex];
+    sTrain.textContent = s.train.toFixed(2);
+    sTest.textContent = s.test.toFixed(2);
+    sGap.textContent = (s.train - s.test >= 0 ? '' : '−') + Math.abs(s.train - s.test).toFixed(2);
+    sBest.textContent = '≈' + (1 - job.cfg.noise).toFixed(2);
+    vPill.className = 'pill ' + s.verdict;
+    vPill.textContent = VERDICT_TEXT[s.verdict][0];
+    vText.textContent = VERDICT_TEXT[s.verdict][1];
+    scrubOut.textContent = s.epoch + ' / ' + job.cfg.epochs;
+  }
+
+  function renderView() {
+    drawPlot();
+    drawCurve();
+    updateStats();
+  }
+
+  /* ------------------------------------------------------------------
+     Controls
+  ------------------------------------------------------------------ */
+  var sliders = {
+    neurons: function (v) { return v + (v === 1 ? ' neuron' : ' neurons'); },
+    points: function (v) { return String(v); },
+    noise: function (v) { return Math.round(v * 100) + '%'; },
+    l2: function (v) { return v === 0 ? 'off' : String(v); },
+    dropout: function (v) { return v === 0 ? 'off' : String(v); },
+    epochs: function (v) { return String(v); }
+  };
+  var layerBtns = document.querySelectorAll('#layers button');
+  var presetBtns = document.querySelectorAll('.preset');
+  var showTrueEl = document.getElementById('showTrue');
+  var showNoisyEl = document.getElementById('showNoisy');
+  var showTestEl = document.getElementById('showTest');
+
+  function syncControls() {
+    Object.keys(sliders).forEach(function (k) {
+      var el = document.getElementById(k), idx = STOPS[k].indexOf(cfg[k]);
+      el.value = String(idx < 0 ? 0 : idx);
+      document.getElementById(k + 'Out').textContent = sliders[k](cfg[k]);
+    });
+    layerBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.v) === cfg.layers)); });
+    presetBtns.forEach(function (b) {
+      var p = PRESETS[b.dataset.preset];
+      var match = Object.keys(p).every(function (k) { return p[k] === cfg[k]; });
+      b.setAttribute('aria-pressed', String(match));
+    });
+  }
+
+  var retrainTimer = null;
+  function scheduleRetrain() {
+    syncControls();
+    clearTimeout(retrainTimer);
+    retrainTimer = setTimeout(startTraining, 220);
+  }
+
+  Object.keys(sliders).forEach(function (k) {
+    var el = document.getElementById(k);
+    el.addEventListener('input', function () {
+      cfg[k] = STOPS[k][Number(el.value)];
+      document.getElementById(k + 'Out').textContent = sliders[k](cfg[k]);
+      scheduleRetrain();
+    });
+  });
+  layerBtns.forEach(function (b) {
+    b.addEventListener('click', function () { cfg.layers = Number(b.dataset.v); scheduleRetrain(); });
+  });
+  presetBtns.forEach(function (b) {
+    b.addEventListener('click', function () { cfg = Object.assign({}, PRESETS[b.dataset.preset]); syncControls(); clearTimeout(retrainTimer); startTraining(); });
+  });
+  document.getElementById('resample').addEventListener('click', function () {
+    dataSeed += 1;
+    pool = makePool(POOL, dataSeed);
+    clearTimeout(retrainTimer); startTraining();
+  });
+  [showTrueEl, showNoisyEl, showTestEl].forEach(function (el) { el.addEventListener('change', drawPlot); });
+
+  // timeline scrubbing
+  function setView(i) {
+    if (!job) return;
+    viewIndex = Math.max(0, Math.min(job.snaps.length - 1, i));
+    follow = job.done ? false : viewIndex === job.snaps.length - 1;
+    scrubEl.value = String(viewIndex);
+    renderView();
+  }
+  scrubEl.addEventListener('input', function () { stopReplay(); setView(Number(scrubEl.value)); });
+
+  var curveBox = document.getElementById('curveBox');
+  function scrubFromPointer(ev) {
+    if (!job) return;
+    var rect = curveBox.getBoundingClientRect(), px = ev.clientX - rect.left, g = curveGeom();
+    var bestI = 0, bestD = Infinity;
+    for (var i = 0; i < job.snaps.length; i++) {
+      var dd = Math.abs(g.x(job.snaps[i].epoch) - px);
+      if (dd < bestD) { bestD = dd; bestI = i; }
+    }
+    setView(bestI);
+  }
+  curveBox.addEventListener('pointerdown', function (ev) { stopReplay(); curveBox.setPointerCapture(ev.pointerId); scrubFromPointer(ev); });
+  curveBox.addEventListener('pointermove', function (ev) { if (ev.buttons & 1) scrubFromPointer(ev); });
+
+  // replay: sweep through the timeline
+  var replayBtn = document.getElementById('replay'), replayRaf = null;
+  function stopReplay() {
+    if (replayRaf) cancelAnimationFrame(replayRaf);
+    replayRaf = null;
+    replayBtn.textContent = '▶ Replay training';
+  }
+  replayBtn.addEventListener('click', function () {
+    if (!job || !job.done) return;
+    if (replayRaf) { stopReplay(); return; }
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var n = job.snaps.length, duration = reduce ? 1 : 6000, start = null;
+    replayBtn.textContent = '■ Stop';
+    function frame(ts) {
+      if (start === null) start = ts;
+      var t = Math.min(1, (ts - start) / duration);
+      setView(Math.round(t * (n - 1)));
+      if (t < 1) replayRaf = requestAnimationFrame(frame); else stopReplay();
+    }
+    replayRaf = requestAnimationFrame(frame);
+  });
+
+  /* ------------------------------------------------------------------
+     Theme + resize
+  ------------------------------------------------------------------ */
+  function onThemeChange() { readColors(); if (job) renderView(); }
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', onThemeChange);
+  }
+  new MutationObserver(onThemeChange).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function () { if (job) renderView(); });
+    ro.observe(plotEl); ro.observe(curveEl);
+  }
+
+  readColors();
+  syncControls();
+  startTraining();
+})();
+</script>

@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regularizing MyNN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --ground:#F2F4F6; --surface:#FFFFFF; --ink:#17212B; --muted:#5A6672; --rule:#D6DCE2;
+  --code:#E9EDF1; --hl:#FBEBD6;
+  --base:#626A73; --l2:#A94E08; --reg:#2266A8;
+  --good:#2C7A4B; --warn:#8C5C06; --bad:#B23A34;
+  --t-kw:#7A3E9D; --t-str:#2F7A4A; --t-num:#A04A16; --t-com:#66707B; --t-fn:#1F5A96; --t-bi:#1F5A96;
+  --accent:var(--ink);
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1318; --surface:#151C23; --ink:#E4E9EE; --muted:#97A2AD; --rule:#2A343E;
+    --code:#10161C; --hl:#35291A;
+    --base:#A3ABB3; --l2:#F0913F; --reg:#6AA6E6;
+    --good:#6CC08E; --warn:#E3B04F; --bad:#EE7C74;
+    --t-kw:#C9A2E6; --t-str:#86C79E; --t-num:#F0A36A; --t-com:#7D8893; --t-fn:#9DC2F0; --t-bi:#9DC2F0;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1318; --surface:#151C23; --ink:#E4E9EE; --muted:#97A2AD; --rule:#2A343E;
+  --code:#10161C; --hl:#35291A;
+  --base:#A3ABB3; --l2:#F0913F; --reg:#6AA6E6;
+  --good:#6CC08E; --warn:#E3B04F; --bad:#EE7C74;
+  --t-kw:#C9A2E6; --t-str:#86C79E; --t-num:#F0A36A; --t-com:#7D8893; --t-fn:#9DC2F0; --t-bi:#9DC2F0;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ground);color:var(--ink);font:15px/1.55 var(--body);margin:0}
+.wrap{max-width:1360px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono)}
+
+/* header */
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:20px 40px;padding-bottom:22px;border-bottom:1px solid var(--rule)}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+h1{font-size:clamp(2.1rem,5vw,3.3rem);font-weight:780;font-stretch:118%;letter-spacing:-.01em;line-height:1}
+.sub{margin:10px 0 0;color:var(--muted);max-width:60ch}
+.runs{display:grid;gap:6px;font-size:13.5px}
+.run{display:flex;align-items:center;gap:10px}
+.run i{width:26px;height:0;border-top:3px solid;display:inline-block}
+.run b{font-weight:600}
+.run span{color:var(--muted);font-family:var(--mono);font-size:12px}
+
+/* story */
+.story{padding-block:20px 4px;display:grid;gap:10px}
+.story ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.story ol{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.story ol{grid-template-columns:minmax(0,1fr)}}
+.story li{border-top:3px solid var(--c);padding-top:8px;font-size:14px;line-height:1.45;color:var(--muted)}
+.story li b{display:block;color:var(--ink);font-family:var(--display);font-weight:650;font-stretch:104%;font-size:15px;margin-bottom:2px}
+
+/* tabs */
+.tabs{display:flex;gap:4px;overflow-x:auto;margin:18px 0 26px;border-bottom:1px solid var(--rule)}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;cursor:pointer;text-align:left;white-space:nowrap;margin-bottom:-1px}
+.tab b{display:block;font-family:var(--display);font-weight:650;font-stretch:108%;font-size:16px}
+.tab small{display:block;font:12px var(--mono);color:var(--muted)}
+.tab:hover b{color:var(--c)}
+.tab[aria-selected="true"]{border-bottom-color:var(--c)}
+.tab[aria-selected="true"] b{color:var(--c)}
+
+.panel{display:grid;gap:22px}
+.panel[data-run="base"]{--accent:var(--base)}
+.panel[data-run="l2"]{--accent:var(--l2)}
+.panel[data-run="reg"]{--accent:var(--reg)}
+.lead{font-size:clamp(1.1rem,2.2vw,1.3rem);line-height:1.5;max-width:62ch;margin:0}
+.lead strong{color:var(--accent);font-weight:600}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:960px){.two{grid-template-columns:minmax(0,1fr)}}
+
+/* widget card */
+.widget{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:16px;display:grid;gap:12px}
+.w-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.w-head h3{font-size:15px;font-weight:650;font-stretch:105%}
+.pill{font:500 12px/1 var(--mono);padding:5px 9px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.pill[data-state="good"]{color:var(--good)} .pill[data-state="warn"]{color:var(--warn)} .pill[data-state="bad"]{color:var(--bad)}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.grid{stroke:var(--rule);stroke-width:1}
+.tick{fill:var(--muted);font:13px var(--mono)}
+.truth{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 5;opacity:.7}
+.fitline{fill:none;stroke:var(--accent);stroke-width:3;stroke-linejoin:round}
+.pt-train{fill:var(--ink)}
+.pt-test{fill:var(--surface);stroke:var(--muted);stroke-width:1.5}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted)}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key svg{width:22px;height:10px;display:inline-block}
+
+.ctl{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px;font-weight:500}
+.ctl output{font:600 13.5px var(--mono);color:var(--accent);font-variant-numeric:tabular-nums}
+input[type="range"]{width:100%;accent-color:var(--accent);margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin:0}
+.stats div{background:var(--surface);padding:8px 10px}
+.stats dt{font-size:11.5px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
+.stats dd{margin:2px 0 0;font:600 16px var(--mono);font-variant-numeric:tabular-nums}
+.note{margin:0;font-size:13px;color:var(--muted)}
+
+.btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:6px 12px;cursor:pointer;font-size:13.5px;font-weight:500}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.seg button{background:var(--surface);border:0;padding:6px 11px;cursor:pointer;font:500 13px var(--mono)}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+
+/* dropout strips */
+.strip-label{font-size:12.5px;color:var(--muted);margin:0 0 4px;display:flex;justify-content:space-between;gap:8px}
+.cells{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:3px}
+@media (max-width:560px){.cells{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.cell{font:500 12.5px/1 var(--mono);font-variant-numeric:tabular-nums;text-align:center;padding:10px 0;border-radius:3px;background:var(--code);border:1px solid transparent}
+.cell.zero{color:var(--muted)}
+.cell.up{border-color:var(--accent);color:var(--accent);font-weight:600}
+.cell.off{color:var(--muted);background:repeating-linear-gradient(135deg,var(--code) 0 5px,var(--surface) 5px 9px);text-decoration:line-through}
+.arrow-down{font:12px var(--mono);color:var(--muted);text-align:center;margin:2px 0}
+
+/* code */
+.code{background:var(--code);border-radius:5px;overflow-x:auto;font:13px/1.65 var(--mono);padding-block:8px}
+.code-inner{display:block}
+.ln{display:flex;padding-right:14px;border-left:3px solid transparent}
+.ln .no{flex:0 0 2.6em;text-align:right;padding-right:12px;color:var(--muted);opacity:.6;user-select:none}
+.ln code{font:inherit;white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
+.ln.add .no{color:var(--accent);opacity:1;font-weight:600}
+.ln.hl{background:var(--hl);border-left-color:var(--accent)}
+.t-kw{color:var(--t-kw)} .t-str{color:var(--t-str)} .t-num{color:var(--t-num)} .t-com{color:var(--t-com);font-style:italic} .t-fn{color:var(--t-fn);font-weight:600} .t-bi{color:var(--t-bi)}
+
+.side{display:grid;gap:14px}
+.side h3,.block-h{font:600 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.points{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px}
+.points code,.lead code,.note code,td code,.notes code,.watch code{white-space:nowrap;font:500 .92em var(--mono);background:var(--code);padding:1px 4px;border-radius:3px}
+.formula{font:500 14px/1.7 var(--mono);background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 4px 4px 0;overflow-x:auto;white-space:nowrap}
+.watch{border-top:1px solid var(--rule);padding-top:12px;font-size:14px;margin:0}
+.watch b{color:var(--warn)}
+
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+.tbl{overflow-x:auto}
+th,td{padding:7px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font:600 12px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* flow */
+.pipe{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px 0}
+.pipe>li{display:flex;align-items:stretch}
+.pipe>li:not(:last-child)::after{content:"→";align-self:center;padding:0 8px;color:var(--muted);font-family:var(--mono)}
+.pipe button{background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:8px 11px;cursor:pointer;text-align:left}
+.pipe button b{display:block;font-family:var(--display);font-weight:650;font-stretch:104%;font-size:14.5px}
+.pipe button small{display:block;font:11.5px var(--mono);color:var(--muted);white-space:nowrap}
+.pipe button:hover{border-color:var(--ink)}
+.pipe button[aria-current="step"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.pipe button[aria-current="step"] small{color:var(--surface);opacity:.75}
+.loop{position:relative;border:1.5px dashed var(--muted);border-radius:8px;padding:16px 7px 7px;gap:6px}
+.loop-label{position:absolute;top:-9px;left:10px;background:var(--ground);padding:0 6px;font:600 11.5px var(--mono);color:var(--muted)}
+.loop .swap{align-self:center;color:var(--muted);font-family:var(--mono)}
+
+.viewer{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:880px){.viewer{grid-template-columns:minmax(0,1fr)}}
+.v-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.v-head h2{font-size:24px;font-weight:720;font-stretch:112%}
+.v-head span{font:12.5px var(--mono);color:var(--muted)}
+.notes{list-style:none;margin:0;padding:0;display:grid;gap:4px;counter-reset:n}
+.notes button{width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:4px;padding:7px 10px 7px 34px;cursor:pointer;position:relative;font-size:14px;line-height:1.45;color:var(--muted)}
+.notes li{counter-increment:n}
+.notes button::before{content:counter(n);position:absolute;left:8px;top:8px;font:600 11.5px var(--mono);width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--rule)}
+.notes button:hover{color:var(--ink)}
+.notes button[aria-current="true"]{background:var(--surface);border-color:var(--rule);color:var(--ink)}
+.notes button[aria-current="true"]::before{background:var(--l2);border-color:var(--l2);color:var(--surface)}
+.stepper{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stepper span{font:12.5px var(--mono);color:var(--muted);margin-right:auto}
+#flow{--accent:var(--l2)}
+
+@media (prefers-reduced-motion:no-preference){
+  .cell,.ln,.pipe button,.notes button,.btn{transition:background-color .15s,border-color .15s,color .15s}
+}
+
+/* MyNN basics (forward pass) */
+#basics{--accent:var(--ink)}
+.fp-banner{margin:0;font:500 12.5px/1.45 var(--mono);color:var(--warn);border:1px dashed currentColor;padding:7px 12px;border-radius:4px;justify-self:start}
+.fp-card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:14px;min-width:0}
+.fp-pick{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.fp-pick>span{font:600 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.fp-thumbs{display:flex;flex-wrap:wrap;gap:6px}
+.fp-thumb{background:none;border:1px solid var(--rule);border-radius:5px;padding:3px;cursor:pointer;display:grid;justify-items:center;gap:2px;font:10.5px var(--mono);color:var(--muted);width:62px}
+.fp-thumb canvas{width:44px;height:44px;image-rendering:pixelated;border-radius:2px}
+.fp-thumb[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);color:var(--ink)}
+.fp-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;border-top:1px solid var(--rule);padding-top:12px}
+.fp-controls .btn{font-size:14px}
+.fp-controls .btn.primary{min-width:92px}
+.fp-steps{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px;flex:1 1 520px}
+.fp-steps button{background:none;border:1px solid transparent;border-radius:99px;padding:4px 10px;cursor:pointer;font:500 12.5px var(--mono);color:var(--muted);white-space:nowrap}
+.fp-steps button:hover{color:var(--ink);border-color:var(--rule)}
+.fp-steps button.done{color:var(--ink)}
+.fp-steps button[aria-current="step"]{background:var(--reg);border-color:var(--reg);color:var(--surface)}
+.fp-switch{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.fp-switch input{accent-color:var(--reg);width:16px;height:16px;margin:0}
+.fp-scene{overflow-x:auto;border-radius:6px;background:var(--surface)}
+#fp-cv{display:block;width:100%;min-width:940px;aspect-ratio:1100/560}
+.fp-explain{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;border-top:1px solid var(--rule);padding-top:14px}
+@media (max-width:860px){.fp-explain{grid-template-columns:minmax(0,1fr)}}
+.fp-kicker{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:500 12.5px var(--mono);color:var(--muted)}
+.fp-chip{font:600 12.5px var(--mono);background:var(--code);color:var(--ink);padding:2px 8px;border-radius:4px}
+.fp-explain h2{margin:6px 0 4px;font-size:22px;font-weight:700;font-stretch:110%;line-height:1.2}
+.fp-body{margin:0 0 10px;max-width:60ch}
+pre.fp-code{margin:0;background:var(--code);border-radius:5px;padding:9px 12px;font:13px/1.6 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.fp-side{display:grid;gap:8px;align-content:start;justify-items:start;font-size:14px}
+.fp-k{margin:0;font:600 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.fp-nums{font:500 13px/1.7 var(--mono);font-variant-numeric:tabular-nums;background:var(--code);border-radius:5px;padding:8px 10px;overflow-wrap:anywhere}
+.fp-nums b{color:var(--reg)}
+.fp-f{font:500 14.5px/1.8 var(--mono);border-left:3px solid var(--reg);padding-left:12px}
+.fp-note{margin:0;color:var(--muted);font-size:13.5px}
+.fp-side svg{width:100%;max-width:340px;height:auto;display:block}
+.fp-side table{border-collapse:collapse;font:13px var(--mono);font-variant-numeric:tabular-nums}
+.fp-side td{padding:2px 10px 2px 0}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">Lab 9 · ANN_Regularization_updated.ipynb</p>
+      <h1>Regularizing MyNN</h1>
+      <p class="sub">Why the Fashion-MNIST network overfits, and exactly which lines of code L2, Dropout and BatchNorm change. Every run uses seed 42, lr 0.1, batch 32, 100 epochs.</p>
+    </div>
+    <div class="runs" aria-label="The three runs and their plot colors">
+      <div class="run"><i style="color:var(--base)"></i><b>Baseline</b><span>no regularization</span></div>
+      <div class="run"><i style="color:var(--l2)"></i><b>+ L2</b><span>Part 1 · changes the optimizer</span></div>
+      <div class="run"><i style="color:var(--reg)"></i><b>+ L2 + Dropout + BatchNorm</b><span>Part 2 · changes the model</span></div>
+    </div>
+  </header>
+
+  <section class="story" aria-label="What the demo showed">
+    <p class="block-h">Missed the demo? The whole story</p>
+    <ol>
+      <li style="--c:var(--base)"><b>Baseline overfits.</b> Train accuracy keeps climbing while test accuracy stalls, so the gap keeps widening.</li>
+      <li style="--c:var(--l2)"><b>+ L2 shrinks the gap.</b> One optimizer argument keeps the weights small and holds train accuracy back.</li>
+      <li style="--c:var(--reg)"><b>+ Dropout + BatchNorm shrinks it further.</b> Dropout does most of this; BatchNorm mainly steadies training.</li>
+      <li style="--c:var(--warn)"><b>Test accuracy barely moves.</b> Regularization stops memorizing; it doesn't add accuracy. The goal is <em>good test accuracy with a small gap</em>, not the smallest gap.</li>
+    </ol>
+    <p class="note">Explore the tabs in order: MyNN basics (how one image flows through the network), the problem, each fix with a hands-on demo and its exact code, then a line-by-line walk through the notebook.</p>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Topics">
+    <button class="tab" role="tab" id="tab-basics" aria-controls="basics" style="--c:var(--ink)"><b>MyNN basics</b><small>one image, forward pass</small></button>
+    <button class="tab" role="tab" id="tab-overfit" aria-controls="overfit" style="--c:var(--base)"><b>Overfitting</b><small>the problem</small></button>
+    <button class="tab" role="tab" id="tab-l2" aria-controls="l2" style="--c:var(--l2)"><b>L2</b><small>Part 1</small></button>
+    <button class="tab" role="tab" id="tab-dropout" aria-controls="dropout" style="--c:var(--reg)"><b>Dropout</b><small>Part 2</small></button>
+    <button class="tab" role="tab" id="tab-bn" aria-controls="bn" style="--c:var(--reg)"><b>BatchNorm</b><small>Part 2</small></button>
+    <button class="tab" role="tab" id="tab-flow" aria-controls="flow" style="--c:var(--ink)"><b>Code flow</b><small>whole notebook</small></button>
+  </div>
+
+  <!-- MYNN BASICS -->
+  <section class="panel" id="basics" role="tabpanel" aria-labelledby="tab-basics">
+    <p class="lead"><strong>How MyNN sees one image.</strong> Follow a single Fashion-MNIST image from pixels, through 784 → 128 → 64 → 10 neurons, to a prediction and a loss. Press Play, or click any step.</p>
+    <p class="fp-banner">Pixels are real, from fashion-mnist_train.csv. Neuron values and scores are example numbers, not a trained model.</p>
+    <div class="fp-card">
+      <div class="fp-pick"><span>Pick an image</span><div class="fp-thumbs" id="fp-thumbs"></div></div>
+      <div class="fp-controls">
+        <button class="btn primary" id="fp-play">▶ Play</button>
+        <button class="btn" id="fp-prev" aria-label="Previous step">←</button>
+        <button class="btn" id="fp-next" aria-label="Next step">→</button>
+        <ol class="fp-steps" id="fp-steps" aria-label="Forward pass steps"></ol>
+        <label class="fp-switch" for="fp-every"><input type="checkbox" id="fp-every"> Show every neuron</label>
+      </div>
+      <div class="fp-scene"><canvas id="fp-cv" role="img" aria-label="Animated forward pass of one Fashion-MNIST image through MyNN"></canvas></div>
+      <div class="fp-explain">
+        <div>
+          <p class="fp-kicker"><span id="fp-ex-n"></span><span class="fp-chip" id="fp-ex-shape"></span></p>
+          <h2 id="fp-ex-title"></h2>
+          <p class="fp-body" id="fp-ex-body"></p>
+          <pre class="fp-code" id="fp-ex-code"></pre>
+        </div>
+        <div class="fp-side" id="fp-ex-side" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERFITTING -->
+  <section class="panel" id="overfit" role="tabpanel" aria-labelledby="tab-overfit" data-run="base" hidden>
+    <p class="lead">A model <strong>overfits</strong> when it memorizes its training data instead of learning the pattern. Train accuracy keeps climbing, test accuracy stalls, and the distance between them is <strong>the gap</strong>.</p>
+    <div class="two">
+      <div class="widget" id="fit-degree"></div>
+      <div class="side">
+        <h3>In the notebook</h3>
+        <ul class="points">
+          <li><code>MyNN</code> has <b>109,386</b> weights and learns from <b>48,000</b> images: plenty of room to memorize.</li>
+          <li>The baseline's <code>plot_curves</code> shows it: the solid train line pulls away from the dashed test line, and the shaded band widens.</li>
+          <li>Test <em>loss</em> may even start rising while train loss keeps falling. That's the model fitting noise.</li>
+        </ul>
+        <h3>Three fixes, added in order</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>Fix</th><th>What it changes</th><th>Main effect</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--l2)"><b>L2</b></td><td>the optimizer</td><td>keeps weights small</td></tr>
+            <tr><td style="color:var(--reg)"><b>Dropout</b></td><td>the model</td><td>most of the regularizing</td></tr>
+            <tr><td style="color:var(--reg)"><b>BatchNorm</b></td><td>the model</td><td>faster, steadier training</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- L2 -->
+  <section class="panel" id="l2" role="tabpanel" aria-labelledby="tab-l2" data-run="l2" hidden>
+    <p class="lead"><strong>L2 regularization</strong> penalizes big weights. Every update also pulls each weight a little toward zero, so the network can't build the large, spiky weights it needs to fit noise.</p>
+    <div class="two">
+      <div class="widget" id="fit-lambda"></div>
+      <div class="side">
+        <div class="formula">Loss = CrossEntropy + (λ/2)·Σw²<br>w ← w − lr·(∇CE + λ·w)</div>
+        <h3>The code: one argument, model unchanged</h3>
+        <div id="code-l2"></div>
+        <ul class="points">
+          <li><code>weight_decay</code> <em>is</em> λ. With SGD it adds exactly the <code>λ·w</code> term above.</li>
+          <li>Same <code>MyNN</code> and same loop as the baseline, so any change in the gap is L2's doing.</li>
+        </ul>
+        <p class="watch"><b>Watch out:</b> λ is a knob. Too small and nothing changes. Too large (try <code>1e-2</code>) and the gap disappears but test accuracy drops too. That's underfitting.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DROPOUT -->
+  <section class="panel" id="dropout" role="tabpanel" aria-labelledby="tab-dropout" data-run="reg" hidden>
+    <p class="lead"><strong>Dropout</strong> switches off a random 30% of a layer's neurons on every training step, so no single neuron can memorize an example. In eval mode it does nothing.</p>
+    <div class="two">
+      <div class="widget" id="do-widget"></div>
+      <div class="side">
+        <h3>The code: after each hidden ReLU</h3>
+        <div id="code-do"></div>
+        <ul class="points">
+          <li><code>0.3</code> is the probability of <b>dropping</b> a neuron, not keeping it.</li>
+          <li>In train mode the kept values are scaled by 1 / (1 − 0.3) ≈ <b>×1.43</b>, so the layer's total output matches eval mode on average.</li>
+          <li>It only runs after <code>model.train()</code>. <code>evaluate()</code> calls <code>model.eval()</code>, so accuracy is measured with every neuron on.</li>
+        </ul>
+        <p class="watch"><b>Watch out:</b> train accuracy <em>should</em> drop. The network is working with 70% of its neurons on every step.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BATCHNORM -->
+  <section class="panel" id="bn" role="tabpanel" aria-labelledby="tab-bn" data-run="reg" hidden>
+    <p class="lead"><strong>BatchNorm</strong> rescales each neuron's outputs across the batch to mean 0 and std 1, then lets the network learn its own scale (γ) and shift (β). Its main job is faster, steadier training; the batch-to-batch noise regularizes only a little.</p>
+    <div class="two">
+      <div class="widget" id="bn-widget"></div>
+      <div class="side">
+        <div class="formula">x̂ = (x − μ<sub>batch</sub>) / √(σ²<sub>batch</sub> + ε)<br>y = γ·x̂ + β</div>
+        <h3>The code: after each hidden Linear</h3>
+        <div id="code-bn"></div>
+        <p class="watch"><b>Watch out:</b> BatchNorm makes the training data <em>easier</em> to fit, which can partly cancel Dropout. That's why the dropout rate has to be tuned together with the rest of the model.</p>
+        <h3>train() vs eval(): what changes</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>Layer</th><th><code>model.train()</code></th><th><code>model.eval()</code></th></tr></thead>
+          <tbody>
+            <tr><td>Dropout</td><td>drops 30%, scales ×1.43</td><td>off</td></tr>
+            <tr><td>BatchNorm</td><td>uses this batch's μ, σ and updates running averages</td><td>uses the running averages</td></tr>
+            <tr><td>L2</td><td colspan="2">only acts inside <code>optimizer.step()</code>, so the mode doesn't matter</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLOW -->
+  <section class="panel" id="flow" role="tabpanel" aria-labelledby="tab-flow" hidden>
+    <ol class="pipe" id="pipe" aria-label="Notebook pipeline">
+      <li><button data-step="0"><b>Load CSV</b><small>60,000 × 785</small></button></li>
+      <li><button data-step="1"><b>Split &amp; scale</b><small>48k / 12k · ÷255</small></button></li>
+      <li><button data-step="2"><b>Loaders</b><small>32 train · 1024 measure</small></button></li>
+      <li><button data-step="3"><b>MyNN</b><small>784→128→64→10</small></button></li>
+      <li class="loop"><span class="loop-label">× 100 epochs, × 3 runs</span>
+        <button data-step="4"><b>Training loop</b><small>1,500 steps / epoch</small></button>
+        <span class="swap" aria-hidden="true">⇄</span>
+        <button data-step="5"><b>evaluate()</b><small>train + test</small></button>
+      </li>
+      <li><button data-step="6"><b>History &amp; plots</b><small>avg last 10</small></button></li>
+    </ol>
+
+    <div class="viewer">
+      <div style="display:grid;gap:10px;min-width:0">
+        <div class="v-head"><h2 id="v-title"></h2><span id="v-sec"></span></div>
+        <div id="v-code"></div>
+      </div>
+      <div class="side">
+        <p class="lead" style="font-size:15.5px" id="v-sum"></p>
+        <ol class="notes" id="v-notes"></ol>
+        <div class="stepper">
+          <span id="v-count" aria-live="polite"></span>
+          <button class="btn" id="v-prev">← Back</button>
+          <button class="btn primary" id="v-next">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="block-h" style="margin:8px 0 8px">What changes between the three runs</p>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th style="color:var(--base)">Baseline</th><th style="color:var(--l2)">+ L2</th><th style="color:var(--reg)">+ L2 + Dropout + BatchNorm</th></tr></thead>
+        <tbody>
+          <tr><td><code>weight_decay</code></td><td class="num">—</td><td class="num">1e-4</td><td class="num">1e-4</td></tr>
+          <tr><td><code>BatchNorm1d</code></td><td class="num">—</td><td class="num">—</td><td class="num">128, 64</td></tr>
+          <tr><td><code>Dropout</code></td><td class="num">—</td><td class="num">—</td><td class="num">0.3, 0.3</td></tr>
+          <tr><td>Learnable weights</td><td class="num">109,386</td><td class="num">109,386</td><td class="num">109,770</td></tr>
+          <tr><td>Seed · lr · batch · epochs</td><td class="num" colspan="3">42 · 0.1 · 32 · 100 (identical, so the comparison is fair)</td></tr>
+          <tr><td>History dict</td><td class="num">base_history</td><td class="num">l2_history</td><td class="num">reg_history</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+const mean = a => a.reduce((s,v)=>s+v,0)/a.length;
+const varB = a => {const m=mean(a);return a.reduce((s,v)=>s+(v-m)**2,0)/a.length};
+const varU = a => varB(a)*a.length/(a.length-1);
+
+/* ---------- python highlighter + code block ---------- */
+const KW = new Set('def class for in with return import from as if else elif and or not None True False lambda while'.split(' '));
+const BI = new Set('range len sum max min print super'.split(' '));
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function hlPy(line){
+  const re = /(#.*$)|((?:\bf)?'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|(\b\d+(?:\.\d+)?(?:e-?\d+)?\b)|([A-Za-z_]\w*)/g;
+  let out = '', last = 0, prev = '', m;
+  while ((m = re.exec(line))) {
+    out += esc(line.slice(last, m.index));
+    const t = m[0];
+    if (m[1]) { out += `<span class="t-com">${esc(t)}</span>`; prev = ''; }
+    else if (m[2]) { out += `<span class="t-str">${esc(t)}</span>`; prev = ''; }
+    else if (m[3]) { out += `<span class="t-num">${t}</span>`; prev = ''; }
+    else {
+      if (KW.has(t)) out += `<span class="t-kw">${t}</span>`;
+      else if (prev === 'def' || prev === 'class') out += `<span class="t-fn">${t}</span>`;
+      else if (BI.has(t)) out += `<span class="t-bi">${t}</span>`;
+      else out += t;
+      prev = t;
+    }
+    last = re.lastIndex;
+  }
+  return out + esc(line.slice(last)) || ' ';
+}
+function renderCode(el, src){
+  const lines = src.replace(/^\n/, '').replace(/\s+$/, '').split('\n')
+    .map(l => l.startsWith('@') ? {add:true, text:l.slice(1)} : {add:false, text:l});
+  el.className = 'code';
+  el.innerHTML = `<div class="code-inner">${lines.map((l,i) =>
+    `<div class="ln${l.add?' add':''}" data-i="${i}"><span class="no" aria-hidden="true">${l.add?'+':i+1}</span><code>${hlPy(l.text)}</code></div>`).join('')}</div>`;
+  return {
+    lines,
+    setHl(set){ el.querySelectorAll('.ln').forEach(n => n.classList.toggle('hl', set.has(+n.dataset.i))); }
+  };
+}
+function resolve(lines, n){
+  const s = new Set();
+  const find = (q, from = 0) => { for (let i = from; i < lines.length; i++) if (lines[i].text.includes(q)) return i; return -1; };
+  if (n.all) lines.forEach((l,i) => { if (n.all.some(q => l.text.includes(q))) s.add(i); });
+  if (n.at) { const i = find(n.at); if (i >= 0) s.add(i); }
+  if (n.from) { const a = find(n.from), b = find(n.to, a); for (let i = a; i <= b && a >= 0; i++) s.add(i); }
+  return s;
+}
+
+/* ---------- curve-fit widget (overfitting + L2) ---------- */
+const FIT = (() => {
+  const r = mulberry32(11), r2 = mulberry32(1011), f = x => 0.9*Math.sin(3.2*x) + 0.25*x, tr = [], te = [];
+  for (let i = 0; i < 14; i++) { const x = -0.95 + 1.9*i/13 + (r()-0.5)*0.06; tr.push([x, f(x) + 0.15*gauss(r)]); }
+  for (let i = 0; i < 300; i++) { const x = -1 + 2*i/299; te.push([x, f(x) + 0.15*gauss(r2)]); }
+  return {f, tr, te};
+})();
+function cheb(x, d){ const t = [1, x]; for (let k = 2; k <= d; k++) t.push(2*x*t[k-1] - t[k-2]); return t.slice(0, d+1); }
+function solve(A, b){
+  const n = b.length;
+  for (let i = 0; i < n; i++) {
+    let p = i; for (let j = i+1; j < n; j++) if (Math.abs(A[j][i]) > Math.abs(A[p][i])) p = j;
+    [A[i],A[p]] = [A[p],A[i]]; [b[i],b[p]] = [b[p],b[i]];
+    for (let j = i+1; j < n; j++) { const m = A[j][i]/A[i][i]; for (let k = i; k < n; k++) A[j][k] -= m*A[i][k]; b[j] -= m*b[i]; }
+  }
+  const x = new Array(n).fill(0);
+  for (let i = n-1; i >= 0; i--) { let s = b[i]; for (let k = i+1; k < n; k++) s -= A[i][k]*x[k]; x[i] = s/A[i][i]; }
+  return x;
+}
+function fitPoly(d, lam){
+  const n = FIT.tr.length, m = d+1, A = Array.from({length:m}, () => new Array(m).fill(0)), b = new Array(m).fill(0);
+  for (const [x,y] of FIT.tr) { const p = cheb(x,d); for (let i = 0; i < m; i++) { b[i] += p[i]*y; for (let j = 0; j < m; j++) A[i][j] += p[i]*p[j]; } }
+  for (let i = 0; i < m; i++) A[i][i] += (i ? lam*n : 0) + 1e-10;
+  return solve(A, b);
+}
+const predict = (w, x) => cheb(x, w.length-1).reduce((s,v,i) => s + v*w[i], 0);
+const rmse = (w, pts) => Math.sqrt(mean(pts.map(([x,y]) => (predict(w,x)-y)**2)));
+function verdict(te, best, tooSimple){
+  if (te <= best*1.2) return ['good', 'Good fit: close to the best test error'];
+  return tooSimple ? ['warn', 'Underfitting: misses the pattern'] : ['bad', 'Overfitting: memorized the noise'];
+}
+const PW=560, PH=280, PL=38, PR=10, PT=10, PB=28;
+const sx = x => PL + (x+1)/2*(PW-PL-PR), sy = y => PT + (2.2-y)/4.4*(PH-PT-PB);
+function drawFit(svg, w, clip){
+  let g = `<defs><clipPath id="${clip}"><rect x="${PL}" y="${PT}" width="${PW-PL-PR}" height="${PH-PT-PB}"/></clipPath></defs>`;
+  for (const v of [-2,-1,0,1,2]) g += `<line class="grid" x1="${PL}" x2="${PW-PR}" y1="${sy(v)}" y2="${sy(v)}"/><text class="tick" x="${PL-8}" y="${sy(v)+4}" text-anchor="end">${v}</text>`;
+  for (const v of [-1,-0.5,0,0.5,1]) g += `<text class="tick" x="${Math.min(PW-PR-8, Math.max(PL+8, sx(v)))}" y="${PH-8}" text-anchor="middle">${v}</text>`;
+  const fit = [], tru = [];
+  for (let i = 0; i <= 240; i++) { const x = -1 + 2*i/240; fit.push(`${sx(x).toFixed(1)},${sy(Math.max(-9, Math.min(9, predict(w,x)))).toFixed(1)}`); tru.push(`${sx(x).toFixed(1)},${sy(FIT.f(x)).toFixed(1)}`); }
+  g += `<polyline class="truth" points="${tru.join(' ')}"/>`;
+  g += `<g clip-path="url(#${clip})"><polyline class="fitline" points="${fit.join(' ')}"/></g>`;
+  g += FIT.te.filter((_,i) => i % 6 === 0).map(([x,y]) => `<circle class="pt-test" cx="${sx(x)}" cy="${sy(y)}" r="4"/>`).join('');
+  g += FIT.tr.map(([x,y]) => `<circle class="pt-train" cx="${sx(x)}" cy="${sy(y)}" r="5.5"/>`).join('');
+  svg.innerHTML = g;
+}
+const fmtE = v => v > 99 ? '>99' : v.toFixed(3);
+const lamOf = i => i === 0 ? 0 : 10 ** (-5 + (i-1)*0.25);
+const fmtLam = l => l === 0 ? '0 (off)' : l.toExponential(1).replace('e', 'e');
+function fitWidget(root, mode){
+  const lam = mode === 'lambda', id = root.id;
+  root.innerHTML = `
+    <div class="w-head"><h3>${lam ? 'Try it: same 14 points, degree 12, now add λ' : 'Try it: fit a curve to 14 noisy points'}</h3><span class="pill" id="${id}-v"></span></div>
+    <svg viewBox="0 0 ${PW} ${PH}" role="img" aria-label="Scatter of training and test points with the fitted curve" id="${id}-svg"></svg>
+    <div class="key">
+      <span><svg viewBox="0 0 22 10"><circle cx="11" cy="5" r="4" fill="var(--ink)"/></svg>train points</span>
+      <span><svg viewBox="0 0 22 10"><circle cx="11" cy="5" r="3.5" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/></svg>test points</span>
+      <span><svg viewBox="0 0 22 10"><line x1="0" x2="22" y1="5" y2="5" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 4"/></svg>real pattern</span>
+      <span><svg viewBox="0 0 22 10"><line x1="0" x2="22" y1="5" y2="5" stroke="var(--accent)" stroke-width="3"/></svg>model</span>
+    </div>
+    <label class="ctl" for="${id}-r"><span>${lam ? 'λ · L2 strength' : 'Model size · polynomial degree'}</span><output id="${id}-o" for="${id}-r"></output></label>
+    <input type="range" id="${id}-r" min="${lam?0:1}" max="${lam?21:13}" step="1" value="${lam?0:9}">
+    ${lam ? `<div><p class="strip-label"><span>Σw², the total size of the weights (log scale)</span><span class="mono" id="${id}-w"></span></p><svg viewBox="0 0 560 44" id="${id}-m" aria-hidden="true"></svg></div>` : ''}
+    <dl class="stats">
+      <div><dt>Train error</dt><dd id="${id}-tr"></dd></div>
+      <div><dt>Test error</dt><dd id="${id}-te"></dd></div>
+      <div><dt>Gap</dt><dd id="${id}-g"></dd></div>
+    </dl>
+    <p class="note">${lam ? 'Drag λ right: the wiggles flatten and test error drops. Keep going past ~0.1 and the curve gets too flat. This is a toy curve fit, so its λ scale differs from MyNN\'s 1e-4.' : 'Drag left to 3–8: the curve follows the pattern. Drag right to 12: train error hits ~0 while test error explodes. This is a toy curve fit, not MyNN, but the idea is the same.'}</p>`;
+  const input = $(`#${id}-r`);
+  const errAt = v => rmse(fitPoly(lam ? 12 : v, lam ? lamOf(v) : 0), FIT.te);
+  let bestV = +input.min, best = Infinity;
+  for (let v = +input.min; v <= +input.max; v++) { const e = errAt(v); if (e < best) { best = e; bestV = v; } }
+  function update(){
+    const v = +input.value, d = lam ? 12 : v, l = lam ? lamOf(v) : 0, w = fitPoly(d, l);
+    const tr = rmse(w, FIT.tr), te = rmse(w, FIT.te), [state, text] = verdict(te, best, lam ? v > bestV : v < bestV);
+    $(`#${id}-o`).textContent = lam ? fmtLam(l) : `${d} (${d+1} weights)`;
+    $(`#${id}-tr`).textContent = fmtE(tr); $(`#${id}-te`).textContent = fmtE(te); $(`#${id}-g`).textContent = fmtE(Math.max(0, te-tr));
+    const pill = $(`#${id}-v`); pill.dataset.state = state; pill.textContent = text;
+    drawFit($(`#${id}-svg`), w, `${id}-clip`);
+    if (lam) {
+      const s = w.slice(1).reduce((a,c) => a + c*c, 0);
+      $(`#${id}-w`).textContent = s.toFixed(2);
+      const L = 14, R = 14, pos = x => L + (Math.log10(Math.max(0.1, Math.min(100, x))) + 1)/3*(560-L-R);
+      let g = `<rect x="${L}" y="6" width="${560-L-R}" height="10" rx="5" fill="var(--code)"/><rect x="${L}" y="6" width="${pos(s)-L}" height="10" rx="5" fill="var(--accent)"/>`;
+      for (const [t, lab] of [[0.1,'0.1'],[1,'1'],[10,'10'],[100,'100']]) g += `<text class="tick" x="${pos(t)}" y="38" text-anchor="${t===0.1?'start':t===100?'end':'middle'}">${lab}</text>`;
+      $(`#${id}-m`).innerHTML = g;
+    }
+  }
+  input.addEventListener('input', update); update();
+}
+
+/* ---------- dropout widget ---------- */
+function dropoutWidget(root){
+  const vals = [0.82, 0, 1.35, 0.41, 0, 2.10, 0.66, 0.97, 0, 1.58, 0.23, 1.12];
+  const r = mulberry32(5); let mode = 'train', m1 = [], m2 = [], steps = 0, dropped = 0, timer = null;
+  const sample = () => { m1 = vals.map(() => r() < 0.3); m2 = Array.from({length:8}, () => r() < 0.3); steps++; dropped += m1.filter(Boolean).length + m2.filter(Boolean).length; };
+  root.innerHTML = `
+    <div class="w-head"><h3>Try it: a different network on every training step</h3>
+      <div class="seg" role="group" aria-label="Model mode"><button id="do-train" aria-pressed="true">model.train()</button><button id="do-eval" aria-pressed="false">model.eval()</button></div></div>
+    <svg viewBox="0 0 560 318" id="do-net" class="nn" role="img" aria-label="MyNN diagram: input, two hidden layers with dropout, output"></svg>
+    <div class="key">
+      <span><svg viewBox="0 0 22 10"><circle cx="11" cy="5" r="4.5" fill="var(--accent)"/></svg>active neuron</span>
+      <span><svg viewBox="0 0 22 10"><circle cx="11" cy="5" r="4.2" fill="var(--surface)" stroke="var(--bad)" stroke-opacity=".7" stroke-dasharray="2 1.5"/><path d="M8.5 2.5 L13.5 7.5 M13.5 2.5 L8.5 7.5" stroke="var(--bad)" stroke-width="1.6"/></svg>dropped this step</span>
+      <span><svg viewBox="0 0 22 10"><circle cx="11" cy="5" r="4.5" fill="var(--accent)" fill-opacity=".25"/></svg>lighter = smaller ReLU output</span>
+      <span><svg viewBox="0 0 22 10"><line x1="0" x2="22" y1="5" y2="5" stroke="var(--muted)" stroke-opacity=".5"/></svg>connection in use</span>
+    </div>
+    <div class="btns"><button class="btn primary" id="do-next">Next training step</button><button class="btn" id="do-play" aria-pressed="false">▶ Auto-play</button><span class="note" id="do-stat" aria-live="polite"></span></div>
+    <div><p class="strip-label"><span>Hidden 1 after ReLU: the 12 highlighted neurons above (zeros come from ReLU)</span></p><div class="cells" id="do-in"></div></div>
+    <div class="arrow-down">↓ nn.Dropout(0.3)</div>
+    <div><p class="strip-label"><span>passed to the next Linear</span><span class="mono" id="do-mode"></span></p><div class="cells" id="do-out"></div></div>`;
+  const X = [58, 208, 358, 506], N = [8, 12, 8, 10], TOP = 50, BOT = 274, STEP = (BOT-TOP)/11;
+  const y = (l, i) => (TOP+BOT)/2 - (N[l]-1)*STEP/2 + i*STEP;
+  const off = (l, i) => mode === 'train' && ((l === 1 && m1[i]) || (l === 2 && m2[i]));
+  function drawNet(){
+    let g = `<rect x="${X[1]-20}" y="${TOP-16}" width="40" height="${BOT-TOP+32}" rx="10" fill="var(--hl)"/>`;
+    for (let l = 0; l < 3; l++) for (let i = 0; i < N[l]; i++) for (let j = 0; j < N[l+1]; j++) {
+      const dead = off(l, i) || off(l+1, j);
+      g += `<line x1="${X[l]}" y1="${y(l,i)}" x2="${X[l+1]}" y2="${y(l+1,j)}" stroke="var(--muted)" stroke-opacity="${dead ? 0.04 : 0.28}" stroke-width="1"/>`;
+    }
+    for (let l = 0; l < 4; l++) for (let i = 0; i < N[l]; i++) {
+      const cx = X[l], cy = y(l, i);
+      if (off(l, i)) { g += `<circle cx="${cx}" cy="${cy}" r="8" fill="var(--surface)" stroke="var(--bad)" stroke-opacity=".7" stroke-width="1.5" stroke-dasharray="3 2"/><path d="M${cx-5} ${cy-5} L${cx+5} ${cy+5} M${cx+5} ${cy-5} L${cx-5} ${cy+5}" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>`; continue; }
+      const fill = l === 0 ? 'var(--muted)' : l === 3 ? 'var(--ink)' : 'var(--accent)';
+      const op = l === 1 ? (vals[i] === 0 ? 0.25 : 0.55 + 0.45*Math.min(1, vals[i]/2.1)) : 1;
+      g += `<circle cx="${cx}" cy="${cy}" r="7.5" fill="${fill}" fill-opacity="${op}" stroke="var(--surface)" stroke-width="1.5"/>`;
+    }
+    const lab = [['Input','784 pixels'],['Hidden 1','128 · Dropout'],['Hidden 2','64 · Dropout'],['Output','10 classes']];
+    lab.forEach(([a, b], l) => {
+      const anchor = l === 0 ? 'start' : l === 3 ? 'end' : 'middle', tx = l === 0 ? X[0]-12 : l === 3 ? X[3]+12 : X[l];
+      g += `<text x="${tx}" y="16" text-anchor="${anchor}" style="font:600 14px var(--body);fill:var(--ink)">${a}</text>`;
+      g += `<text x="${tx}" y="${BOT+36}" text-anchor="${anchor}" style="font:13px var(--mono);fill:${l===1||l===2?'var(--accent)':'var(--muted)'}">${b}</text>`;
+    });
+    $('#do-net').innerHTML = g;
+  }
+  function render(){
+    drawNet();
+    $('#do-in').innerHTML = vals.map(v => `<div class="cell${v===0?' zero':''}">${v.toFixed(2)}</div>`).join('');
+    $('#do-out').innerHTML = vals.map((v,i) => {
+      if (mode === 'eval') return `<div class="cell${v===0?' zero':''}">${v.toFixed(2)}</div>`;
+      if (m1[i]) return `<div class="cell off" title="dropped">0.00</div>`;
+      return `<div class="cell${v===0?' zero':' up'}">${(v/0.7).toFixed(2)}</div>`;
+    }).join('');
+    const k1 = m1.filter(Boolean).length, k2 = m2.filter(Boolean).length;
+    $('#do-mode').textContent = mode === 'train' ? 'kept ×1.43' : 'unchanged';
+    $('#do-stat').textContent = mode === 'train'
+      ? `Dropped ${k1}/12 in Hidden 1, ${k2}/8 in Hidden 2 · ${Math.round(100*dropped/(steps*20))}% over ${steps} step${steps>1?'s':''}`
+      : 'Eval mode: every neuron on, nothing scaled.';
+    $('#do-next').disabled = $('#do-play').disabled = mode === 'eval';
+    $('#do-train').setAttribute('aria-pressed', mode === 'train'); $('#do-eval').setAttribute('aria-pressed', mode === 'eval');
+  }
+  function stop(){ clearInterval(timer); timer = null; $('#do-play').textContent = '▶ Auto-play'; $('#do-play').setAttribute('aria-pressed', 'false'); }
+  $('#do-play').onclick = () => {
+    if (timer) return stop();
+    $('#do-play').textContent = '❚❚ Pause'; $('#do-play').setAttribute('aria-pressed', 'true');
+    timer = setInterval(() => { if (root.closest('[hidden]')) return stop(); sample(); render(); }, 900);
+  };
+  $('#do-next').onclick = () => { sample(); render(); };
+  $('#do-train').onclick = () => { mode = 'train'; render(); };
+  $('#do-eval').onclick = () => { stop(); mode = 'eval'; render(); };
+  sample(); render();
+}
+
+/* ---------- batchnorm widget ---------- */
+function bnWidget(root){
+  const r = mulberry32(21); let batch = [], mode = 'train', gamma = 1, beta = 0, rm = 0, rv = 1, n = 0;
+  function next(){
+    const shift = 4 + 0.7*gauss(r);
+    batch = Array.from({length:8}, () => shift + 2.2*gauss(r));
+    if (mode === 'train') { rm = 0.9*rm + 0.1*mean(batch); rv = 0.9*rv + 0.1*varU(batch); n++; }
+  }
+  root.innerHTML = `
+    <div class="w-head"><h3>Try it: one neuron's output for a batch of 8 images</h3>
+      <div class="seg" role="group" aria-label="Model mode"><button id="bn-train" aria-pressed="true">model.train()</button><button id="bn-eval" aria-pressed="false">model.eval()</button></div></div>
+    <svg viewBox="0 0 560 190" id="bn-svg" role="img" aria-label="Number lines showing values before and after BatchNorm"></svg>
+    <dl class="stats">
+      <div><dt>Input μ · σ</dt><dd id="bn-in"></dd></div>
+      <div><dt>Output μ · σ</dt><dd id="bn-out"></dd></div>
+      <div><dt id="bn-uselab">Normalized with</dt><dd id="bn-use"></dd></div>
+    </dl>
+    <div class="btns"><button class="btn primary" id="bn-next">Next batch</button><span class="note" id="bn-hint" aria-live="polite"></span></div>
+    <label class="ctl" for="bn-gamma"><span>γ · learned scale</span><output id="bn-go" for="bn-gamma"></output></label>
+    <input type="range" id="bn-gamma" min="0.2" max="3" step="0.1" value="1">
+    <label class="ctl" for="bn-beta"><span>β · learned shift</span><output id="bn-bo" for="bn-beta"></output></label>
+    <input type="range" id="bn-beta" min="-3" max="3" step="0.1" value="0">
+    <p class="note">In the real model the optimizer learns γ and β. Here you set them by hand.</p>`;
+  const L = 24, R = 24, lo = -4, hi = 12, px = v => L + (Math.max(lo, Math.min(hi, v)) - lo)/(hi-lo)*(560-L-R);
+  function line(y, vals, label, color){
+    const m = mean(vals), s = Math.sqrt(varB(vals));
+    let g = `<text class="tick" x="${L}" y="${y-34}" style="font-weight:600;fill:var(--ink)">${label}</text>`;
+    g += `<rect x="${px(m-s)}" y="${y-16}" width="${Math.max(2, px(m+s)-px(m-s))}" height="32" fill="${color}" opacity=".13"/>`;
+    g += `<line class="grid" x1="${L}" x2="${560-R}" y1="${y}" y2="${y}"/>`;
+    for (let t = lo; t <= hi; t += 2) g += `<line class="grid" x1="${px(t)}" x2="${px(t)}" y1="${y-4}" y2="${y+4}"/><text class="tick" x="${px(t)}" y="${y+26}" text-anchor="middle" style="font-size:11px">${t}</text>`;
+    g += vals.map(v => `<circle cx="${px(v)}" cy="${y}" r="6.5" fill="${color}" fill-opacity=".8" stroke="var(--surface)" stroke-width="1.5"/>`).join('');
+    g += `<line x1="${px(m)}" x2="${px(m)}" y1="${y-18}" y2="${y+10}" stroke="var(--ink)" stroke-width="2"/><text class="tick" x="${px(m)+5}" y="${y-19}">μ</text>`;
+    return g;
+  }
+  function render(){
+    const mu = mode === 'train' ? mean(batch) : rm, sd = Math.sqrt((mode === 'train' ? varB(batch) : rv) + 1e-5);
+    const out = batch.map(x => gamma*(x-mu)/sd + beta);
+    $('#bn-svg').innerHTML = line(56, batch, 'before BatchNorm', 'var(--muted)') + line(150, out, 'after BatchNorm', 'var(--accent)');
+    const f = a => `${mean(a).toFixed(2)} · ${Math.sqrt(varB(a)).toFixed(2)}`;
+    $('#bn-in').textContent = f(batch); $('#bn-out').textContent = f(out);
+    $('#bn-uselab').textContent = mode === 'train' ? 'Using this batch' : 'Using running avg';
+    $('#bn-use').textContent = `${mu.toFixed(2)} · ${sd.toFixed(2)}`;
+    $('#bn-go').textContent = gamma.toFixed(1); $('#bn-bo').textContent = beta.toFixed(1);
+    $('#bn-hint').textContent = mode === 'train'
+      ? `Running averages updated after ${n} training batch${n>1?'es':''} (momentum 0.1).`
+      : (n < 15 ? `Only ${n} training batch${n>1?'es':''} seen, so the running averages haven't caught up and the output is off. Switch to model.train() and click Next batch a few times.` : `Running averages from ${n} batches: close to the batch values now.`);
+    $('#bn-train').setAttribute('aria-pressed', mode === 'train'); $('#bn-eval').setAttribute('aria-pressed', mode === 'eval');
+  }
+  $('#bn-next').onclick = () => { next(); render(); };
+  $('#bn-train').onclick = () => { mode = 'train'; render(); };
+  $('#bn-eval').onclick = () => { mode = 'eval'; render(); };
+  $('#bn-gamma').oninput = e => { gamma = +e.target.value; render(); };
+  $('#bn-beta').oninput = e => { beta = +e.target.value; render(); };
+  next(); render();
+}
+
+/* ---------- static code on concept tabs ---------- */
+renderCode($('#code-l2'), `
+# Baseline
+optimizer = optim.SGD(model.parameters(),
+                      lr=learning_rate)
+
+# Part 1 (L2)
+weight_decay = 1e-4
+optimizer = optim.SGD(model.parameters(),
+                      lr=learning_rate,
+                      weight_decay=weight_decay)`).setHl(new Set([5,8]));
+{ const c = renderCode($('#code-do'), `
+self.model = nn.Sequential(
+    nn.Linear(num_features, 128),
+    nn.BatchNorm1d(128),
+    nn.ReLU(),
+@    nn.Dropout(0.3),        # drop 30% of the 128 activations
+    nn.Linear(128, 64),
+    nn.BatchNorm1d(64),
+    nn.ReLU(),
+@    nn.Dropout(0.3),
+    nn.Linear(64, 10)
+)`); c.setHl(resolve(c.lines, {all:['Dropout']})); }
+{ const c = renderCode($('#code-bn'), `
+self.model = nn.Sequential(
+    nn.Linear(num_features, 128),
+@    nn.BatchNorm1d(128),    # one μ, σ, γ, β per neuron
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(128, 64),
+@    nn.BatchNorm1d(64),
+    nn.ReLU(),
+    nn.Dropout(0.3),
+    nn.Linear(64, 10)
+)`); c.setHl(resolve(c.lines, {all:['BatchNorm1d']})); }
+
+/* ---------- code flow ---------- */
+const STEPS = [
+{ title:'Load CSV', sec:'notebook: Load the data',
+  sum:'Read Fashion-MNIST into a table: one row per image, a label and 784 pixels.',
+  code:`
+url = 'https://media.githubusercontent.com/media/fpleoni/fashion_mnist/master/fashion-mnist_train.csv'
+df = pd.read_csv(url)
+df.shape                      # (60000, 785)
+
+X = df.iloc[:, 1:].values     # 784 pixel columns
+y = df.iloc[:, 0].values      # label column`,
+  notes:[
+    {at:'read_csv', text:'Downloads the CSV. Each row is a 28×28 image flattened into 784 numbers.'},
+    {at:'df.shape', text:'60,000 rows × 785 columns: 1 label + 784 pixels.'},
+    {from:'X = df', to:'y = df', text:'Column 0 is the label (0 = T-shirt … 9 = ankle boot); the rest are pixels from 0 to 255.'}
+  ]},
+{ title:'Split & scale', sec:'notebook: before CustomDataset',
+  sum:'Hold back unseen images for testing and bring the pixels into a small range.',
+  code:`
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# scale pixels to 0-1
+X_train = X_train/255.0
+X_test = X_test/255.0`,
+  notes:[
+    {at:'train_test_split', text:'48,000 images to learn from, 12,000 kept aside. The test set stands in for new data, and the gap is measured against it.'},
+    {from:'X_train = X_train', to:'X_test = X_test', text:'Pixels go from 0–255 to 0–1, which keeps gradients in a range that lr = 0.1 can handle.'}
+  ]},
+{ title:'Datasets & loaders', sec:'notebook: CustomDataset + DataLoader',
+  sum:'Wrap the arrays as tensors, then batch them. There are four loaders, each with its own job.',
+  code:`
+class CustomDataset(Dataset):
+  def __init__(self, features, labels):
+    self.features = torch.tensor(features, dtype=torch.float32)
+    self.labels = torch.tensor(labels, dtype=torch.long)
+  def __len__(self):
+    return len(self.features)
+  def __getitem__(self, index):
+    return self.features[index], self.labels[index]
+
+train_dataset = CustomDataset(X_train, y_train)
+test_dataset = CustomDataset(X_test, y_test)
+
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, pin_memory=True)
+test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, pin_memory=True)
+
+train_eval_loader = DataLoader(train_dataset, batch_size=1024, shuffle=False, pin_memory=True)
+test_eval_loader = DataLoader(test_dataset, batch_size=1024, shuffle=False, pin_memory=True)`,
+  notes:[
+    {from:'class CustomDataset', to:'self.labels', text:'Converts to tensors: float32 pixels and long (integer) labels, because CrossEntropyLoss needs integer classes.'},
+    {from:'def __len__', to:'return self.features[index]', text:'DataLoader uses these two methods to count the images and fetch one by index.'},
+    {at:'train_loader =', text:'The only loader that trains the model: shuffled batches of 32.'},
+    {at:'test_loader =', text:'Used once, in the hand-written accuracy check after the baseline.'},
+    {from:'train_eval_loader', to:'test_eval_loader', text:'Only for measuring: batches of 1024 with no shuffling. Faster, and the numbers come out the same.'}
+  ]},
+{ title:'MyNN', sec:'notebook: Baseline, redefined in Part 2 (Dropout + BatchNorm)',
+  sum:'A 3-layer MLP. Part 2 (Dropout + BatchNorm) inserts four layers (marked +) into the same class.',
+  code:`
+class MyNN(nn.Module):
+
+  def __init__(self, num_features):
+    super().__init__()
+    self.model = nn.Sequential(
+        nn.Linear(num_features, 128),
+@        nn.BatchNorm1d(128),
+        nn.ReLU(),
+@        nn.Dropout(0.3),
+        nn.Linear(128, 64),
+@        nn.BatchNorm1d(64),
+        nn.ReLU(),
+@        nn.Dropout(0.3),
+        nn.Linear(64, 10)
+    )
+
+  def forward(self, x):
+    return self.model(x)`,
+  notes:[
+    {all:['nn.Linear'], text:'Baseline: Linear 784 → 128 → 64 → 10 with ReLU between the layers. That\'s 109,386 weights.'},
+    {all:['BatchNorm1d'], text:'Part 2 (Dropout + BatchNorm) adds BatchNorm1d after each hidden Linear, adding 384 weights (a γ and β per neuron).'},
+    {all:['Dropout'], text:'…and Dropout(0.3) after each hidden ReLU, which has no weights.'},
+    {at:'nn.Linear(64, 10)', text:'The output is 10 raw scores with no softmax, because CrossEntropyLoss applies it.'},
+    {at:'class MyNN', text:'Part 2 (Dropout + BatchNorm) redefines the class under the same name, MyNN. Re-run the Baseline cell after it and your "baseline" silently gets Dropout and BatchNorm too.'}
+  ]},
+{ title:'Training loop', sec:'notebook: same loop in all 3 runs (L2 run shown)',
+  sum:'For each epoch, 1,500 batches update the weights, then evaluate() measures train and test.',
+  code:`
+torch.manual_seed(42)
+model = MyNN(X_train.shape[1]).to(device)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
+l2_history = {'train_loss': [], 'test_loss': [], 'train_acc': [], 'test_acc': []}
+
+for epoch in range(epochs):
+  model.train()
+  total_epoch_loss = 0
+  for batch_features, batch_labels in train_loader:
+    batch_features, batch_labels = batch_features.to(device), batch_labels.to(device)
+    outputs = model(batch_features)
+    loss = criterion(outputs, batch_labels)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    total_epoch_loss += loss.item()
+
+  train_loss, train_acc = evaluate(model, train_eval_loader)
+  test_loss, test_acc = evaluate(model, test_eval_loader)
+  l2_history['train_loss'].append(train_loss)
+  l2_history['test_loss'].append(test_loss)
+  l2_history['train_acc'].append(train_acc)
+  l2_history['test_acc'].append(test_acc)
+
+  if (epoch + 1) % 10 == 0:
+    print(f'Epoch: {epoch + 1} , Loss: {total_epoch_loss/len(train_loader):.4f} , '
+          f'train acc: {train_acc:.4f} , test acc: {test_acc:.4f}')`,
+  notes:[
+    {at:'manual_seed', text:'Same seed in all three runs, so they get the same starting weights and batch order. Only the regularizer differs.'},
+    {from:'model = MyNN', to:'optimizer =', text:'A fresh model on the GPU, the loss and SGD. Adding weight_decay is the whole of Part 1 (L2); the Baseline leaves it out.'},
+    {at:'l2_history =', text:'Four empty lists, one for each curve plot_curves draws later.'},
+    {from:'for epoch', to:'model.train()', text:'Each epoch starts in train mode (Dropout on, BatchNorm uses batch stats). This is needed because evaluate() switched to eval mode last epoch.'},
+    {from:'for batch_features', to:'.to(device)', text:'Takes the next 32 shuffled images and labels and copies them to the GPU. 48,000 ÷ 32 = 1,500 batches per epoch.'},
+    {from:'outputs = model', to:'loss = criterion', text:'Forward pass: 10 scores per image, then cross-entropy compares them with the true labels.'},
+    {at:'zero_grad', text:'Clears the last batch\'s gradients. Without this, PyTorch adds new gradients on top of old ones.'},
+    {at:'loss.backward', text:'Backpropagation computes a gradient for every weight.'},
+    {at:'optimizer.step', text:'The update: w ← w − 0.1·(gradient + λ·w). The λ·w term is L2 pulling weights toward zero.'},
+    {at:'total_epoch_loss +=', text:'Running loss, used only for the printout. .item() turns the tensor into a plain number.'},
+    {from:'train_loss, train_acc =', to:'test_loss, test_acc =', text:'After every epoch, evaluate() measures on all train and all test images. These are the numbers that get plotted.'},
+    {from:"l2_history['train_loss']", to:"l2_history['test_acc']", text:'Stores this epoch\'s four numbers.'},
+    {from:'if (epoch', to:"f'train acc", text:'Prints every 10th epoch to keep the log short.'}
+  ]},
+{ title:'evaluate()', sec:'notebook: Helper: measure loss + accuracy',
+  sum:'Measures without changing the model: eval mode, no gradients, then average loss and accuracy.',
+  code:`
+def evaluate(model, loader):
+  model.eval()
+  total_loss, correct, total = 0.0, 0, 0
+  with torch.no_grad():
+    for batch_features, batch_labels in loader:
+      batch_features, batch_labels = batch_features.to(device), batch_labels.to(device)
+      outputs = model(batch_features)
+      total_loss += criterion(outputs, batch_labels).item() * batch_labels.shape[0]
+      correct += (outputs.argmax(dim=1) == batch_labels).sum().item()
+      total += batch_labels.shape[0]
+  return total_loss / total, correct / total`,
+  notes:[
+    {from:'def evaluate', to:'model.eval()', text:'Switches to eval mode first: Dropout off, BatchNorm on running averages. This is how the model will actually be used.'},
+    {at:'total_loss, correct, total =', text:'Three counters, added up over every batch.'},
+    {at:'torch.no_grad', text:'Measuring needs no gradients, so this saves memory and time.'},
+    {from:'for batch_features', to:'.to(device)', text:'Batches of 1024 from an eval loader, moved to the GPU.'},
+    {at:'outputs = model', text:'Forward pass only. There\'s no zero_grad, backward or step, so the weights never change here.'},
+    {at:'total_loss +=', text:'The batch loss is an average, so multiplying by batch size turns it into a sum. The last batch is smaller (896 train images, 736 test), and this keeps the total exact.'},
+    {at:'correct +=', text:'argmax picks the highest of the 10 scores as the prediction; this counts how many match the label.'},
+    {at:'total +=', text:'Number of images seen so far.'},
+    {at:'return', text:'Returns average loss and accuracy (0–1). Note that criterion and device are globals, not arguments.'}
+  ]},
+{ title:'History & plots', sec:'notebook: plot_curves, results table',
+  sum:'Turn the per-epoch numbers into a fair comparison of the three runs.',
+  code:`
+N_LAST = 10
+
+def avg_last(history, key, n=N_LAST):
+  return sum(history[key][-n:]) / n
+
+base_train_avg = avg_last(base_history, 'train_acc')
+base_test_avg = avg_last(base_history, 'test_acc')
+base_gap = base_train_avg - base_test_avg
+
+plot_curves([
+  ('Baseline', base_history, 'tab:gray'),
+  ('+ L2', l2_history, 'tab:orange'),
+  ('+ L2 + Dropout + BatchNorm', reg_history, 'tab:blue'),
+])`,
+  notes:[
+    {from:'def avg_last', to:'return sum', text:'The mean of the last 10 epochs. With lr 0.1 and batch 32, accuracy jumps between epochs, and one lucky epoch shouldn\'t pick the winner.'},
+    {from:'base_train_avg', to:'base_gap', text:'Gap = train accuracy − test accuracy. The same lines exist for Part 1 (L2) and Part 2 (Dropout + BatchNorm).'},
+    {from:'plot_curves([', to:'])', text:'One column per run: solid = train, dashed = test, shaded band = gap. The rows share a y-axis. Colors match this page.'}
+  ]}
+];
+
+(function flow(){
+  let step = 0, note = 0, code;
+  const btns = [...document.querySelectorAll('#pipe button')];
+  function load(si, ni){
+    step = si; note = ni; const S = STEPS[si];
+    $('#v-title').textContent = S.title; $('#v-sec').textContent = S.sec; $('#v-sum').textContent = S.sum;
+    code = renderCode($('#v-code'), S.code);
+    $('#v-notes').innerHTML = S.notes.map((n,i) => `<li><button data-n="${i}">${esc(n.text)}</button></li>`).join('');
+    $('#v-notes').querySelectorAll('button').forEach(b => b.onclick = () => { note = +b.dataset.n; update(); });
+    btns.forEach(b => b.toggleAttribute('aria-current', false));
+    btns.forEach(b => { if (+b.dataset.step === si) b.setAttribute('aria-current', 'step'); });
+    update();
+  }
+  function update(){
+    const S = STEPS[step];
+    code.setHl(resolve(code.lines, S.notes[note]));
+    $('#v-notes').querySelectorAll('button').forEach((b,i) => b.setAttribute('aria-current', i === note));
+    $('#v-count').textContent = `Step ${step+1}/${STEPS.length} · note ${note+1}/${S.notes.length}`;
+    $('#v-prev').disabled = step === 0 && note === 0;
+    const last = step === STEPS.length-1 && note === S.notes.length-1;
+    $('#v-next').disabled = last;
+    $('#v-next').textContent = note === S.notes.length-1 && !last ? `Next: ${STEPS[step+1].title} →` : 'Next →';
+  }
+  $('#v-next').onclick = () => { if (note < STEPS[step].notes.length-1) { note++; update(); } else if (step < STEPS.length-1) load(step+1, 0); };
+  $('#v-prev').onclick = () => { if (note > 0) { note--; update(); } else if (step > 0) load(step-1, STEPS[step-1].notes.length-1); };
+  btns.forEach(b => b.onclick = () => load(+b.dataset.step, 0));
+  load(4, 0);
+})();
+
+/* ---------- tabs ---------- */
+(function tabs(){
+  const tabs = [...document.querySelectorAll('.tab')];
+  function select(t, focus){
+    tabs.forEach(x => { const on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; $('#' + x.getAttribute('aria-controls')).hidden = !on; });
+    if (focus) t.focus();
+    try { localStorage.setItem('reg-tab', t.id); } catch (e) {}
+  }
+  tabs.forEach((t,i) => {
+    t.onclick = () => select(t);
+    t.onkeydown = e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); select(tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length], true); }
+    };
+  });
+  let saved = null; try { saved = localStorage.getItem('reg-tab'); } catch (e) {}
+  select(tabs.find(t => t.id === saved) || tabs[0]);
+})();
+
+fitWidget($('#fit-degree'), 'degree');
+fitWidget($('#fit-lambda'), 'lambda');
+dropoutWidget($('#do-widget'));
+bnWidget($('#bn-widget'));
+</script>
+<script>
+/* ---------- MyNN basics: forward pass of one image ---------- */
+(function forwardPass(){
+const SAMPLES = {"2": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000003e3d151d1733883d000000000000000000000000000000000058c9e4e1ff733e89ffebdeff87000000000000000000000000002ffceaeee0d7d7e56cb4cfd6e0e7f9fe2d0000000000000000010000d6ded2d5e0e1d9dcfee9dbddd9dfddf0fe0000010000000100000080edcfe0e0cfd8d6d2d0d3ddd0dbd5e2d3ed96000000000000020000edded7cfd2d4d5ced6d5d6d5d2d7d6cec7daff0d0002000000040055e4d2dac8d3d0cbd7d2d1d1d2d5d3d2d9ced5e7af00000000000000d9e0d7cecdccd9e6ded7e0e9e4e8e4e0cfd4d7d5e51f000400010015e1d4d4cbd3e1c18b88c3939c8b80a2c5dfcfdcd5e8b100000000007be2cfd3d1cde49e5a67ba8a6479939eb7e2d0d6d1d8ff0d00010000e2dbcad0cecdd8b89c96c1aaa4a8bcbac8dbd8d5d5d3e9940000002de3ccd6d3dadedde6e5ddd5e0e9e2dcdbdde0dfd9d2dad5fe0000009de2cbcfd3d1d7cdc6cfd0c9c9c5cbcdd2cfd5d6d6d6d5d0ea6b0000ebd5ccd3d2d1d5cac5ccd7d9d5d4d2ced4cbd3dad7d6d0d1dee60034ffcfc8d0d5d2d2d0cfcac9d1d8d8d8d8d6d4cdd7c9e4d0d6d4da1976d9c9ced0d5d0cdced2d3cac7cfd0d1d2cfd2d2f58b77ffcacbec72abeed4cbdcd8d9d1cfcdd2d3ceccced1d3d7d2ceddf200e0eae6b51a2791c9ff9d73fac8cfcecfd5d8cecdcecfced7cfddee0000bc5500000000001f0081fdbecfd0d0d0d1d3d3d1d1d1d4c9e2a5000000000000020000000059fec7c7c0c4c6c7c9cacbcccbcbc8de9b000303030200000001050000ffdae2e8e4e0dedcdbdbd9dddcd4ec5f0002000000000000000000009bc2a8aaabadadb3b1afacaba7a1b400000100010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "9": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101000000005115000100010000000000000000000000000000000100000000000ec83100000000000000000000000000000000020101010001000000a2b8a514000101030401000000000000000000000000010200020078b79ace20000505000000000000000000000000000000020003004ce3978b9e0000000000421700000000000000000001000100000037e0a28f79ccec90154a5abe0800000000000000000000010000002ae4a0947da5dfd0ddf6d3ae97000000000001030001000300090017e6a89377a3e3cec8beceba8bab2900000000000000000003040010d1b98b76b5e3d1ccd2c7e19d7fbe6f000103020103020300000043d6bb8b6fbfe5cbd0d0c4dfbc64809b7000000000000000000030a1daab9374b9ebc9d1cbccdcd07e85a2a4bb00000c1009041349aad3bc91959488dedacfd0d7e0c18c92a29c76cb252fffbcbbb6cbceb6938c94949486b4dadde1cc9c868b908c7b61ce1e58cba4a7aaa193939c9f99989b96868899918897a4a8aaa69982c80a83c39685848ea0a6a2999899979aa39398a3cdd0aeafb2b5a896c4019be4c5ac8a7b797a7e81878b909eb1c0eff4b2b0b7b3b9b19394c0000050c4c7d4d1beb0aab2b7c0ccccca903b030043d9b8bcb2a6a0bc0d000000033369b3d9ebe3d0c9853a000000000010bbc2b8b9afb583000003000000000000000000000000000505050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "6": "0000000000000005000000695c656b648400000204000100000000000000000000000000000096e3d3abbfece4ac00000000010000000000000000000000003099d1d2bbc78e9dd1b3c7e98a2c0000000000000000000000000078dad7cfc6c6dfdbd6e1beb1c3d1cc8b000100000000000000000000d0c8c5cac1cbcfe4f5c4c5cac1bea7cb1b0000000000000000000059d9c8d3afbdcdc7dad8b5b3b9c0c6b8c679000000000000000000008cdcccdfbbb6c8cfd9d5d2cfb4a1c0b8c7a200000000000000000000a6dacbc3b9c4bda7b5ceb1b0b5a5bbb3bdb700000000000000000000c4d7d3cec9c4b4bcd2cebeadb4bbc0b8c0c700000000000000000000d4d9e0d3d8c9bdb8cad2c2b6adadb0c0c3d000000000000000000000ded7e4cbd4c7c6bfbae4c3bfa1b2b1c6c2d21d000000000000000000f4d7ebced6caabc9b2cbbeb4bbc4b7cec3ce2c000000000000000000e9ddedb6cecfc3c8c0e0bfb6b1b4bab2c4cf3c000000000000000010f9e0e5c0d7cfc6c6c0e2c1c0b4b0b9c4c8d957000000000000000035dedfebcddcc897cec6d6c7aba1c5badac6d85800000000000000004bdfdfedc7dbcbc1ccc9dcc9c1b0bda7dacac66d00000000000000004ffae2f3c4dec9cecdcfdeb9c2babb90cfd0e26f000000000000000057f9def0e2c1bbcdcec6d4bebdb9b9bfd3d4d27100000000000000005ff9e3ecdbd5bacbdbc6cedac2b1b5c394e5ce7a00000000000000006af8e4e0cecac8cebfbec2cbc4b4b4b994e4d67500000000000000006ef2e1efdaccc9cad3c1c5d9cbb7b8afd4dbce7a00000000000000007af9eaf1d8d7c4c8ded0c3e1d4b5bab7e3d6d379000000000000000094e6ede4d6d5c9cfd6c9ccebbfa1b9b4d8c9d477000000000000000097e6ebe5dad1c6c1e2b6bdf0c8babcbcdad8d16e000000000000000060ede9edcfc8cbbfd5aabaefd1baadba9cc7d954000000000000000059edcf79ffc1b7c1d1e0d0e0cba0b8df00bad86600000000000000006cf2fd0070ffd9d3e3f5c3c2d3dcd64a00ffde800000000000000000002c0c00002886a2bfd6a392a54f0000001e2b0000000000", "0": "0000000102000000000072b77037174866a5a01c00000001000000000000000001000018bca35d8899a8fcae88a6827b834200000100000000000002000a9dd8e2d08e427395e6bec4c6acde6ba5d30000000000000000000076d6aea86dc87c968f3a3f598961a88a8ec39c0000000000000000198c46502b47605d9779c58f6b52656f5089c1d006000000000000004ac26b92b2b9b64db9dad2afaeebd9d981b4d2d05900000000000000b3d5cbb1e4c0c1a28facc4cdb5b48c86b0c2abaa4100000000000000b8c2e5d1b0c681e3e18cc482b3916d4fb6dfa4c3e900000000000026b4b1d5ca9f8162b3955abbd33d865b3976d4dcdacf000000000000729a8eb6db82585134366a5d6e9fdee35375fddad2ce300000000000127fd0e4b9acf05b7ed0a59ad5d6e5d7afdecc99827d2700000000000000001c00d4e4aaddcde1e4d2b2d65975d5000000000000000000000000000000c48d38b0d2a4a25b87c49e45b500000302030000000000000001000096be583291c29f7888cfe690ab040001000000000000000000000000bbdcb6488bc7c0e8fff4c6aabd020003000000000000000000000000baafb55da4e686998e894f8fb70000020000000000000000000000005d48908aa4717c625039618a7c04000300000000000000000000000095ab6246b498e3ad8fb4b77fce260005000000000000000001000000c3d2e271bbe0d2bfb5e0d4c6ac24000600000000000000000100000099c5abafa1abc7e0bbcec0b0b3300006010000000000000000000000b4c388e6f094cc8cadc7c19cd5250005000000000000000000010000966548a79e5fb1ea718e703b98160003000000000000000000000000c5b2522f406a70796ebde179623a0004000000000000000000020000cadba187cdc89cc3e7eadab6df630006000000000000000000040000bc9876ded6cbe9e2c1c8ad35a6610006000000000000000000030002b6983359aeb7a8706db5aa886c3c0004000000000000000000020005c2c1cc6874f1d9c4abf9cfc5ca2d0003000000000000000000000100000016151945342d4a2703000000000100000000", "3": "0000000000000000000000002e001544000000000000000000000000000000000000000019bbbd0077adef7000bd7d000000000000000000000000000000000edbe0d35c34e3e07f5cc4ed880000000000000000000000000000006aeecacde0e1d9dadee3caceda000000000000000000000000000000a6efd8d6c0b5cdccb4bbcdd0e62d0000000000000000000000000000dcebe9d5cdc9b9b8c8c7dfe0e8650000000000000000000000000000fceee2e2dde0c3c6dfe5cdcaeb9e0000000000000000000000000009e4f17deee4e1d4d7defaa88df3c50000000000000000000000000033e8f722e1eddbdedfd8f8b67cf6c80000000000000000000000000045ecff00daf0dbddded6fc9947f8d70000000000000000000000000052f8f700e7ecdbddddd4fd6d00f7e0130000000000000000000000006afcc600fae6dcdbdbd4fc8100ffe83b00000000000000000000000086fc9600fed7dbdbdbd8e9de00fded59000000000000000000000000a3fd7e73fdd3dedcdbdbd5fd36cef390000000000000000000000000cdff95d1eadbdddcdbdbd5f4a4e0f0c3000000000000000000000000090014fddbdddbdbdbdbdde0e6000000000000000000000000000000000031fed9dddbdbdbdcddd8fd07000000000000000000000000000006005ee5d8dcdadadbdcdbdae2340005000000000000000000000000040077e7d6dcd9dadbdcddd9e0220003000000000000000000000000030071e7d5ded9dadbdcdbdbdb0a0002000000000000000000000000030033e3d7ddd9d9dbdcdadbd5000001000000000000000000000000020000d8d9dbdadadbdbdadcf6000002000000000000000000000000020000d9d8d8dbdadbdbd9deeb000002000000000000000000000000020000d4d8d9dbdadbdbd8e0cc000002000000000000000000000000040003d9d8d9dbdadcdcdaded1000002000000000000000000000000030004d6d3d5d5d7d5d3d6dcc8000001000000000000000000000000030000d6e8e5f9f5f8fce6ede500000100000000000000000000000000000044747088939079663f00000000000000000000", "4": "00000005040505030506020000000000000002030704040505000000000000040504050b02000015e79c86b1c2010000000a0505040000000000000405030700001a70a8a2d4e2c792a87c190000000405000000000000040508000f5f8eaa907b9cac8c8387a0898d3500000300000000000005060000a5827882387c7a448f6f62847d6fa43c000600000000000003070063a5879a6242828d728f71476b9375b0ac0005000000000000040000c5bca99492846e856b8b83858d9c8faaba0000000000000000060000e1828ca9946e2d758976356193939a85ca1200000000000000070030d3877c8c539e91a07e97889c716ea7a8d95d00000000000000060068dbd0a69d82aa89909ba096a09e78c2dcd58000000000000000060085d5ebcea9c28b4c77b28b6378c7a7bee2d298000000000000000400a5d1e9ed839e977c939d956c89bb6193e9ccb8000000000000000000c7cae9f5a54c8aaea0949f9ba37d5ae6e4cbd2000000000000000000dac4eef9cc658fb8ab95a3ad9e6784ffd9cdde000000000000000000eac1edffa98bc7b6b59aabbab59a94f2d8d0dc000000000000000007efbef3e767a49058bc9db19a76b569e2dfd2db00000000000000001ef2bbf6c45da2735bbb97b672419e74b0dcd8df00000000000000002ecebbed9c6abab4b2ada0b0b4a1bc8885e2dbdb14000000000000004cd0b9f99895ab6ea3aea0a7be8a959a93e1d8ce2d0000000000000059cabae298a77a4a97bb95a6b6714785a8d0dab319000000000000006cc1b4c5989ba073a8c09aa1c18d7a9f9cc1d5aa1d000000000000008dc1aaa997a1a399a8c69b99bca4a1aa94c3d2bc3c00000000000000b2b8bca394a0a3a4a2ca9b9cbba898ac94adcfe06400000000000000bcb5ccc2929ea1a9b1b99a94a8a99da19bbcd1be3e0000000000000075c6bd50d8c9cdcdd1e9bdc5d3cac8c9d296dcc5480000000000000097d6b5069952381e0300494a291c1e2e4e0dc992270000000000000007223a000000000000000000000000000000000000000000000000040000000204090708070504080c0507080704030705000000", "5": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001020100005f2e00000000000000000001000000000000000000010200000040cc9bcb2800000000005bac93f7160000000000010200000000399ad9320facbf210064e5e8d4932f0e0000000000000000001956a8d66600000000c5cbb7e5d96300000000000001020000003cbae5821a00000002020017def61600000002010702000000000000e7580000000000000000000016e2c5000000000000000027464b245baf002021201a1c1c242a282c0182fec425554e4d4d5219001c35403c2e585860595c5c5c5c5c5852552b20607c72716e6b773600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "8": "00000000000000000000000100008d2d000100000000000000000000000000000000000000000006005667412a000300000000000000000000000000000000000000000100a200589600070000000000000000000000000000000000000003002d8a00229c000100000000000000000000000000000000000000040076330000aa00000100000000000000000000000000000000000000009900010093470004000000000000000000000000000000000003003299000300657000090000000000000000000000000000000000040064730003003b90000400000000000000000000000000000000000000912a00010010ad000001000000000000000000000000000000010000b30000010000b90a0004000000000000000000000000030404030044e80000040000bd48000401060000000000000000000000000000007cc90000000000b6b60000000000000000000000000000166a67764eb1c0366168794babc33f5653500000000000000000000036d2c8bfc5dfe3ccd6b1c5a89dc8c5c6cfb70000000000000000000012c3c2c0b7a6b7b08a798eb1a58bbfc3ce840000000000000000000004ddbdb197a8aa9981888a94ab9a94cbf16d0000000000000000000000d7bcb4bdb9b3c9a0a2ae9391abaab1f4500000000000000000000000b1dcd4c3c0b18790b7b1909a9fbdb1d42800000000000000000000009adfcfc5c69c97a2c2a399a0b0c2cfe800000000000000000000000059ddd2ccd9cfc9c2b08aa0a5c2c5d1e00000000000000000000000001eebe0d2e0f4e8dcd4c8c2b3c9cec9cb00000000000000000000000000ecc9c2d6cecbd4e0dde0dcd9d1c9ae00000000000000000000000000d7dcd4d6c3ccd7dddddfe2e2cfce9300000000000000000000000000a2ebd2ccdce8ebeeebe5dfddd4d4770000000000000000000000040088f2daeff7eee5dcc8c2ccd2d9dc560000000000000000000000010068e8cfc3bab7b7c0c9d9dcdcdada150000000000000000000000030030f4d6d1d4e5f1f5f4eee5e3dfff000000000000000000000000030000dcd7d2c6b9bcc2b1bdc6cbd6a600000000000000", "7": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070000c19a000000000000000000000000000000412e36b50f000000000068aa9e00000000000000000000000000004dad9a457b3d000000005cc58bbd0000000000000000000000001751927bc8aa517377363d64c587b9bd0000000000000000000000226c87967f6cb9d48e6449516c6c96b1c80f00000000000000000b4d7b8b6c6092c8c8d8f7e0dcbdadc1ccb5c587000000000000004da29a737f96c8c5aaadbdccebfff7e7e3e0cccc7b00031b0f55705c8b4d395c839a9eaab5bdccc5d0d0c5b5c1c1b9d8871b36494d7068878377aab5d0e3ebefeff3fbebe3e3e3e0d8c8aaad68322a321b3645605864606064646c68605c606060605c64707070776449393d585c646c6858555c64646c70777b7b777b7f838b87878ba28770a27b776c777b7b73777b7b7f87878b8b8ea29ea2a2a6b1b5b1c196000b3d585873737b737b7b7b7b7373706868706864645c64603d260000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "1": "000000000000000000abfcd5d9d9dbdad9d0f5290000000000000000000000000000000000f8ffebf0f1f4f4f4eaff7b0000000000000000000000000000000000ffe6e6eaeae8eaede5ff9a000000000000000000000000000000003effe2e8eaebebedeee7fbc00000000000000000000000000000000073ffe1eaebecedebebe9efe10000000000000000000000000000000091ffe2ebececf1e9eaeaebee000000000000000000000000000000009cffe2ededeaf3e9e8e9ecef0000000000000000000000000000000087ffe0ecedf6ffe7e8e9eded0000000000000000000000000000000075ffe2e9f8e5d1f8e6e7f5de0000000000000000000000000000000051ffe4e8ffb36affe1e9ffbb0000000000000000000000000000000021ffe3e5ff9225ffdfe4ff8a0000000000000000000000000000000000ffeae8ff6200ffe3e3ff470000000000000000000000000000000000ffeee7ff3800ffeae9ff0e0000000000000000000000000000000000fbeee8ff1c00ffebecff000000000000000000000000000000000000f1f1e8ff0000ffedeffc000000000000000000000000000000000000e1f4e9ff0000f7f0f3eb000000000000000000000000000000000000caf6eaff0000f1f1f4e5000000000000000000000000000000000000baf6eaff0000e5f2f7d2000000000000000000000000000000000000a3f5ebff0000dff4f9be00000000000000000000000000000000000084f7ecfe0000dff3fa9b00000000000000000000000000000000000060faebff0000ddf1fb6b00000000000000000000000000000000000046faecfe0000dcf1fb490000000000000000000000000000000000002ef3effd0000d8f5f42d00000000000000000000000000000000000009eaf1fc0000d5f9e60000000000000000000000000000000000000000daf4f80000d2fcd70000000000000000000000000000000000000000c5f7dd0000bdffb2000000000000000000000000000000000000010083ffdf0000b8ff92000200000000000000000000000000000000010000e7c60000a5f42000010000000000000000"};
+const CSV_ROW = {0:3, 1:29, 2:0, 3:4, 4:5, 5:7, 6:2, 7:21, 8:9, 9:1};
+const NAMES = ['T-shirt/top','Trouser','Pullover','Dress','Coat','Sandal','Shirt','Sneaker','Bag','Ankle boot'];
+const SIMILAR = {0:[6,2,3], 1:[3], 2:[4,6,0], 3:[1,4], 4:[2,6], 5:[7,9], 6:[0,2,4], 7:[5,9], 8:[4], 9:[7,5]};
+const $ = s => document.querySelector(s);
+const clamp = (v, a=0, b=1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, u) => a + (b-a)*u;
+const ease = u => u < .5 ? 2*u*u : 1 - (-2*u+2)**2/2;
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- example model (random weights, real math) ---------- */
+const R = rng(20260915);
+const W1 = Float32Array.from({length:128*784}, () => (R()*2-1)*0.09);
+const W2 = Float32Array.from({length:64*128}, () => (R()*2-1)*0.25);
+function compute(k){
+  const pix = Array.from({length:784}, (_,i) => parseInt(SAMPLES[k].substr(i*2,2),16));
+  const x = pix.map(v => v/255);
+  const h1 = Array.from({length:128}, (_,j) => { let s = -0.05; for (let i = 0; i < 784; i++) s += W1[j*784+i]*x[i]; return Math.max(0, s); });
+  const h2 = Array.from({length:64}, (_,j) => { let s = -0.02; for (let i = 0; i < 128; i++) s += W2[j*128+i]*h1[i]; return Math.max(0, s); });
+  const r = rng(k*131+7);
+  const z = NAMES.map((_,c) => c === k ? 3.1 + r()*0.6 : SIMILAR[k].includes(c) ? 1.1 + r()*0.9 : -0.9 + r()*1.1);
+  const ez = z.map(Math.exp), sum = ez.reduce((a,b) => a+b, 0), p = ez.map(v => v/sum);
+  const img = document.createElement('canvas'); img.width = img.height = 28;
+  const strip = document.createElement('canvas'); strip.width = 1; strip.height = 784;
+  const gi = img.getContext('2d'), gs = strip.getContext('2d'), di = gi.createImageData(28, 28), ds = gs.createImageData(1, 784);
+  pix.forEach((v, i) => { di.data.set([v,v,v,255], i*4); ds.data.set([v,v,v,255], i*4); });
+  gi.putImageData(di, 0, 0); gs.putImageData(ds, 0, 0);
+  return {k, pix, x, h1, h2, z, p, sum, loss: -Math.log(p[k]), img, strip};
+}
+
+/* ---------- steps ---------- */
+const STEPS = [
+  {chip:'Image', shape:'28 × 28', title:'Start with one image',
+   body:'A single training image from the CSV. The notebook draws rows like this one with reshape(28, 28) and a gray colormap.',
+   code:"img = df.iloc[i, 1:].values.reshape(28, 28)\nax.imshow(img, cmap='gray')"},
+  {chip:'Pixels', shape:'784 values · 0–255', title:'An image is just numbers',
+   body:'Each square is one number: 0 is black, 255 is white. The CSV stores them in 784 columns named pixel1 to pixel784.',
+   code:'X = df.iloc[:, 1:].values    # 784 pixel columns'},
+  {chip:'÷ 255', shape:'784 values · 0–1', title:'Scale to 0–1',
+   body:'Dividing by 255 keeps every input small, which keeps training with lr = 0.1 stable.',
+   code:'X_train = X_train/255.0'},
+  {chip:'Unroll', shape:'(1, 784)', title:'Unroll into the input layer',
+   body:'The 28 rows are laid end to end: row 1 is pixel1–28, row 2 is pixel29–56, and so on. That list of 784 numbers is the input layer. The CSV already stores it this way; the 28 × 28 grid is only for viewing.',
+   code:'self.features = torch.tensor(features, dtype=torch.float32)'},
+  {chip:'Hidden 1', shape:'(1, 128)', title:'Hidden layer 1: 128 neurons',
+   body:'Every neuron multiplies all 784 inputs by its own weights, adds a bias, then ReLU turns negative results into 0. Brighter blue = bigger output; empty = 0.',
+   code:'nn.Linear(num_features, 128),\nnn.ReLU(),'},
+  {chip:'Hidden 2', shape:'(1, 64)', title:'Hidden layer 2: 64 neurons',
+   body:'The same recipe again, now reading the 128 outputs of Hidden 1.',
+   code:'nn.Linear(128, 64),\nnn.ReLU(),'},
+  {chip:'Scores', shape:'(1, 10)', title:'10 raw scores (logits)',
+   body:'The last Linear gives one score per class. Scores can be any number, even negative, and they don\'t add up to anything yet.',
+   code:'nn.Linear(64, 10)\noutputs = model(batch_features)'},
+  {chip:'Softmax', shape:'10 probabilities · sum 1', title:'Softmax: scores → probabilities',
+   body:'Softmax makes every score positive and scales them to add up to 100%. The biggest score gets the biggest share.',
+   code:'# happens inside nn.CrossEntropyLoss()\ncriterion = nn.CrossEntropyLoss()'},
+  {chip:'Loss', shape:'1 number', title:'Cross-entropy loss: only the true class counts',
+   body:'The loss is −log of the probability given to the correct label. Confident and right → close to 0. Unsure or wrong → large. Training changes the weights to push this number down.',
+   code:'loss = criterion(outputs, batch_labels)'},
+  {chip:'Overfitting', shape:'48,000 images × 100 epochs', title:'From one image to overfitting',
+   body:'Training repeats this for all 48,000 training images, 100 times, nudging the weights after every batch. Train loss keeps falling. When test loss stops following it, the network is memorizing: that\'s overfitting.',
+   code:'for epoch in range(epochs):\n  for batch_features, batch_labels in train_loader:\n    outputs = model(batch_features)\n    loss = criterion(outputs, batch_labels)'}
+];
+const DUR = [1600, 2200, 1800, 2600, 2400, 2000, 1800, 2000, 2400, 2600];
+
+/* ---------- state ---------- */
+let D = compute(2), stage = 0, t = 1, playing = false, every = false, lastTs = 0;
+
+/* ---------- canvas setup ---------- */
+const cv = $('#fp-cv'), ctx = cv.getContext('2d');
+const W = 1100, H = 560;
+let C = {};
+function readColors(){
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  C = {surface:g('--surface'), ink:g('--ink'), muted:g('--muted'), rule:g('--rule'), code:g('--code'), hl:g('--hl'), act:g('--reg'), pulse:g('--l2'), good:g('--good')};
+}
+const rgb = h => { h = h.replace('#',''); return [0,2,4].map(i => parseInt(h.substr(i,2),16)); };
+function mix(a, b, u){ const A = rgb(a), B = rgb(b); return `rgb(${A.map((v,i) => Math.round(lerp(v, B[i], clamp(u)))).join(',')})`; }
+function size(){
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  if (!r.width) return;
+  cv.width = Math.round(r.width*dpr); cv.height = Math.round(r.width*H/W*dpr);
+  ctx.setTransform(cv.width/W, 0, 0, cv.height/H, 0, 0);
+  draw(performance.now());
+}
+const MONO = '"IBM Plex Mono", ui-monospace, Menlo, monospace', SANS = '"IBM Plex Sans", system-ui, sans-serif';
+function text(s, x, y, o = {}){
+  ctx.font = `${o.w || 400} ${o.size || 13}px ${o.sans ? SANS : MONO}`;
+  ctx.fillStyle = o.color || C.ink; ctx.textAlign = o.align || 'left'; ctx.textBaseline = o.base || 'alphabetic';
+  ctx.globalAlpha = o.a ?? 1; ctx.fillText(s, x, y); ctx.globalAlpha = 1;
+}
+function circle(x, y, r, fill, stroke, lw = 1){
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+
+/* ---------- layout ---------- */
+const IX = 30, IY = 112, CELL = 9;                  // image
+const MX = 318, MY = 112, MC = 40;                  // magnifier (6×6)
+const SX = 330, SY = 104, SH = 432, HS = SH/784;    // input strip
+const evenly = (n, k) => Array.from({length:k}, (_,i) => Math.round(i*(n-1)/(k-1)));
+const LAYERS = [
+  {x:400, n:784, tb:Array.from({length:14}, (_,i) => (i+7)*28 + 14), sp:26, r:8},
+  {x:600, n:128, tb:evenly(128, 12), sp:30, r:9.5},
+  {x:770, n:64,  tb:evenly(64, 10),  sp:34, r:9.5},
+  {x:880, n:10,  tb:evenly(10, 10),  sp:38, r:11}
+];
+const CY = 320;
+function tbY(L, j){ const n = L.tb.length, half = n/2, gap = L.n === 10 ? 0 : L.sp*0.9; return CY + (j - (n-1)/2)*L.sp + (L.n === 10 ? 0 : (j >= half ? gap/2 : -gap/2)); }
+function nodes(l){
+  const L = LAYERS[l];
+  if (l === 3) return L.tb.map((idx, j) => ({idx, x:L.x, y:tbY(L, j), r:L.r}));
+  if (!every) return L.tb.map((idx, j) => ({idx, x:L.x, y:tbY(L, j), r:L.r}));
+  if (l === 0) return Array.from({length:784}, (_,i) => ({idx:i, x:SX+12, y:SY + i*HS + HS/2, r:0}));
+  const n = L.n, top = 106, bot = 534;
+  return Array.from({length:n}, (_,i) => ({idx:i, x:L.x, y:lerp(top, bot, i/(n-1)), r: l === 1 ? 1.5 : 2.6}));
+}
+const ER = rng(99);
+const SAMPLE_IN = Array.from({length:128}, () => Array.from({length:5}, () => Math.floor(ER()*784)));
+const SAMPLE_H1 = Array.from({length:64}, () => Array.from({length:7}, () => Math.floor(ER()*128)));
+function edges(l){
+  const A = nodes(l), B = nodes(l+1), out = [];
+  if (every && l === 0) B.forEach(b => SAMPLE_IN[b.idx].forEach(i => out.push([A[i], b])));
+  else if (every && l === 1) B.forEach(b => SAMPLE_H1[b.idx].forEach(i => out.push([A[i], b])));
+  else A.forEach(a => B.forEach(b => out.push([a, b])));
+  return out;
+}
+function layerVals(l){ return l === 0 ? D.x : l === 1 ? D.h1 : l === 2 ? D.h2 : null; }
+function maxOf(a){ return Math.max(1e-6, ...a); }
+
+/* ---------- drawing ---------- */
+function prog(k){ const tt = RM ? 1 : t; return stage > k ? 1 : stage === k ? tt : 0; }
+function draw(now){
+  readColors();
+  ctx.clearRect(0, 0, W, H); ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
+  const tt = RM ? 1 : t;
+
+  // column headers
+  const hdr = (x, a, b, on, align='left') => { text(a, x, 40, {sans:true, w:600, size:15, color:on ? C.act : C.ink, align}); text(b, x, 60, {size:12, color:C.muted, align}); };
+  hdr(IX, 'Image', 'real pixels · 28 × 28', stage <= 2);
+  hdr(SX, 'Input layer', '784 numbers', stage === 3);
+  hdr(LAYERS[1].x, 'Hidden 1', '128 · ReLU', stage === 4, 'center');
+  hdr(LAYERS[2].x, 'Hidden 2', '64 · ReLU', stage === 5, 'center');
+  hdr(866, 'Output', '10 classes', stage >= 6);
+
+  // image
+  const imgA = Math.max(stage === 0 ? ease(tt) : 1, 0);
+  ctx.imageSmoothingEnabled = false;
+  ctx.globalAlpha = imgA; ctx.drawImage(D.img, IX, IY, 28*CELL, 28*CELL); ctx.globalAlpha = 1;
+  ctx.strokeStyle = C.rule; ctx.lineWidth = 1; ctx.strokeRect(IX-.5, IY-.5, 28*CELL+1, 28*CELL+1);
+  text(`label ${D.k} · ${NAMES[D.k]}`, IX, IY + 28*CELL + 24, {w:600, size:13, a:imgA});
+  text(`CSV row ${CSV_ROW[D.k]}`, IX, IY + 28*CELL + 42, {size:12, color:C.muted, a:imgA});
+  if (stage >= 1 && stage <= 3) {
+    const ga = stage === 3 ? 1 - clamp(tt/0.3) : stage === 1 ? clamp(tt*3) : 1;
+    ctx.globalAlpha = 0.35*ga; ctx.strokeStyle = '#7f8a94'; ctx.lineWidth = 0.6;
+    for (let i = 1; i < 28; i++) { ctx.beginPath(); ctx.moveTo(IX + i*CELL, IY); ctx.lineTo(IX + i*CELL, IY + 28*CELL); ctx.moveTo(IX, IY + i*CELL); ctx.lineTo(IX + 28*CELL, IY + i*CELL); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+  }
+
+  // network skeleton (always visible, faint)
+  for (let l = 0; l < 3; l++) {
+    ctx.strokeStyle = C.muted; ctx.globalAlpha = every ? 0.05 : 0.09; ctx.lineWidth = 1;
+    ctx.beginPath(); edges(l).forEach(([a, b]) => { ctx.moveTo(a.x + a.r, a.y); ctx.lineTo(b.x - b.r, b.y); }); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  for (let l = 1; l < 4; l++) nodes(l).forEach(n => circle(n.x, n.y, n.r || 1.5, C.surface, C.rule, every && l < 3 ? 0.8 : 1.2));
+  if (!every) [0,1,2].forEach(l => text('⋮', LAYERS[l].x, CY + 5, {size:18, color:C.muted, align:'center'}));
+  // input strip frame + input circles skeleton
+  ctx.strokeStyle = C.rule; ctx.strokeRect(SX-.5, SY-.5, 13, SH+1);
+  if (stage >= 3) {
+    text('pixel1', SX - 6, SY + 8, {size:10.5, color:C.muted, align:'right'});
+    text('pixel784', SX - 6, SY + SH, {size:10.5, color:C.muted, align:'right'});
+  }
+  if (!every) nodes(0).forEach(n => circle(n.x, n.y, n.r, C.surface, C.rule, 1.2));
+
+  // unroll: pixels fly from grid into the strip
+  if (stage === 3 && tt < 1) {
+    for (let i = 0; i < 784; i++) {
+      const r = Math.floor(i/28), c = i%28, u = ease(clamp((tt - (r/28)*0.55)/0.45)), v = D.pix[i];
+      ctx.fillStyle = `rgb(${v},${v},${v})`;
+      ctx.fillRect(lerp(IX + c*CELL, SX, u), lerp(IY + r*CELL, SY + i*HS, u), lerp(CELL, 12, u), lerp(CELL, Math.max(HS, 0.7), u));
+    }
+  }
+  if (stage > 3 || (stage === 3 && tt >= 1)) {
+    ctx.imageSmoothingEnabled = false; ctx.drawImage(D.strip, SX, SY, 12, SH);
+  }
+  // input neurons
+  const inA = stage > 3 ? 1 : stage === 3 ? clamp((tt - 0.7)/0.3) : 0;
+  if (inA > 0 && !every) {
+    ctx.globalAlpha = 0.35*inA; ctx.strokeStyle = C.muted; ctx.lineWidth = 0.8;
+    nodes(0).forEach(n => { ctx.beginPath(); ctx.moveTo(SX + 13, SY + n.idx*HS); ctx.lineTo(n.x - n.r, n.y); ctx.stroke(); });
+    ctx.globalAlpha = inA;
+    nodes(0).forEach(n => { const v = D.pix[n.idx]; circle(n.x, n.y, n.r, `rgb(${v},${v},${v})`, C.muted, 1); });
+    const f = nodes(0)[0], la = nodes(0).at(-1);
+    text(`pixel${f.idx+1}`, f.x + 13, f.y + 4, {size:10.5, color:C.muted});
+    text(`pixel${la.idx+1}`, la.x + 13, la.y + 4, {size:10.5, color:C.muted});
+    ctx.globalAlpha = 1;
+  }
+
+  // layer flows: stage 4 → in→h1, 5 → h1→h2, 6 → h2→out
+  for (let l = 0; l < 3; l++) {
+    const s = 4 + l, p = prog(s);
+    if (p <= 0) continue;
+    const E = edges(l);
+    ctx.strokeStyle = C.act; ctx.globalAlpha = (every ? 0.07 : 0.16)*p; ctx.lineWidth = 1;
+    ctx.beginPath(); E.forEach(([a, b]) => { ctx.moveTo(a.x + a.r, a.y); ctx.lineTo(b.x - b.r, b.y); }); ctx.stroke();
+    if (stage === s && tt < 1 && !RM) {
+      ctx.strokeStyle = C.pulse; ctx.globalAlpha = 0.75*Math.sin(Math.PI*tt); ctx.lineWidth = every ? 0.8 : 1.4;
+      ctx.setLineDash([5, 11]); ctx.lineDashOffset = -now*0.06;
+      ctx.beginPath(); E.forEach(([a, b]) => { ctx.moveTo(a.x + a.r, a.y); ctx.lineTo(b.x - b.r, b.y); }); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.globalAlpha = 1;
+    if (l < 2) {
+      const vals = layerVals(l+1), m = maxOf(vals);
+      nodes(l+1).forEach((n, j) => {
+        const order = j / Math.max(1, nodes(l+1).length - 1), u = clamp((p - order*0.6)/0.4), v = vals[n.idx]/m;
+        if (u <= 0) return;
+        ctx.globalAlpha = u; circle(n.x, n.y, n.r || 1.5, v > 0 ? mix(C.surface, C.act, 0.18 + 0.82*v) : C.surface, v > 0 ? C.act : C.rule, every ? 0.6 : 1.2); ctx.globalAlpha = 1;
+      });
+    }
+  }
+
+  // outputs
+  const zMin = Math.min(...D.z), zMax = Math.max(...D.z), pS = prog(6), pP = prog(7), pL = prog(8);
+  nodes(3).forEach((n, j) => {
+    const k = n.idx, isTrue = k === D.k;
+    if (pL > 0 && isTrue) { ctx.globalAlpha = pL; ctx.fillStyle = C.hl; ctx.beginPath(); ctx.roundRect(866, n.y - 16, 228, 32, 6); ctx.fill(); ctx.globalAlpha = 1; }
+    if (pS > 0) { const v = (D.z[k] - zMin)/(zMax - zMin); ctx.globalAlpha = pS; circle(n.x, n.y, n.r, mix(C.surface, C.act, 0.12 + 0.88*v), C.act, 1.2); ctx.globalAlpha = 1; }
+    text(NAMES[k], 900, n.y + 4.5, {sans:true, size:13, w: pL > 0 && isTrue ? 600 : 400, color: stage >= 6 ? C.ink : C.muted});
+    const bx = 990, bw = 64;
+    if (pS > 0 && pP < 1) text(`${D.z[k] >= 0 ? ' ' : ''}${D.z[k].toFixed(2)}`, bx, n.y + 4.5, {size:12.5, color:C.ink, a:pS*(1 - pP)});
+    if (pP > 0) {
+      ctx.fillStyle = C.code; ctx.globalAlpha = pP; ctx.fillRect(bx, n.y - 6, bw, 12);
+      ctx.fillStyle = pL > 0 ? (isTrue ? C.good : mix(C.surface, C.muted, 1 - 0.5*pL)) : C.act;
+      ctx.fillRect(bx, n.y - 6, bw*D.p[k]*ease(pP), 12); ctx.globalAlpha = 1;
+      text(`${(D.p[k]*100).toFixed(D.p[k] < 0.1 ? 1 : 0)}%`, 1092, n.y + 4.5, {size:12, align:'right', a:pP, w: isTrue && pL > 0 ? 600 : 400});
+    }
+  });
+  if (pS > 0 && pP < 1) text('score (logit)', 990, 106, {size:11, color:C.muted, a:pS*(1-pP)});
+  if (pP > 0) text('probability', 990, 106, {size:11, color:C.muted, a:pP});
+  if (pL > 0) {
+    const n = nodes(3)[D.k];
+    text(`loss = −log(${D.p[D.k].toFixed(2)}) = ${D.loss.toFixed(2)}`, 1092, 530, {w:600, size:13.5, align:'right', color:C.good, a:pL});
+  }
+
+  // step 10: repeat for the whole training set
+  const pO = prog(9);
+  if (pO > 0) {
+    ctx.globalAlpha = pO; ctx.strokeStyle = C.pulse; ctx.lineWidth = 2;
+    if (stage === 9 && tt < 1 && !RM) { ctx.setLineDash([7, 7]); ctx.lineDashOffset = now*0.05; }
+    ctx.beginPath(); ctx.moveTo(880, 528); ctx.quadraticCurveTo(640, 578, 400, 528); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C.pulse; ctx.beginPath(); ctx.moveTo(400, 528); ctx.lineTo(413, 527); ctx.lineTo(406, 538); ctx.closePath(); ctx.fill();
+    ctx.font = `600 14px ${MONO}`; ctx.textAlign = 'center'; ctx.lineWidth = 5; ctx.strokeStyle = C.surface; ctx.strokeText('repeat: 48,000 images × 100 epochs', 640, 546);
+    ctx.globalAlpha = 1;
+    text('repeat: 48,000 images × 100 epochs', 640, 546, {w:600, size:14, align:'center', color:C.pulse, a:pO});
+  }
+
+  // magnifier (pixel values), drawn on top
+  if (stage === 1 || stage === 2 || (stage === 3 && tt < 0.3)) {
+    const a = stage === 1 ? clamp(tt*2.5) : stage === 3 ? 1 - tt/0.3 : 1;
+    const u = stage === 1 ? ease(clamp((tt - 0.2)/0.8)) : 1;
+    const pr = Math.round(lerp(6, 12, u)), pc = Math.round(lerp(5, 11, u));
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = C.pulse; ctx.lineWidth = 2; ctx.strokeRect(IX + pc*CELL, IY + pr*CELL, 6*CELL, 6*CELL);
+    ctx.lineWidth = 1; ctx.beginPath();
+    ctx.moveTo(IX + (pc+6)*CELL, IY + pr*CELL); ctx.lineTo(MX, MY);
+    ctx.moveTo(IX + (pc+6)*CELL, IY + (pr+6)*CELL); ctx.lineTo(MX, MY + 6*MC); ctx.stroke();
+    ctx.fillStyle = C.surface; ctx.fillRect(MX - 6, MY - 30, 6*MC + 12, 6*MC + 40);
+    text(`rows ${pr+1}–${pr+6}, columns ${pc+1}–${pc+6}`, MX, MY - 10, {size:11.5, color:C.muted});
+    const scaled = stage >= 2, sw = stage === 2 ? ease(tt) : stage === 3 ? 1 : 0;
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 6; c++) {
+      const v = D.pix[(pr+r)*28 + pc + c];
+      ctx.fillStyle = `rgb(${v},${v},${v})`; ctx.fillRect(MX + c*MC, MY + r*MC, MC - 1, MC - 1);
+      const col = v > 130 ? '#111' : '#eee', cx = MX + c*MC + MC/2, cy = MY + r*MC + MC/2 + 4;
+      if (sw < 1) text(String(v), cx, cy, {size:12, align:'center', color:col, a:a*(1 - sw)});
+      if (sw > 0) text((v/255).toFixed(2), cx, cy, {size:11, align:'center', color:col, a:a*sw});
+    }
+    ctx.strokeStyle = C.pulse; ctx.lineWidth = 2; ctx.strokeRect(MX - 1, MY - 1, 6*MC + 1, 6*MC + 1);
+    if (stage === 2) text('÷ 255', MX + 6*MC/2, MY + 6*MC + 26, {w:600, size:14, align:'center', color:C.pulse, a:a});
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* ---------- explanation panel ---------- */
+function curve(p){
+  const w = 340, h = 150, L = 36, Rr = 10, T = 10, B = 26, X = v => L + v*(w-L-Rr), Y = v => T + (1 - v/4.6)*(h-T-B);
+  let d = ''; for (let i = 1; i <= 100; i++) { const q = i/100; d += `${i === 1 ? 'M' : 'L'}${X(q).toFixed(1)} ${Y(Math.min(4.6, -Math.log(q))).toFixed(1)}`; }
+  const lp = -Math.log(p);
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Loss curve: loss equals minus log of p">
+    ${[0,1,2,3,4].map(v => `<line x1="${L}" x2="${w-Rr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" style="font:11px var(--mono);fill:var(--muted)">${v}</text>`).join('')}
+    ${[0,0.5,1].map(v => `<text x="${X(v)}" y="${h-8}" text-anchor="${v===0?'start':v===1?'end':'middle'}" style="font:11px var(--mono);fill:var(--muted)">${v}</text>`).join('')}
+    <path d="${d}" fill="none" stroke="var(--reg)" stroke-width="2.5"/>
+    <line x1="${X(p)}" x2="${X(p)}" y1="${Y(0)}" y2="${Y(lp)}" stroke="var(--good)" stroke-dasharray="3 3"/>
+    <circle cx="${X(p)}" cy="${Y(lp)}" r="5.5" fill="var(--good)"/>
+    <text x="${X(p) + (p > 0.62 ? -10 : 10)}" y="${Math.max(24, Y(lp) - 16)}" text-anchor="${p > 0.62 ? 'end' : 'start'}" style="font:600 12px var(--mono);fill:var(--good);paint-order:stroke;stroke:var(--surface);stroke-width:4px">p = ${p.toFixed(2)} → loss ${lp.toFixed(2)}</text>
+  </svg>`;
+}
+function fitSketch(){
+  const w = 340, h = 140, L = 34, Rr = 10, T = 10, B = 26, X = e => L + (e-1)/99*(w-L-Rr), Y = v => T + (1 - v/1.2)*(h-T-B);
+  const tr = e => 0.95*Math.exp(-e/14) + 0.07, te = e => 0.95*Math.exp(-e/14) + 0.3 + (e > 20 ? 0.0028*(e-20) : 0);
+  const pts = f => Array.from({length:100}, (_,i) => `${X(i+1).toFixed(1)} ${Y(f(i+1)).toFixed(1)}`);
+  const a = pts(tr), b = pts(te);
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Illustrative train and test loss curves with a growing gap">
+    ${[0, 0.5, 1].map(v => `<line x1="${L}" x2="${w-Rr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" style="font:11px var(--mono);fill:var(--muted)">${v}</text>`).join('')}
+    <path d="M${a.join(' L')} L${b.slice().reverse().join(' L')} Z" fill="var(--reg)" opacity=".12"/>
+    <path d="M${b.join(' L')}" fill="none" stroke="var(--reg)" stroke-width="2.2" stroke-dasharray="6 4"/>
+    <path d="M${a.join(' L')}" fill="none" stroke="var(--reg)" stroke-width="2.2"/>
+    <text x="${X(1)}" y="${h-8}" style="font:11px var(--mono);fill:var(--muted)">epoch 1</text>
+    <text x="${X(100)}" y="${h-8}" text-anchor="end" style="font:11px var(--mono);fill:var(--muted)">100</text>
+    <text x="${X(96)}" y="${Y(te(96)) - 8}" text-anchor="end" style="font:600 11.5px var(--mono);fill:var(--reg)">test</text>
+    <text x="${X(96)}" y="${Y(tr(96)) - 8}" text-anchor="end" style="font:600 11.5px var(--mono);fill:var(--reg)">train</text>
+  </svg>`;
+}
+function side(){
+  const row = 14, vals = D.pix.slice(row*28, row*28 + 28), name = NAMES[D.k];
+  const active = a => a.filter(v => v > 0).length;
+  switch (stage) {
+    case 0: return `<p class="fp-k">This image</p><table><tr><td>label</td><td>${D.k} (${name})</td></tr><tr><td>CSV row</td><td>${CSV_ROW[D.k]}</td></tr><tr><td>pixels</td><td>28 × 28 = 784</td></tr></table><p class="fp-note">In training, 32 images go through at once. Here we follow just one.</p>`;
+    case 1: return `<p class="fp-k">Row 15 of 28 · pixel393–pixel420</p><div class="fp-nums">${vals.map(v => v ? `<b>${v}</b>` : v).join(' ')}</div><p class="fp-note">Zeros are the black background; the garment is the non-zero part.</p>`;
+    case 2: return `<p class="fp-k">Same row after ÷ 255</p><div class="fp-nums">${vals.map(v => v ? `<b>${(v/255).toFixed(2)}</b>` : '0').join(' ')}</div>`;
+    case 3: return `<p class="fp-k">Input vector x</p><div class="fp-f">x = [x₁, x₂, …, x₇₈₄]<br>x₃₉₃ … x₄₀₀ = ${D.x.slice(392, 400).map(v => v.toFixed(2)).join(' ')}</div><p class="fp-note">Row 15 starts at pixel393, because 14 full rows × 28 = 392 pixels come before it.</p>`;
+    case 4: return `<p class="fp-k">What each neuron computes</p><div class="fp-f">h₁ = ReLU(W₁·x + b₁)<br>W₁: 128 × 784 = 100,352 · b₁: 128<br>= 100,480 weights</div><p class="fp-note">In this example ${active(D.h1)} of 128 neurons are non-zero. One image runs in model.eval(), so Part 2's Dropout would be off here.</p>`;
+    case 5: return `<p class="fp-k">What each neuron computes</p><div class="fp-f">h₂ = ReLU(W₂·h₁ + b₂)<br>W₂: 64 × 128 = 8,192 · b₂: 64<br>= 8,256 weights</div><p class="fp-note">In this example ${active(D.h2)} of 64 neurons are non-zero.</p>`;
+    case 6: { const top = D.z.indexOf(Math.max(...D.z)); return `<p class="fp-k">Output scores</p><div class="fp-f">z = W₃·h₂ + b₃<br>W₃: 10 × 64 = 640 · b₃: 10<br>= 650 weights</div><p class="fp-note">Highest score: ${NAMES[top]} (${D.z[top].toFixed(2)}). No softmax layer in MyNN — the loss applies it.</p>`; }
+    case 7: return `<p class="fp-k">Softmax for the true class</p><div class="fp-f">p(${name}) = e<sup>${D.z[D.k].toFixed(2)}</sup> / Σ e<sup>z</sup><br>= ${Math.exp(D.z[D.k]).toFixed(1)} / ${D.sum.toFixed(1)} = ${D.p[D.k].toFixed(2)}</div><p class="fp-note">All 10 probabilities add up to ${D.p.reduce((a,b) => a+b, 0).toFixed(2)}.</p>`;
+    case 8: return `<p class="fp-k">Loss for this image</p><div class="fp-f">loss = −log p(${name})<br>= −log(${D.p[D.k].toFixed(2)}) = ${D.loss.toFixed(2)}</div>${curve(D.p[D.k])}<p class="fp-note">If the model gave ${name} only 5%, the loss would be 3.00. For a batch of 32, CrossEntropyLoss returns the average.</p>`;
+    case 9: return `<p class="fp-k">The shape to look for (illustrative)</p>${fitSketch()}<p class="fp-note">Solid = train loss, dashed = test loss. The shaded gap is what L2, Dropout and BatchNorm try to shrink.</p><button class="btn primary" id="fp-go-overfit">Open the Overfitting tab →</button>`;
+  }
+}
+function explain(){
+  const S = STEPS[stage];
+  $('#fp-ex-n').textContent = `Step ${stage+1} of ${STEPS.length}`;
+  $('#fp-ex-shape').textContent = S.shape;
+  $('#fp-ex-title').textContent = S.title;
+  $('#fp-ex-body').textContent = S.body;
+  $('#fp-ex-code').textContent = S.code;
+  $('#fp-ex-side').innerHTML = side();
+  document.querySelectorAll('#fp-steps button').forEach((b, i) => { b.classList.toggle('done', i < stage); if (i === stage) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+}
+
+/* ---------- controls ---------- */
+$('#fp-steps').innerHTML = STEPS.map((s, i) => `<li><button data-i="${i}">${i+1} ${s.chip}</button></li>`).join('');
+document.querySelectorAll('#fp-steps button').forEach(b => b.onclick = () => { pause(); go(+b.dataset.i, 1); });
+function go(s, tt){ const changed = s !== stage; stage = s; t = tt; if (changed || tt === 1) explain(); draw(performance.now()); }
+function pause(){ playing = false; $('#fp-play').textContent = '▶ Play'; }
+function tick(ts){
+  if (!playing) return;
+  if (cv.closest('[hidden]')) return pause();
+  const dt = Math.min(64, ts - lastTs); lastTs = ts;
+  t += dt/DUR[stage];
+  if (t >= 1) {
+    if (stage < STEPS.length - 1) { stage++; t = 0; explain(); }
+    else { t = 1; draw(ts); pause(); return; }
+  }
+  draw(ts); requestAnimationFrame(tick);
+}
+$('#fp-play').onclick = () => {
+  if (playing) return pause();
+  if (stage === STEPS.length - 1 && t >= 1) { stage = 0; t = 0; explain(); }
+  else if (t >= 1) { stage = Math.min(STEPS.length - 1, stage + 1); t = 0; explain(); }
+  playing = true; $('#fp-play').textContent = '❚❚ Pause'; lastTs = performance.now(); requestAnimationFrame(tick);
+};
+$('#fp-next').onclick = () => { pause(); go(Math.min(STEPS.length - 1, stage + (t < 1 ? 0 : 1)), 1); };
+$('#fp-prev').onclick = () => { pause(); go(Math.max(0, stage - 1), 1); };
+$('#fp-every').onchange = e => { every = e.target.checked; draw(performance.now()); };
+
+const thumbs = $('#fp-thumbs');
+for (let k = 0; k < 10; k++) {
+  const b = document.createElement('button'); b.className = 'fp-thumb'; b.setAttribute('aria-pressed', k === 2); b.setAttribute('aria-label', NAMES[k]);
+  const c = document.createElement('canvas'); c.width = c.height = 28;
+  const g = c.getContext('2d'), img = g.createImageData(28, 28);
+  for (let i = 0; i < 784; i++) { const v = parseInt(SAMPLES[k].substr(i*2,2),16); img.data.set([v,v,v,255], i*4); }
+  g.putImageData(img, 0, 0);
+  b.append(c, NAMES[k].split('/')[0]);
+  b.onclick = () => { D = compute(k); thumbs.querySelectorAll('.fp-thumb').forEach((x, i) => x.setAttribute('aria-pressed', i === k)); explain(); draw(performance.now()); };
+  thumbs.append(b);
+}
+
+$('#fp-ex-side').addEventListener('click', e => {
+  if (!e.target.closest('#fp-go-overfit')) return;
+  pause(); document.querySelector('#tab-overfit').click();
+  document.querySelector('.tabs').scrollIntoView({block:'start', behavior: RM ? 'auto' : 'smooth'});
+});
+new ResizeObserver(size).observe(cv);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => draw(performance.now()));
+new MutationObserver(() => draw(performance.now())).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+document.fonts?.ready.then(() => draw(performance.now()));
+stage = 4; t = 1; explain(); size();
+})();
+</script>
+

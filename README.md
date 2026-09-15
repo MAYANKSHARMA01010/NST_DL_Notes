@@ -11,6 +11,7 @@ All materials have been categorized into dedicated folders and cross-referenced 
 * 📂 **[DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)** — Official lecture slides, reading notes, and worksheets.
 * 📓 **[DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)** — Official lab notebooks and reference solutions.
 * 🐙 **[Newton Deep Learning Labs GitHub](https://github.com/sparshbansal-newton/deep-learning-labs)** — Course lab repository by Sparsh Bansal with notebooks and interactive labs.
+* 🐙 **[Kartik Gupta DL Worksheets GitHub](https://github.com/kartikgupta98/dl-worksheets)** — Interactive worksheets, backpropagation explorables, and Flagged or Fraud Kaggle competition materials.
 
 ---
 
@@ -19,10 +20,10 @@ All materials have been categorized into dedicated folders and cross-referenced 
 ```text
 DL/
 ├── 01_Notes/                  # Lecture slides and comprehensive notes
-├── 02_Worksheets/             # Worksheets 01 to 08 (PDFs & interactive HTML worksheets)
-│   └── Solved/                # Solved worksheet answer keys
+├── 02_Worksheets/             # Worksheets 01 to 08 & Contest Technique Cards (PDFs & interactive HTMLs)
+│   └── Solved and Markdowns/  # Solved worksheet answer keys & markdown guides
 ├── 03_HTML_Visualizations/    # Web-based explorables, interactive tools, & visual analogies
-├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 09)
+├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 10 + Contests)
 │   ├── Lab_00_PyTorch_Basics/                           # (includes Solved/)
 │   ├── Lab_01_Perceptrons_and_XOR/                       # (includes Solved/)
 │   ├── Lab_02_Activation_Functions/                      # (includes Solved/)
@@ -32,7 +33,9 @@ DL/
 │   ├── Lab_06_Gradient_Descent_and_DataLoaders/          # (includes Solved/)
 │   ├── Lab_07_The_Optimizer_Zoo/                         # (includes Solved/)
 │   ├── Lab_08_Face_Recognition_MLP_Pipeline/             # (includes Solved/)
-│   ├── Lab_09_Overfitting_Underfitting_and_Regularization/ # (includes Solved/)
+│   ├── Lab_09_Overfitting_Underfitting_and_Regularization/ # (includes Solved/ & Exercises/)
+│   ├── Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/ # (includes Solved/)
+│   ├── Contest_02_Flagged_or_Fraud/                      # In-class Kaggle competition starter
 │   └── Pratice/
 └── docs/                      # Course documentation and guides
 ```
@@ -147,14 +150,19 @@ DL/
 ---
 
 ### Module 7: Overfitting, Underfitting & Regularization
-*Analyzing model capacity, bias-variance tradeoff, decision boundaries on overlapping classes, and repairing high-variance networks using L2 weight decay, L1 sparsity, and Dropout.*
+*Analyzing model capacity, bias-variance tradeoff, decision boundaries on overlapping classes, and repairing high-variance networks using L2 weight decay, L1 sparsity, BatchNorm, and Dropout.*
 
 | Category | File | Description |
 | :--- | :--- | :--- |
 | **Worksheet / Web** | [Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html](02_Worksheets/Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Worksheet 09: Interactive Model Capacity, Bias–Variance Tradeoff & Double Descent Lab |
 | **Visualization** | [Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html](03_HTML_Visualizations/Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Interactive model capacity dial, training timeline, resampling & double descent explorer |
+| **Visualization** | [Module_07_Overfitting_Playground.html](03_HTML_Visualizations/Module_07_Overfitting_Playground.html) | Standalone interactive playground for model capacity, noise, and polynomial degree fitting |
+| **Visualization** | [Module_07_Regularizing_MyNN_Interactive_Comparison.html](03_HTML_Visualizations/Module_07_Regularizing_MyNN_Interactive_Comparison.html) | Interactive dashboard comparing Baseline vs L2 vs Dropout+BatchNorm in `MyNN` |
 | **Lab Notebook** | [Lab_09_Overfitting_Underfitting_and_Regularization.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Lab_09_Overfitting_Underfitting_and_Regularization.ipynb) | Lab 9: Underfitting, Overfitting, and Regularisation on Moons dataset (Student) |
 | **Lab Notebook (Solved)** | [Lab_09_Overfitting_Underfitting_and_Regularization_Solved.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Solved/Lab_09_Overfitting_Underfitting_and_Regularization_Solved.ipynb) | Lab 9: Complete reference key with Model 1, Model 2, Model 3, L2, L1, and Dropout |
+| **Lab Notebook (Live)** | [Lab_09_Live_Fighting_Overfitting_MyNN.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Lab_09_Live_Fighting_Overfitting_MyNN.ipynb) | Classroom live notebook: Baseline vs L2 vs Dropout+BatchNorm on `MyNN` |
+| **Exercises** | [Model_Optimizations_Regularization_Techniques_Exercises.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Exercises/Model_Optimizations_Regularization_Techniques_Exercises.ipynb) | Practice exercises for Dropout, L1/L2 regularization, and Early Stopping on churn data |
+| **Exercises (Solved)** | [Model_Optimizations_Regularization_Techniques_Solutions.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Exercises/Model_Optimizations_Regularization_Techniques_Solutions.ipynb) | Complete solution key for Regularization Techniques exercises |
 
 ---
 
@@ -166,6 +174,19 @@ DL/
 | **Interactive Quiz** | [Deep_Learning_Contest_1_Practice_Quiz.html](02_Worksheets/Deep_Learning_Contest_1_Practice_Quiz.html) | Contest 1 Practice Quiz: 50 questions across 15 DL topics with instant justifications |
 | **Worksheet / Web** | [Worksheet_10_Deep_Learning_Contest_1_Practice_Quiz.html](02_Worksheets/Worksheet_10_Deep_Learning_Contest_1_Practice_Quiz.html) | Worksheet 10: Complete self-contained Contest 1 preparation assessment |
 | **Visualization** | [Deep_Learning_Contest_1_Practice_Quiz.html](03_HTML_Visualizations/Deep_Learning_Contest_1_Practice_Quiz.html) | Standalone dark-mode quiz interface for browser-based contest revision |
+
+---
+
+### In-Class Kaggle Competition: Flagged or Fraud?
+*Classification challenge predicting flagged/fraudulent transactions using multi-layer perceptrons, preprocessing pipelines, and systematic regularization strategies.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Lab Notebook** | [Starter_Notebook_Flagged_or_Fraud.ipynb](04_Notebooks/Kaggle_Contest_Flagged_or_Fraud/Starter_Notebook_Flagged_or_Fraud.ipynb) | Official Kaggle competition starter notebook using Keras & tabular preprocessing |
+| **Technique Cards** | [Contest_02_Flagged_or_Fraud_Technique_Cards.html](02_Worksheets/Contest_02_Flagged_or_Fraud_Technique_Cards.html) | Interactive technique cards: what to try, where it goes, and how to verify |
+| **Technique Cards (Code)** | [Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html](02_Worksheets/Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html) | Interactive technique cards with expandable code snippets and implementation hints |
+| **Visualization** | [Contest_02_Flagged_or_Fraud_Technique_Cards.html](03_HTML_Visualizations/Contest_02_Flagged_or_Fraud_Technique_Cards.html) | Standalone technique cards explorer in visual analogies collection |
+| **Visualization (Code)** | [Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html](03_HTML_Visualizations/Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html) | Standalone code-enabled technique cards in visual analogies collection |
 
 ---
 
