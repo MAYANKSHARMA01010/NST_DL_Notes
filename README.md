@@ -35,7 +35,7 @@ DL/
 │   ├── Lab_08_Face_Recognition_MLP_Pipeline/             # (includes Solved/)
 │   ├── Lab_09_Overfitting_Underfitting_and_Regularization/ # (includes Solved/ & Exercises/)
 │   ├── Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/ # (includes Solved/)
-│   ├── Contest_02_Flagged_or_Fraud/                      # In-class Kaggle competition starter
+│   ├── Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/ # In-class Kaggle competition, dataset & solution
 │   └── Pratice/
 └── docs/                      # Course documentation and guides
 ```
@@ -177,16 +177,16 @@ DL/
 
 ---
 
-### In-Class Kaggle Competition: Flagged or Fraud?
-*Classification challenge predicting flagged/fraudulent transactions using multi-layer perceptrons, preprocessing pipelines, and systematic regularization strategies.*
+### In-Class Kaggle Competition 1 (14 Sep 2026): Flagged or Fraud?
+*Classification challenge predicting flagged/fraudulent transactions using deep tabular ResNet, multi-layer perceptrons, preprocessing pipelines, and systematic regularization strategies.*
 
 | Category | File | Description |
 | :--- | :--- | :--- |
-| **Lab Notebook** | [Starter_Notebook_Flagged_or_Fraud.ipynb](04_Notebooks/Kaggle_Contest_Flagged_or_Fraud/Starter_Notebook_Flagged_or_Fraud.ipynb) | Official Kaggle competition starter notebook using Keras & tabular preprocessing |
-| **Technique Cards** | [Contest_02_Flagged_or_Fraud_Technique_Cards.html](02_Worksheets/Contest_02_Flagged_or_Fraud_Technique_Cards.html) | Interactive technique cards: what to try, where it goes, and how to verify |
-| **Technique Cards (Code)** | [Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html](02_Worksheets/Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html) | Interactive technique cards with expandable code snippets and implementation hints |
-| **Visualization** | [Contest_02_Flagged_or_Fraud_Technique_Cards.html](03_HTML_Visualizations/Contest_02_Flagged_or_Fraud_Technique_Cards.html) | Standalone technique cards explorer in visual analogies collection |
-| **Visualization (Code)** | [Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html](03_HTML_Visualizations/Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html) | Standalone code-enabled technique cards in visual analogies collection |
+| **Competition Notebook** | [Kaggle_Competition_01_Flagged_or_Fraud.ipynb](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Kaggle_Competition_01_Flagged_or_Fraud.ipynb) | End-to-end unified ~90%+ solution with complete Technique Cards implementation, Tabular ResNet, 5-Fold CV, and hybrid ensembling |
+| **Training Dataset** | [Train Data.csv](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Train%20Data.csv) | 20,000 labeled transaction records with 20 tabular features |
+| **Testing Dataset** | [Test Data.csv](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Test%20Data.csv) | 30,000 unlabeled transaction records for evaluation |
+| **Technique Cards** | [Contest_02_Flagged_or_Fraud_Technique_Cards.html](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Contest_02_Flagged_or_Fraud_Technique_Cards.html) | Interactive technique cards: what to try, where it goes, and how to verify |
+| **Technique Cards (Code)** | [Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html) | Interactive technique cards with expandable code snippets and implementation hints |
 
 ---
 
