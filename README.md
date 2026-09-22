@@ -20,10 +20,10 @@ All materials have been categorized into dedicated folders and cross-referenced 
 ```text
 DL/
 ├── 01_Notes/                  # Lecture slides and comprehensive notes
-├── 02_Worksheets/             # Worksheets 01 to 08 & Contest Technique Cards (PDFs & interactive HTMLs)
+├── 02_Worksheets/             # Worksheets 01 to 10 & Contest Technique Cards (PDFs & interactive HTMLs)
 │   └── Solved and Markdowns/  # Solved worksheet answer keys & markdown guides
 ├── 03_HTML_Visualizations/    # Web-based explorables, interactive tools, & visual analogies
-├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 10 + Contests)
+├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 12 + Contests)
 │   ├── Lab_00_PyTorch_Basics/                           # (includes Solved/)
 │   ├── Lab_01_Perceptrons_and_XOR/                       # (includes Solved/)
 │   ├── Lab_02_Activation_Functions/                      # (includes Solved/)
@@ -35,9 +35,12 @@ DL/
 │   ├── Lab_08_Face_Recognition_MLP_Pipeline/             # (includes Solved/)
 │   ├── Lab_09_Overfitting_Underfitting_and_Regularization/ # (includes Solved/ & Exercises/)
 │   ├── Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/ # (includes Solved/)
+│   ├── Lab_11_Hyperparameter_Tuning_with_Optuna/        # Optuna Bayesian hyperparameter search (Fashion-MNIST, Faces, QuickDraw)
+│   ├── Lab_12_Weight_Initialization/                    # Guided code worksheet for weight initialization
 │   ├── Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/ # In-class Kaggle competition, dataset & solution
 │   └── Pratice/
-└── docs/                      # Course documentation and guides
+└── docs/                      # Course documentation, guides & interview preparation
+    └── DSA_Core_Interview_Questions_Guide.md # Teacher's Priority DSA / LeetCode Guide (Two Sum, Stock, Parens, Intervals, Islands)
 ```
 
 ---
@@ -138,7 +141,7 @@ DL/
 | Category | File | Description |
 | :--- | :--- | :--- |
 | **Worksheet** | [Worksheet_06_Optimizers_With_Memory_Student.pdf](02_Worksheets/Worksheet_06_Optimizers_With_Memory_Student.pdf) | Worksheet 06: Student practice worksheet (unsolved) |
-| **Worksheet (Solved)** | [Worksheet_06_Optimizers_With_Memory_Solved.pdf](02_Worksheets/Solved/Worksheet_06_Optimizers_With_Memory_Solved.pdf) | Worksheet 06: Full step-by-step solved key derivations |
+| **Worksheet (Solved)** | [Worksheet_06_Optimizers_With_Memory_Solved.pdf](02_Worksheets/Solved%20and%20Markdowns/Worksheet_06_Optimizers_With_Memory_Solved.pdf) | Worksheet 06: Full step-by-step solved key derivations |
 | **Worksheet / Web** | [Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html](02_Worksheets/Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html) | Interactive Worksheet 07: SGD &rarr; EWMA &rarr; Momentum &rarr; NAG |
 | **Worksheet / Web** | [Worksheet_08_Adaptive_Learning_AdaGrad_RMSProp_and_Adam_Interactive.html](02_Worksheets/Worksheet_08_Adaptive_Learning_AdaGrad_RMSProp_and_Adam_Interactive.html) | Interactive Worksheet 08: Adaptive Learning Rates &middot; AdaGrad &rarr; RMSProp &rarr; Adam |
 | **Visualization** | [Module_06_Gradient_Descent_Interactive_Lecture.html](03_HTML_Visualizations/Module_06_Gradient_Descent_Interactive_Lecture.html) | Explorable gradient descent trajectory visualizer |
@@ -163,6 +166,7 @@ DL/
 | **Lab Notebook (Live)** | [Lab_09_Live_Fighting_Overfitting_MyNN.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Lab_09_Live_Fighting_Overfitting_MyNN.ipynb) | Classroom live notebook: Baseline vs L2 vs Dropout+BatchNorm on `MyNN` |
 | **Exercises** | [Model_Optimizations_Regularization_Techniques_Exercises.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Exercises/Model_Optimizations_Regularization_Techniques_Exercises.ipynb) | Practice exercises for Dropout, L1/L2 regularization, and Early Stopping on churn data |
 | **Exercises (Solved)** | [Model_Optimizations_Regularization_Techniques_Solutions.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Exercises/Model_Optimizations_Regularization_Techniques_Solutions.ipynb) | Complete solution key for Regularization Techniques exercises |
+| **Lab Notebook** | [ANN_Regularization_BatchNorm_Dropout_L2.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Exercises/ANN_Regularization_BatchNorm_Dropout_L2.ipynb) | Fighting Overfitting: Adding BatchNorm1d, Dropout & weight decay (L2) to `MyNN` |
 
 ---
 
@@ -199,6 +203,41 @@ DL/
 | **Lab Notebook (Part 1 Solved)** | [Lab_10_Part_1_Fashion_MNIST_CPU_vs_GPU_Speed_Solved.ipynb](04_Notebooks/Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/Solved/Lab_10_Part_1_Fashion_MNIST_CPU_vs_GPU_Speed_Solved.ipynb) | Lab 10 Part 1: Solved reference with CPU vs GPU timing benchmark outputs & bar plots |
 | **Lab Notebook (Part 2)** | [Lab_10_Part_2_Fashion_MNIST_GPU_Full_Dataset_Scaling.ipynb](04_Notebooks/Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/Lab_10_Part_2_Fashion_MNIST_GPU_Full_Dataset_Scaling.ipynb) | Lab 10 Part 2: GPU training on full 60k dataset across 10 epochs & overfitting check (Student) |
 | **Lab Notebook (Part 2 Solved)** | [Lab_10_Part_2_Fashion_MNIST_GPU_Full_Dataset_Scaling_Solved.ipynb](04_Notebooks/Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/Solved/Lab_10_Part_2_Fashion_MNIST_GPU_Full_Dataset_Scaling_Solved.ipynb) | Lab 10 Part 2: Solved key with 98.2% train vs 88.9% test accuracy diagnosis |
+
+---
+
+### Module 9: Automated Hyperparameter Tuning with Optuna
+*Bayesian optimization using Tree-structured Parzen Estimator (TPE), defining dynamic trial search spaces for hidden layers, units, learning rates, weight decays, and pruning unpromising runs across real-world datasets.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Lab Notebook** | [Lab_11_Optuna_Hyperparameter_Tuning_Fashion_MNIST.ipynb](04_Notebooks/Lab_11_Hyperparameter_Tuning_with_Optuna/Lab_11_Optuna_Hyperparameter_Tuning_Fashion_MNIST.ipynb) | Lab 11: End-to-end Optuna study optimizing Fashion-MNIST ANN hyperparameters |
+| **Lab Notebook (Boilerplate)** | [Lab_11_Olivetti_Faces_Optuna_Boilerplate.ipynb](04_Notebooks/Lab_11_Hyperparameter_Tuning_with_Optuna/Lab_11_Olivetti_Faces_Optuna_Boilerplate.ipynb) | Lab 11: Hyperparameter tuning boilerplate on Olivetti Faces dataset with student TODOs |
+| **Lab Notebook (Boilerplate)** | [Lab_11_QuickDraw_Optuna_Boilerplate.ipynb](04_Notebooks/Lab_11_Hyperparameter_Tuning_with_Optuna/Lab_11_QuickDraw_Optuna_Boilerplate.ipynb) | Lab 11: Hyperparameter tuning boilerplate on Google Quick, Draw! doodle dataset |
+
+---
+
+### Module 10: Weight Initialization & Symmetry Breaking
+*Investigating the mathematical and empirical impact of initial weight distributions on deep networks: Zero initialization failure & symmetry lock, Random Normal vanishing/exploding variance, Xavier/Glorot for symmetric activations, and He/Kaiming for ReLU.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Lab Notebook** | [Lab_12_Weight_Initialization_Guided.ipynb](04_Notebooks/Lab_12_Weight_Initialization/Lab_12_Weight_Initialization_Guided.ipynb) | Lab 12: Comprehensive guided notebook analyzing Zero, Random, Xavier, and He initialization |
+| **Worksheet Notebook** | [Worksheet_10_Weight_Initialization_Guided.ipynb](02_Worksheets/Worksheet_10_Weight_Initialization_Guided.ipynb) | Worksheet 10: Interactive notebook covering weight distributions, variance scaling & gradient flow |
+
+---
+
+### Data Structures & Algorithms: Teacher's Priority Problem Set
+*Foundational problem-solving and technical interview preparation covering core algorithmic patterns: Hashing, Sliding Window, LIFO Stack matching, Interval Sorting, and 2D Grid Graph Traversal.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Comprehensive Guide** | [DSA_Core_Interview_Questions_Guide.md](docs/DSA_Core_Interview_Questions_Guide.md) | Complete guide with conceptual breakdowns, visual walkthroughs, optimal Python solutions & complexity analysis |
+| **Problem 1: Two Sum** | [LeetCode #1](https://leetcode.com/problems/two-sum/) | Core array and hash map complement lookup ($O(n)$ time, $O(n)$ space) |
+| **Problem 2: Best Time to Buy & Sell Stock** | [LeetCode #121](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/) | Fundamental sliding window and running minimum profit tracking ($O(n)$ time, $O(1)$ space) |
+| **Problem 3: Valid Parentheses** | [LeetCode #20](https://leetcode.com/problems/valid-parentheses/) | Essential LIFO stack operations and bracket nesting validation ($O(n)$ time, $O(n)$ space) |
+| **Problem 4: Merge Intervals** | [LeetCode #56](https://leetcode.com/problems/merge-intervals/) | Staple interval manipulation via start-time sorting & greedy consolidation ($O(n \log n)$ time) |
+| **Problem 5: Number of Islands** | [LeetCode #200](https://leetcode.com/problems/number-of-islands/) | Classic 2D matrix graph traversal challenge using DFS/BFS flood-fill ($O(m \times n)$ time) |
 
 ---
 
