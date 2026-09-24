@@ -10,6 +10,8 @@ All materials have been categorized into dedicated folders and cross-referenced 
 
 * 📂 **[DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)** — Official lecture slides, reading notes, and worksheets.
 * 📓 **[DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)** — Official lab notebooks and reference solutions.
+* 🐙 **[Ashwin Tewary DL Worksheets GitHub](https://github.com/ashwin-tewary/dl-worksheets)** — Official lecture presentation sheets, numerical practice sheets, and interactive tools by Ashwin Tewary.
+* 🌐 **[Ashwin Tewary Interactive Presentations Portal](https://ashwin-tewary.github.io/dl-worksheets/)** — Interactive browser-based presentation and practice sheets (CNNs, Receptive Fields, ResNet, Transfer Learning, RNNs).
 * 🐙 **[Newton Deep Learning Labs GitHub](https://github.com/sparshbansal-newton/deep-learning-labs)** — Course lab repository by Sparsh Bansal with notebooks and interactive labs.
 * 🐙 **[Kartik Gupta DL Worksheets GitHub](https://github.com/kartikgupta98/dl-worksheets)** — Interactive worksheets, backpropagation explorables, and Flagged or Fraud Kaggle competition materials.
 
@@ -23,7 +25,8 @@ DL/
 ├── 02_Worksheets/             # Worksheets 01 to 10 & Contest Technique Cards (PDFs & interactive HTMLs)
 │   └── Solved and Markdowns/  # Solved worksheet answer keys & markdown guides
 ├── 03_HTML_Visualizations/    # Web-based explorables, interactive tools, & visual analogies
-├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 12 + Contests)
+│   └── Ashwin_Tewary_Presentations/ # Complete offline interactive presentations (CNN, Receptive Field, ResNet, RNN)
+├── 04_Notebooks/              # Complete Jupyter & Google Colab curriculum (Labs 00 through 13 + Contests)
 │   ├── Lab_00_PyTorch_Basics/                           # (includes Solved/)
 │   ├── Lab_01_Perceptrons_and_XOR/                       # (includes Solved/)
 │   ├── Lab_02_Activation_Functions/                      # (includes Solved/)
@@ -37,10 +40,15 @@ DL/
 │   ├── Lab_10_ANN_Fashion_MNIST_CPU_vs_GPU_and_Scaling/ # (includes Solved/)
 │   ├── Lab_11_Hyperparameter_Tuning_with_Optuna/        # Optuna Bayesian hyperparameter search (Fashion-MNIST, Faces, QuickDraw)
 │   ├── Lab_12_Weight_Initialization/                    # Guided code worksheet for weight initialization
+│   ├── Lab_13_CNN_Fashion_MNIST/                        # CNN architecture, spatial filters & PyTorch shape tracing
 │   ├── Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/ # In-class Kaggle competition, dataset & solution
 │   └── Pratice/
-└── docs/                      # Course documentation, guides & interview preparation
-    └── DSA_Core_Interview_Questions_Guide.md # Teacher's Priority DSA / LeetCode Guide (Two Sum, Stock, Parens, Intervals, Islands)
+├── docs/                      # Course documentation, guides & interview preparation
+│   ├── CNN_and_Receptive_Fields_Deep_Dive_Guide.md # Comprehensive guide on CNNs, kernel math, and receptive fields
+│   └── DSA_Core_Interview_Questions_Guide.md       # Teacher's Priority DSA / LeetCode Guide (Two Sum, Stock, Parens, Intervals, Islands)
+└── scripts/                   # Workflow scripts for setup and syncing
+    ├── launch_jupyter.sh      # Automated .venv and JupyterLab launcher
+    └── update_ashwin_presentations.sh # Force-sync upstream instructor presentations
 ```
 
 ---
@@ -227,6 +235,19 @@ DL/
 
 ---
 
+### Module 11: Convolutional Neural Networks (CNNs) & Receptive Fields
+*Moving beyond flat MLPs into computer vision: spatial locality, translation equivariance, discrete 2D convolutions, stride, padding, pooling, receptive field growth dynamics, and PyTorch shape tracing.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Lab Notebook** | [Lab_13_CNN_Fashion_MNIST.ipynb](04_Notebooks/Lab_13_CNN_Fashion_MNIST/Lab_13_CNN_Fashion_MNIST.ipynb) | Lab 13: End-to-end PyTorch CNN pipeline on Fashion-MNIST with shape tracing & visualization |
+| **Comprehensive Guide** | [CNN_and_Receptive_Fields_Deep_Dive_Guide.md](docs/CNN_and_Receptive_Fields_Deep_Dive_Guide.md) | Complete guide covering convolution math, output dimensions, receptive field recurrence & self-implementation |
+| **Interactive Presentation (Local)** | [CNN Presentation](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/cnn/index.html) | Offline-ready interactive presentation sheet with live filters, feature maps, and receptive field explorer |
+| **Interactive Presentation (Web)** | [Ashwin Tewary CNN Lecture Sheet](https://ashwin-tewary.github.io/dl-worksheets/presentations/cnn/#field) | Live lecture sheet by Ashwin Tewary focusing on receptive field growth and VGG kernel design |
+| **Self-Implementation Dataset** | [Kaggle ImageNet-10k](https://www.kaggle.com/datasets/priyerana/imagenet-10k) | Reference dataset for testing custom CNN architectures and transfer learning |
+
+---
+
 ### Data Structures & Algorithms: Teacher's Priority Problem Set
 *Foundational problem-solving and technical interview preparation covering core algorithmic patterns: Hashing, Sliding Window, LIFO Stack matching, Interval Sorting, and 2D Grid Graph Traversal.*
 
@@ -253,7 +274,29 @@ DL/
    jupyter notebook
    ```
    Alternatively, open directly in Google Colab or JupyterLab.
-3. **Official Course References**:
+3. **Updating & Running Instructor Presentations Locally**:
+   To pull the latest interactive presentations and practice sheets from Ashwin Tewary's upstream repository, strip `.git`, and serve the portal locally:
+   ```bash
+   ./scripts/update_ashwin_presentations.sh
+   ```
+   *Helpful Options*:
+   - Launch directly into today's CNN & Receptive Field presentation:
+     ```bash
+     ./scripts/update_ashwin_presentations.sh --cnn
+     ```
+   - Run in the background detached mode:
+     ```bash
+     ./scripts/update_ashwin_presentations.sh --bg
+     # Stop background server when done:
+     ./scripts/update_ashwin_presentations.sh --stop
+     ```
+   - Sync files and remove `.git` without launching local server:
+     ```bash
+     ./scripts/update_ashwin_presentations.sh --update-only
+     ```
+4. **Official Course References**:
+   - Instructor Presentations & Worksheets: [Ashwin Tewary DL Worksheets](https://github.com/ashwin-tewary/dl-worksheets)
+   - Interactive Presentations Portal: [https://ashwin-tewary.github.io/dl-worksheets/](https://ashwin-tewary.github.io/dl-worksheets/)
    - Slides, Notes & Worksheets: [DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)
    - Lab Notebooks: [DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)
    - Course Labs Repository: [Newton Deep Learning Labs GitHub](https://github.com/sparshbansal-newton/deep-learning-labs)
