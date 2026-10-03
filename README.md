@@ -42,13 +42,16 @@ DL/
 │   ├── Lab_12_Weight_Initialization/                    # Guided code worksheet for weight initialization
 │   ├── Lab_13_CNN_Fashion_MNIST/                        # CNN architecture, spatial filters & PyTorch shape tracing
 │   ├── Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/ # In-class Kaggle competition, dataset & solution
+│   │   └── Materials/                                  # Instructor card code, reference solutions, and guides
 │   └── Pratice/
 ├── docs/                      # Course documentation, guides & interview preparation
 │   ├── CNN_and_Receptive_Fields_Deep_Dive_Guide.md # Comprehensive guide on CNNs, kernel math, and receptive fields
 │   └── DSA_Core_Interview_Questions_Guide.md       # Teacher's Priority DSA / LeetCode Guide (Two Sum, Stock, Parens, Intervals, Islands)
 └── scripts/                   # Workflow scripts for setup and syncing
-    ├── launch_jupyter.sh      # Automated .venv and JupyterLab launcher
-    └── update_ashwin_presentations.sh # Force-sync upstream instructor presentations
+    ├── launch_jupyter.sh              # Automated .venv and JupyterLab launcher
+    ├── update_all_worksheets.sh       # Master sync for all instructor presentations & worksheets
+    ├── update_ashwin_presentations.sh # Force-sync & serve Ashwin Tewary's presentations
+    └── update_kartik_worksheets.sh    # Force-sync & serve Kartik Gupta's worksheets
 ```
 
 ---
@@ -165,7 +168,8 @@ DL/
 
 | Category | File | Description |
 | :--- | :--- | :--- |
-| **Worksheet / Web** | [Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html](02_Worksheets/Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Worksheet 09: Interactive Model Capacity, Bias–Variance Tradeoff & Double Descent Lab |
+| **Worksheet / Web** | [Worksheet_09_Regularisation_Interactive.html](02_Worksheets/Worksheet_09_Regularisation_Interactive.html) | Interactive Worksheet 09: Overfitting, L2, L1, Early Stopping, Dropout, and live in-browser training lab |
+| **Worksheet / Web** | [Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html](02_Worksheets/Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Interactive Model Capacity, Bias–Variance Tradeoff & Double Descent Lab |
 | **Visualization** | [Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html](03_HTML_Visualizations/Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Interactive model capacity dial, training timeline, resampling & double descent explorer |
 | **Visualization** | [Module_07_Overfitting_Playground.html](03_HTML_Visualizations/Module_07_Overfitting_Playground.html) | Standalone interactive playground for model capacity, noise, and polynomial degree fitting |
 | **Visualization** | [Module_07_Regularizing_MyNN_Interactive_Comparison.html](03_HTML_Visualizations/Module_07_Regularizing_MyNN_Interactive_Comparison.html) | Interactive dashboard comparing Baseline vs L2 vs Dropout+BatchNorm in `MyNN` |
@@ -199,6 +203,9 @@ DL/
 | **Testing Dataset** | [Test Data.csv](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Test%20Data.csv) | 30,000 unlabeled transaction records for evaluation |
 | **Technique Cards** | [Contest_02_Flagged_or_Fraud_Technique_Cards.html](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Contest_02_Flagged_or_Fraud_Technique_Cards.html) | Interactive technique cards: what to try, where it goes, and how to verify |
 | **Technique Cards (Code)** | [Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Contest_02_Flagged_or_Fraud_Technique_Cards_Code.html) | Interactive technique cards with expandable code snippets and implementation hints |
+| **Instructor Cards Code** | [instructor_card_code.ipynb](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Materials/instructor_card_code.ipynb) | Teacher's reference notebook with working PyTorch code for all 25 technique cards |
+| **Instructor Solution** | [instructor_solution_notebook.ipynb](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Materials/instructor_solution_notebook.ipynb) | Official instructor baseline benchmark and solution pipeline |
+| **Starter Notebook** | [starter_notebook.ipynb](04_Notebooks/Kaggle_Competition_01_Flagged_or_Fraud_14_Sep_2026/Materials/starter_notebook.ipynb) | Official clean competition starter notebook |
 
 ---
 
@@ -241,10 +248,51 @@ DL/
 | Category | File | Description |
 | :--- | :--- | :--- |
 | **Lab Notebook** | [Lab_13_CNN_Fashion_MNIST.ipynb](04_Notebooks/Lab_13_CNN_Fashion_MNIST/Lab_13_CNN_Fashion_MNIST.ipynb) | Lab 13: End-to-end PyTorch CNN pipeline on Fashion-MNIST with shape tracing & visualization |
+| **Interactive Worksheet** | [Worksheet_09_CNN_From_Pixels_to_Patterns_Interactive.html](02_Worksheets/Worksheet_09_CNN_From_Pixels_to_Patterns_Interactive.html) | Interactive Worksheet 09: Pixels & RGB, Sobel filters, convolution, ReLU, stride, padding, pooling, and LeNet quizzes |
 | **Comprehensive Guide** | [CNN_and_Receptive_Fields_Deep_Dive_Guide.md](docs/CNN_and_Receptive_Fields_Deep_Dive_Guide.md) | Complete guide covering convolution math, output dimensions, receptive field recurrence & self-implementation |
 | **Interactive Presentation (Local)** | [CNN Presentation](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/cnn/index.html) | Offline-ready interactive presentation sheet with live filters, feature maps, and receptive field explorer |
 | **Interactive Presentation (Web)** | [Ashwin Tewary CNN Lecture Sheet](https://ashwin-tewary.github.io/dl-worksheets/presentations/cnn/#field) | Live lecture sheet by Ashwin Tewary focusing on receptive field growth and VGG kernel design |
 | **Self-Implementation Dataset** | [Kaggle ImageNet-10k](https://www.kaggle.com/datasets/priyerana/imagenet-10k) | Reference dataset for testing custom CNN architectures and transfer learning |
+
+---
+
+### Module 12: CNN Architectures (LeNet-5, AlexNet & VGG-16)
+*Tracing network depth, parameter counts, real activation maps, feature degradation, and the evolution from classical LeNet to deep VGG stacks.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Interactive Worksheet** | [Worksheet_10_Inside_LeNet_AlexNet_VGG16_Interactive.html](02_Worksheets/Worksheet_10_Inside_LeNet_AlexNet_VGG16_Interactive.html) | Inside LeNet, AlexNet & VGG-16: Architecture diagrams, handwritten digit inference, live activation maps, shape & parameter exercises |
+| **Interactive Presentation (Local)** | [CNN Architectures Presentation](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/cnn-architectures/index.html) | Shattered gradients, residual connections, ResNet, Inception, depthwise separable convolutions, and interactive calculators |
+| **Interactive Presentation (Web)** | [Ashwin Tewary CNN Architectures Sheet](https://ashwin-tewary.github.io/dl-worksheets/presentations/cnn-architectures/) | Online presentation sheet with guided animated walkthroughs |
+
+---
+
+### Module 13: Inception & Residual Networks (GoogLeNet & ResNet)
+*Overcoming vanishing gradients and degradation: multiscale parallel 1x1 bottleneck reductions in Inception vs identity shortcut residual mappings in ResNet.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Interactive Worksheet** | [Worksheet_11_Inception_and_ResNet_Interactive.html](02_Worksheets/Worksheet_11_Inception_and_ResNet_Interactive.html) | Inception & ResNet: Multiscale branches, 1x1 convolutions, residual learning, MCQs, and full GoogLeNet/ResNet-18 diagrams |
+| **Interactive Visualization** | [Module_12_Worksheet_11_Inception_and_ResNet.html](03_HTML_Visualizations/Module_12_Worksheet_11_Inception_and_ResNet_Interactive.html) | Self-contained visual discovery environment for deep residual networks |
+
+---
+
+### Module 14: Sequence Modelling & Gated RNNs (LSTM, GRU & Bidirectional)
+*Sequential dependencies, causal inputs and targets, hidden state recurrence, unrolling, vanishing/exploding gradients through time, and gating mechanisms.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Interactive Presentation (Local)** | [Sequence Modelling Presentation](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/sequence-modelling/index.html) | Sequential data, hidden states, RNN unrolling, long-term dependencies, and Stanford architecture diagrams |
+| **Interactive Presentation (Local)** | [Gated RNNs Presentation](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/gated-rnns/index.html) | LSTM, GRU & Bidirectional RNNs: gate experiments, gradient-path comparisons, and context design challenges |
+
+---
+
+### Module 15: Transfer Learning & Vision Transformers (ViTs)
+*Reusing pretrained representations: feature extraction vs fine-tuning, freezing strategies, data augmentation, and why Vision Transformers connect distant evidence.*
+
+| Category | File | Description |
+| :--- | :--- | :--- |
+| **Interactive Presentation (Local)** | [Transfer Learning Presentation](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/transfer-learning/index.html) | Pretrained models, feature extraction, layer freezing, augmentation, and CNN limitations motivating ViTs |
 
 ---
 
@@ -274,29 +322,37 @@ DL/
    jupyter notebook
    ```
    Alternatively, open directly in Google Colab or JupyterLab.
-3. **Updating & Running Instructor Presentations Locally**:
-   To pull the latest interactive presentations and practice sheets from Ashwin Tewary's upstream repository, strip `.git`, and serve the portal locally:
-   ```bash
-   ./scripts/update_ashwin_presentations.sh
-   ```
-   *Helpful Options*:
-   - Launch directly into today's CNN & Receptive Field presentation:
+3. **Updating & Running Course Presentations & Worksheets Locally**:
+   - **One-Command Master Sync (Both Repositories)**:
+     To update both Ashwin Tewary's presentations and Kartik Gupta's worksheets in a single step, strip `.git`, and organize all files:
      ```bash
-     ./scripts/update_ashwin_presentations.sh --cnn
+     ./scripts/update_all_worksheets.sh
      ```
-   - Run in the background detached mode:
+   - **Ashwin Tewary Presentations (Local Server & Browser Launch)**:
      ```bash
+     ./scripts/update_ashwin_presentations.sh
+     # Direct link to CNN & Receptive Field:
+     ./scripts/update_ashwin_presentations.sh --cnn
+     # Background detached server:
      ./scripts/update_ashwin_presentations.sh --bg
-     # Stop background server when done:
      ./scripts/update_ashwin_presentations.sh --stop
      ```
-   - Sync files and remove `.git` without launching local server:
+   - **Kartik Gupta Interactive Worksheets (Local Server & Browser Launch)**:
      ```bash
-     ./scripts/update_ashwin_presentations.sh --update-only
+     ./scripts/update_kartik_worksheets.sh
+     # Direct links to advanced vision worksheets:
+     ./scripts/update_kartik_worksheets.sh --cnn      # Worksheet 09: CNN
+     ./scripts/update_kartik_worksheets.sh --arch     # Worksheet 10: LeNet, AlexNet, VGG-16
+     ./scripts/update_kartik_worksheets.sh --resnet   # Worksheet 11: Inception & ResNet
+     # Background detached server:
+     ./scripts/update_kartik_worksheets.sh --bg
+     ./scripts/update_kartik_worksheets.sh --stop
      ```
 4. **Official Course References**:
-   - Instructor Presentations & Worksheets: [Ashwin Tewary DL Worksheets](https://github.com/ashwin-tewary/dl-worksheets)
    - Interactive Presentations Portal: [https://ashwin-tewary.github.io/dl-worksheets/](https://ashwin-tewary.github.io/dl-worksheets/)
+   - Interactive Worksheets Portal: [https://kartikgupta98.github.io/dl-worksheets/](https://kartikgupta98.github.io/dl-worksheets/)
+   - Ashwin Tewary DL Repository: [Ashwin Tewary DL Worksheets GitHub](https://github.com/ashwin-tewary/dl-worksheets)
+   - Kartik Gupta DL Repository: [Kartik Gupta DL Worksheets GitHub](https://github.com/kartikgupta98/dl-worksheets)
    - Slides, Notes & Worksheets: [DL Notes Google Drive](https://drive.google.com/drive/folders/1dFwGfgOvE9a-1veKjbuvSMYV3qb5Swe5)
    - Lab Notebooks: [DL Lab Notebooks Google Drive](https://drive.google.com/drive/folders/1cb0M-aseFx7djB3bF0OrtyB14QLSfaaV)
    - Course Labs Repository: [Newton Deep Learning Labs GitHub](https://github.com/sparshbansal-newton/deep-learning-labs)

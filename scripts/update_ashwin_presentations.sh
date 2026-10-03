@@ -217,6 +217,7 @@ if [ "${RUN_LOCAL}" = true ]; then
         nohup python3 -m http.server "${ACTUAL_PORT}" --directory "${TARGET_DIR}" >"${LOG_FILE}" 2>&1 &
         SERVER_PID=$!
         echo "${SERVER_PID}" > "${PID_FILE}"
+        sleep 1
         
         echo "  Server PID:       ${SERVER_PID} (Running in background)"
         echo "  Logs:             ${LOG_FILE}"
