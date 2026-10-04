@@ -46,7 +46,8 @@ DL/
 │   └── Pratice/
 ├── docs/                      # Course documentation, guides & interview preparation
 │   ├── CNN_and_Receptive_Fields_Deep_Dive_Guide.md # Comprehensive guide on CNNs, kernel math, and receptive fields
-│   └── DSA_Core_Interview_Questions_Guide.md       # Teacher's Priority DSA / LeetCode Guide (Two Sum, Stock, Parens, Intervals, Islands)
+│   ├── DSA_Core_Interview_Questions_Guide.md       # Teacher's Priority DSA / LeetCode Guide (Two Sum, Stock, Parens, Intervals, Islands)
+│   └── L1_and_L2_Loss_Deep_Dive_Guide.md           # Master guide on L1 (MAE) vs. L2 (MSE) Loss, Gradients, MLE & Outliers
 └── scripts/                   # Workflow scripts for setup and syncing
     ├── launch_jupyter.sh              # Automated .venv and JupyterLab launcher
     ├── update_all_worksheets.sh       # Master sync for all instructor presentations & worksheets
@@ -104,6 +105,7 @@ DL/
 | **Lab Notebook** | [Lab_04_Part_2_Loss_Functions_Practice_and_Landscapes.ipynb](04_Notebooks/Lab_04_Loss_Functions/Lab_04_Part_2_Loss_Functions_Practice_and_Landscapes.ipynb) | Lab 4: Loss landscapes, California Housing (MSE/MAE), BCE with logits, and CCE |
 | **Lab Notebook (Exercise)** | [Lab_04_Exercise_AI_Town_Loss_Functions.ipynb](04_Notebooks/Lab_04_Loss_Functions/Lab_04_Exercise_AI_Town_Loss_Functions.ipynb) | Practice Exercise: Back to AI Town — Teaching Models to Learn (Student) |
 | **Lab Notebook (Solved)** | [Lab_04_Exercise_Solution_AI_Town_Loss_Functions.ipynb](04_Notebooks/Lab_04_Loss_Functions/Solved/Lab_04_Exercise_Solution_AI_Town_Loss_Functions.ipynb) | Practice Exercise: Back to AI Town — Teaching Models to Learn (Solution Key) |
+| **Guide** | [L1_and_L2_Loss_Deep_Dive_Guide.md](docs/L1_and_L2_Loss_Deep_Dive_Guide.md) | Comprehensive master guide: L1 (MAE) vs. L2 (MSE), gradients, MLE derivation, outlier dynamics, and Huber Loss |
 
 ---
 
