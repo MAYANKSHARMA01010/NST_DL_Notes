@@ -158,8 +158,8 @@ DL/
 | **Worksheet / Web** | [Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html](02_Worksheets/Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html) | Interactive Worksheet 07: SGD &rarr; EWMA &rarr; Momentum &rarr; NAG |
 | **Worksheet / Web** | [Worksheet_08_Adaptive_Learning_AdaGrad_RMSProp_and_Adam_Interactive.html](02_Worksheets/Worksheet_08_Adaptive_Learning_AdaGrad_RMSProp_and_Adam_Interactive.html) | Interactive Worksheet 08: Adaptive Learning Rates &middot; AdaGrad &rarr; RMSProp &rarr; Adam |
 | **Visualization** | [Module_06_Gradient_Descent_Interactive_Lecture.html](03_HTML_Visualizations/Module_06_Gradient_Descent_Interactive_Lecture.html) | Explorable gradient descent trajectory visualizer |
-| **Visualization** | [Module_06_Momentum_and_NAG_Interactive_Worksheet.html](03_HTML_Visualizations/Module_06_Momentum_and_NAG_Interactive_Worksheet.html) | Interactive momentum and NAG comparison tool |
-| **Visualization** | [Module_06_Adaptive_Learning_Rates_Interactive_Worksheet.html](03_HTML_Visualizations/Module_06_Adaptive_Learning_Rates_Interactive_Worksheet.html) | Interactive adaptive learning rates comparison tool (AdaGrad, RMSProp, Adam) |
+| **Visualization** | [Module_05_Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html](03_HTML_Visualizations/Module_05_Worksheet_07_Momentum_EWMA_and_NAG_Interactive.html) | Interactive momentum and NAG comparison tool (mirror of Worksheet 07) |
+| **Visualization** | [Module_05_Worksheet_08_Adaptive_Learning_AdaGrad_RMSProp_Adam_Interactive.html](03_HTML_Visualizations/Module_05_Worksheet_08_Adaptive_Learning_AdaGrad_RMSProp_Adam_Interactive.html) | Interactive adaptive learning rates comparison tool — AdaGrad, RMSProp, Adam (mirror of Worksheet 08) |
 | **Lab Notebook** | [Lab_07_Part_A_Optimizers_Zoo_Ravine_Trajectories.ipynb](04_Notebooks/Lab_07_The_Optimizer_Zoo/Lab_07_Part_A_Optimizers_Zoo_Ravine_Trajectories.ipynb) | Lab 7 Part A: 2D quadratic ravine loss optimizer trajectories |
 | **Lab Notebook** | [Lab_07_The_Optimizer_Zoo_SGD_to_Adam.ipynb](04_Notebooks/Lab_07_The_Optimizer_Zoo/Lab_07_The_Optimizer_Zoo_SGD_to_Adam.ipynb) | Lab 7: The complete Optimizer Zoo navigating SGD, Momentum, NAG, AdaGrad, RMSProp, and Adam |
 
@@ -171,10 +171,15 @@ DL/
 | Category | File | Description |
 | :--- | :--- | :--- |
 | **Worksheet / Web** | [Worksheet_09_Regularisation_Interactive.html](02_Worksheets/Worksheet_09_Regularisation_Interactive.html) | Interactive Worksheet 09: Overfitting, L2, L1, Early Stopping, Dropout, and live in-browser training lab |
-| **Worksheet / Web** | [Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html](02_Worksheets/Worksheet_09_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Interactive Model Capacity, Bias–Variance Tradeoff & Double Descent Lab |
-| **Visualization** | [Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html](03_HTML_Visualizations/Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Interactive model capacity dial, training timeline, resampling & double descent explorer |
+| **Visualization** | [Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html](03_HTML_Visualizations/Module_07_Generalisation_and_Model_Capacity_Interactive_Lab.html) | Interactive model capacity dial, training timeline, resampling & double descent explorer (Bias–Variance Tradeoff & Double Descent) |
 | **Visualization** | [Module_07_Overfitting_Playground.html](03_HTML_Visualizations/Module_07_Overfitting_Playground.html) | Standalone interactive playground for model capacity, noise, and polynomial degree fitting |
 | **Visualization** | [Module_07_Regularizing_MyNN_Interactive_Comparison.html](03_HTML_Visualizations/Module_07_Regularizing_MyNN_Interactive_Comparison.html) | Interactive dashboard comparing Baseline vs L2 vs Dropout+BatchNorm in `MyNN` |
+| **Visualization** | [Module_07_Worksheet_09_Regularisation_Interactive.html](03_HTML_Visualizations/Module_07_Worksheet_09_Regularisation_Interactive.html) | Mirror copy of Worksheet 09 Regularisation in visualizations folder |
+| **Presentation / Web** | [Regularisation Lecture Sheet (Local)](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/regularisation/index.html) | Ashwin Tewary: L2, L1, Dropout, BatchNorm, and Early Stopping interactive lecture presentation |
+| **Practice Sheet** | [Generalisation Practice (Local)](03_HTML_Visualizations/Ashwin_Tewary_Presentations/practice/generalisation/index.html) | Ashwin Tewary: Bias–Variance Tradeoff, Double Descent — click-to-fill numerical exercises |
+| **Practice Sheet** | [Regularisation Practice (Local)](03_HTML_Visualizations/Ashwin_Tewary_Presentations/practice/regularisation/index.html) | Ashwin Tewary: L2, L1, Dropout, BatchNorm — worked numerical examples with textbook references |
+| **Practice Sheet (Web)** | [Generalisation Practice (Web)](https://ashwin-tewary.github.io/dl-worksheets/practice/generalisation/) | Ashwin Tewary online: Bias–Variance Tradeoff & Double Descent |
+| **Practice Sheet (Web)** | [Regularisation Practice (Web)](https://ashwin-tewary.github.io/dl-worksheets/practice/regularisation/) | Ashwin Tewary online: L2, L1, Dropout, BatchNorm numerical practice |
 | **Lab Notebook** | [Lab_09_Overfitting_Underfitting_and_Regularization.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Lab_09_Overfitting_Underfitting_and_Regularization.ipynb) | Lab 9: Underfitting, Overfitting, and Regularisation on Moons dataset (Student) |
 | **Lab Notebook (Solved)** | [Lab_09_Overfitting_Underfitting_and_Regularization_Solved.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Solved/Lab_09_Overfitting_Underfitting_and_Regularization_Solved.ipynb) | Lab 9: Complete reference key with Model 1, Model 2, Model 3, L2, L1, and Dropout |
 | **Lab Notebook (Live)** | [Lab_09_Live_Fighting_Overfitting_MyNN.ipynb](04_Notebooks/Lab_09_Overfitting_Underfitting_and_Regularization/Lab_09_Live_Fighting_Overfitting_MyNN.ipynb) | Classroom live notebook: Baseline vs L2 vs Dropout+BatchNorm on `MyNN` |
@@ -250,7 +255,8 @@ DL/
 | Category | File | Description |
 | :--- | :--- | :--- |
 | **Lab Notebook** | [Lab_13_CNN_Fashion_MNIST.ipynb](04_Notebooks/Lab_13_CNN_Fashion_MNIST/Lab_13_CNN_Fashion_MNIST.ipynb) | Lab 13: End-to-end PyTorch CNN pipeline on Fashion-MNIST with shape tracing & visualization |
-| **Interactive Worksheet** | [Worksheet_09_CNN_From_Pixels_to_Patterns_Interactive.html](02_Worksheets/Worksheet_09_CNN_From_Pixels_to_Patterns_Interactive.html) | Interactive Worksheet 09: Pixels & RGB, Sobel filters, convolution, ReLU, stride, padding, pooling, and LeNet quizzes |
+| **Interactive Worksheet** | [Worksheet_09_CNN_From_Pixels_to_Patterns_Interactive.html](02_Worksheets/Worksheet_09_CNN_From_Pixels_to_Patterns_Interactive.html) | Interactive Worksheet 09 (CNN): Pixels & RGB, Sobel filters, convolution, ReLU, stride, padding, pooling, and LeNet quizzes |
+| **Visualization (Mirror)** | [Module_10_Worksheet_09_CNN_Pixels_to_Patterns_Interactive.html](03_HTML_Visualizations/Module_10_Worksheet_09_CNN_Pixels_to_Patterns_Interactive.html) | Mirror copy of CNN Worksheet 09 in visualizations folder |
 | **Comprehensive Guide** | [CNN_and_Receptive_Fields_Deep_Dive_Guide.md](docs/CNN_and_Receptive_Fields_Deep_Dive_Guide.md) | Complete guide covering convolution math, output dimensions, receptive field recurrence & self-implementation |
 | **Interactive Presentation (Local)** | [CNN Presentation](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/cnn/index.html) | Offline-ready interactive presentation sheet with live filters, feature maps, and receptive field explorer |
 | **Interactive Presentation (Web)** | [Ashwin Tewary CNN Lecture Sheet](https://ashwin-tewary.github.io/dl-worksheets/presentations/cnn/#field) | Live lecture sheet by Ashwin Tewary focusing on receptive field growth and VGG kernel design |
@@ -264,6 +270,7 @@ DL/
 | Category | File | Description |
 | :--- | :--- | :--- |
 | **Interactive Worksheet** | [Worksheet_10_Inside_LeNet_AlexNet_VGG16_Interactive.html](02_Worksheets/Worksheet_10_Inside_LeNet_AlexNet_VGG16_Interactive.html) | Inside LeNet, AlexNet & VGG-16: Architecture diagrams, handwritten digit inference, live activation maps, shape & parameter exercises |
+| **Visualization (Mirror)** | [Module_11_Worksheet_10_Inside_LeNet_AlexNet_VGG16_Interactive.html](03_HTML_Visualizations/Module_11_Worksheet_10_Inside_LeNet_AlexNet_VGG16_Interactive.html) | Mirror copy of Worksheet 10 (LeNet/AlexNet/VGG16) in visualizations folder |
 | **Interactive Presentation (Local)** | [CNN Architectures Presentation](03_HTML_Visualizations/Ashwin_Tewary_Presentations/presentations/cnn-architectures/index.html) | Shattered gradients, residual connections, ResNet, Inception, depthwise separable convolutions, and interactive calculators |
 | **Interactive Presentation (Web)** | [Ashwin Tewary CNN Architectures Sheet](https://ashwin-tewary.github.io/dl-worksheets/presentations/cnn-architectures/) | Online presentation sheet with guided animated walkthroughs |
 
